@@ -7,7 +7,7 @@ using System.Net.Sockets;
 namespace eExNetworkLibrary
 {
     /// <summary>
-    /// Represents a IPv4 subnetmask
+    /// Represents an IP subnetmask
     /// </summary>
     public class Subnetmask
     {
