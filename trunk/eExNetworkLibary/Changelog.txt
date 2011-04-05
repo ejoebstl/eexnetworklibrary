@@ -1,0 +1,57 @@
+﻿+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+eEx Network Library and Net Lab Changelog 
+Author: Emanuel Jöbstl - emi@eex-dev.net
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Open Targets:
+* Extend the WebSurferMonitor
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2.4.2010
+* Implemented asyouncronous reading of HTTP messages
+  from streams.
+* Implemented TCP on-the-fly modification framework, 
+  including sockets and read-only sockets.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+7.12.2010
+* Implemented HTTP message creation
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+6.12.2010
+* Finished moving the NetLab logic and IO to eExNLML
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+23.8.2010
+ * Changed some TrafficHandlers to use System.Timers.Timer
+   instead of System.Windows.Forms.Timer
+2.10.2010
+ * Fixed a bug when clearing the document (MITM attacks got not removed)
+3.10.2010
+ * Changed the handling of IPv4 addresses and address ranges
+ * Added an ISingleHostAttack interface
+ * Rewrote plugin architecture to use a seperate in-between layer
+   to ensure compatibility (eExNLML)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+18.7.2010
+ * Changed the InterfaceConfiguration class to use the
+   .Net API instead of WMI to increase portability and
+   speed.
+25.7.2010
+ * Changed some internal functions of the EthernetInterface
+   and the Router to prevent RacingConditions and to fix
+   some bugs concerning flexibility and architecture.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+6.7.2010
+* Fix of a bug concerning WinPcap Interfaces
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2.6.2010
+NetLab Version: 1.0.1, NetworkLibrary Version: 1.9.9.1
+* Several Minor Bugfixes
+* Implementation of WinPcap-Filters
+* Release of experimental classes and Plug-Ins
+	- WebSurferMonitor
+	- TCPStreamModifier (non-functional)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+9.3.2010
+NetLab Version: 1.0.0, NetworkLibrary Version: 1.9.8.1
+
+Release: Net-Lab 1.0 & Network Library

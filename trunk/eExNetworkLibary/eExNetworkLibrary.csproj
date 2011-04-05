@@ -1,0 +1,218 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3693D7A0-6012-4C81-B561-286E058499AF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>eExNetworkLibrary</RootNamespace>
+    <AssemblyName>eExNetworkLibrary</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>eExNetworkLibrary.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>eExNetworkLibrary.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attacks\ISingleHostAttack.cs" />
+    <Compile Include="Attacks\Spoofing\DHCPSpoofer.cs" />
+    <Compile Include="Attacks\Modification\DNSOnTheFlySpoofer.cs" />
+    <Compile Include="Attacks\Scanning\ARPNetScan.cs" />
+    <Compile Include="Attacks\Scanning\IScanner.cs" />
+    <Compile Include="Attacks\IMITMAttack.cs" />
+    <Compile Include="Enumerations.cs" />
+    <Compile Include="CodeLab\DynamicFunctionCompiler.cs" />
+    <Compile Include="CodeLab\DynamicFunctionHandler.cs" />
+    <Compile Include="CodeLab\IDynamicHandler.cs" />
+    <Compile Include="EthernetInterface.cs" />
+    <Compile Include="HTTP\HTTPHeaderCollection.cs" />
+    <Compile Include="HTTP\HTTPMessage.cs" />
+    <Compile Include="HTTP\HTTPConversationParser.cs" />
+    <Compile Include="HTTP\HTTPRequest.cs" />
+    <Compile Include="HTTP\HTTPResponse.cs" />
+    <Compile Include="IP\IIPFrame.cs" />
+    <Compile Include="IP\IPv6Frame.cs" />
+    <Compile Include="Monitoring\SpeedMeter.cs" />
+    <Compile Include="Monitoring\HTTPMonitor.cs" />
+    <Compile Include="Monitoring\StreamMonitoring\HTTPReaders.cs" />
+    <Compile Include="Monitoring\StreamMonitoring\NetworkStreamMonitor.cs" />
+    <Compile Include="Monitoring\TCPStreamMonitor.cs" />
+    <Compile Include="Sockets\TCPIPListenerStack.cs" />
+    <Compile Include="Sockets\TCPListenerSocket.cs" />
+    <Compile Include="Routing\NetworkAddressTranslationHandler.cs" />
+    <Compile Include="Sockets\BindingInformation.cs" />
+    <Compile Include="Sockets\BufferNetworkStream.cs" />
+    <Compile Include="Sockets\NetworkStream.cs" />
+    <Compile Include="Sockets\IPSocket.cs" />
+    <Compile Include="Sockets\ISocket.cs" />
+    <Compile Include="Sockets\SocketNetworkStream.cs" />
+    <Compile Include="Sockets\SocketBase.cs" />
+    <Compile Include="Sockets\TCPIPStack.cs" />
+    <Compile Include="Sockets\TCPSocket.cs" />
+    <Compile Include="Sockets\UDPSocket.cs" />
+    <Compile Include="TrafficModifiers\HTTPStreamModifier.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTPStreamOperator.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTPStreamReplacementOperator.cs" />
+    <Compile Include="TrafficModifiers\TextStreamModifier.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\NetworkStreamModifier.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\StreamReplacementOperator.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\StreamReplacementRule.cs" />
+    <Compile Include="TrafficSplitting\IPAddressRule.cs" />
+    <Compile Include="TrafficSplitting\PortRule.cs" />
+    <Compile Include="TrafficSplitting\ConditionalTrafficSplitter.cs" />
+    <Compile Include="TrafficSplitting\TrafficSplitterRule.cs" />
+    <Compile Include="DHCP\DHCPFrame.cs" />
+    <Compile Include="DHCP\DHCPPool.cs" />
+    <Compile Include="DHCP\DHCPServer.cs" />
+    <Compile Include="DHCP\DHCPTLVItem.cs" />
+    <Compile Include="DNS\DNSFrame.cs" />
+    <Compile Include="DNS\DNSNameEncoder.cs" />
+    <Compile Include="Monitoring\DNSQueryLogger.cs" />
+    <Compile Include="DNS\DNSQuestion.cs" />
+    <Compile Include="DNS\DNSResourceRecord.cs" />
+    <Compile Include="ICMP\ICMPv4Frame.cs" />
+    <Compile Include="IHelperStructure.cs" />
+    <Compile Include="IPInterface.cs" />
+    <Compile Include="Attacks\Spoofing\APRAttack.cs" />
+    <Compile Include="Attacks\MITMAttackEntry.cs" />
+    <Compile Include="ARP\ARPFrame.cs" />
+    <Compile Include="Attacks\ARPHostIsolation.cs" />
+    <Compile Include="Attacks\Scanning\ARPScanTask.cs" />
+    <Compile Include="ARP\HostTable.cs" />
+    <Compile Include="Monitoring\NetMap.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Routing\IRouter.cs" />
+    <Compile Include="Routing\OSPF\ASExternalLSA.cs" />
+    <Compile Include="Routing\OSPF\IOSPFRouter.cs" />
+    <Compile Include="Routing\OSPF\LSDatabase.cs" />
+    <Compile Include="Routing\OSPF\OSPFArea.cs" />
+    <Compile Include="Routing\OSPF\OSPFDatabaseDescriptionMessage.cs" />
+    <Compile Include="Routing\OSPF\LSAHeader.cs" />
+    <Compile Include="Routing\OSPF\NetworkLSA.cs" />
+    <Compile Include="Routing\OSPF\OSPFCommonHeader.cs" />
+    <Compile Include="Routing\OSPF\OSPFHelloMessage.cs" />
+    <Compile Include="Routing\OSPF\OSPFLSAAcknowledgementMessage.cs" />
+    <Compile Include="Routing\OSPF\OSPFLSARequestMessage.cs" />
+    <Compile Include="Routing\OSPF\OSPFLSAUpdateMessage.cs" />
+    <Compile Include="Routing\OSPF\OSPFOptionsField.cs" />
+    <Compile Include="Routing\OSPF\OSPFRouter.cs" />
+    <Compile Include="Routing\OSPF\RouterLSA.cs" />
+    <Compile Include="Routing\OSPF\SummaryLSA.cs" />
+    <Compile Include="Routing\RIP\RIPRouter.cs" />
+    <Compile Include="Routing\Router.cs" />
+    <Compile Include="Routing\RoutingProcess.cs" />
+    <Compile Include="RunningObject.cs" />
+    <Compile Include="Simulation\ByteFlipper.cs" />
+    <Compile Include="Simulation\PackedReorderer.cs" />
+    <Compile Include="Simulation\PacketCorrupter.cs" />
+    <Compile Include="Simulation\PacketDropper.cs" />
+    <Compile Include="Simulation\PacketDuplicator.cs" />
+    <Compile Include="Simulation\RandomEventTrafficSimulator.cs" />
+    <Compile Include="Simulation\Simulator.cs" />
+    <Compile Include="Simulation\SpeedConstrainer.cs" />
+    <Compile Include="Simulation\DelayJitter.cs" />
+    <Compile Include="Simulation\WANEmulator.cs" />
+    <Compile Include="TLVItem.cs" />
+    <Compile Include="CommonTrafficAnalysis\LibCapDumper.cs" />
+    <Compile Include="DirectInterfaceIOHandler.cs" />
+    <Compile Include="TrafficModifiers\TCPStreamModifier.cs" />
+    <Compile Include="TrafficSplitting\TrafficSplitter.cs" />
+    <Compile Include="Utilities\CompressionHelper.cs" />
+    <Compile Include="Utilities\RingBuffer.cs" />
+    <Compile Include="Utilities\SystemRouteQuery.cs" />
+    <Compile Include="Threading\WorkItem.cs" />
+    <Compile Include="CommonTrafficAnalysis\TrafficAnalyzer.cs" />
+    <Compile Include="TrafficDescriptionFrame.cs" />
+    <Compile Include="TrafficHandler.cs" />
+    <Compile Include="TrafficModifiers\TrafficModifier.cs" />
+    <Compile Include="Utilities\ChecksumCalculator.cs" />
+    <Compile Include="Ethernet\EthernetFrame.cs" />
+    <Compile Include="Frame.cs" />
+    <Compile Include="ARP\ARPHostEntry.cs" />
+    <Compile Include="Utilities\InterfaceConfiguration.cs" />
+    <Compile Include="IP\IPAddressAnalysis.cs" />
+    <Compile Include="IP\IPv4Frame.cs" />
+    <Compile Include="MACAddress.cs" />
+    <Compile Include="Utilities\NetDiscovery.cs" />
+    <Compile Include="Utilities\PacketMonitor.cs" />
+    <Compile Include="Utilities\Portscan.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="RawDataFrame.cs" />
+    <Compile Include="Routing\RIP\RIPFrame.cs" />
+    <Compile Include="Routing\RoutingEntry.cs" />
+    <Compile Include="Routing\RoutingTable.cs" />
+    <Compile Include="Subnetmask.cs" />
+    <Compile Include="TCP\TCPFrame.cs" />
+    <Compile Include="IP\IPv4Options.cs" />
+    <Compile Include="TCP\TCPOptions.cs" />
+    <Compile Include="UDP\UDPFrame.cs" />
+    <Compile Include="VirtualHostBase.cs" />
+    <Compile Include="Utilities\WinPcapDotNet.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Changelog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
