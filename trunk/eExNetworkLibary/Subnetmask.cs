@@ -34,6 +34,23 @@ namespace eExNetworkLibrary
             bSubnetMask = new byte[4];
         }
 
+        public AddressFamily AddressFamily
+        {
+            get
+            {
+                if (bSubnetMask.Length == 4)
+                {
+                    return AddressFamily.InterNetwork;
+                }
+                if(bSubnetMask.Length == 16)
+                {
+                    return AddressFamily.InterNetworkV6;
+                }
+
+                throw new ArgumentException("Only IPv4 and IPv6 addresses are supported at the moment.");
+            }
+        }
+
         /// <summary>
         /// Gets the integer form of this subnetmask, e.g. 4294967040 for 255.255.255.0. This works only for IPv4 subnet masks.
         /// </summary>

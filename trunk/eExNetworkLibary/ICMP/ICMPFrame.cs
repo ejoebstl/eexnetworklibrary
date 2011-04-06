@@ -8,17 +8,16 @@ namespace eExNetworkLibrary.ICMP
     /// <summary>
     /// Represents a ICMPv4 frame
     /// </summary>
-    public class ICMPv4Frame : Frame
+    public class ICMPFrame : Frame
     {
-        byte[] bData;
-        ICMPv4Type icmpType;
+        ICMPType icmpType;
         int icmpCode;
         ChecksumCalculator cCalc;
 
         /// <summary>
         /// Gets or sets the type of this ICMP frame
         /// </summary>
-        public ICMPv4Type ICMPType
+        public ICMPType ICMPType
         {
             get { return icmpType; }
             set { icmpType = value; }
@@ -37,12 +36,12 @@ namespace eExNetworkLibrary.ICMP
         /// Gets the ICMP parameter problem code for ICMP parameter problem frames.
         /// This operation is only supported if this ICMP frame is a parameter problem frame.
         /// </summary>
-        public ICMPv4ParameterProblemCode ICMPParameterProblemCode
+        public ICMPParameterProblemCode ICMPParameterProblemCode
         {
             get
             {
-                if (this.icmpType != ICMPv4Type.ParameterProblem) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.ParameterProblem.ToString());
-                return (ICMPv4ParameterProblemCode)icmpCode;
+                if (this.icmpType != ICMPType.ParameterProblem) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPType.ParameterProblem.ToString());
+                return (ICMPParameterProblemCode)icmpCode;
             }
         }
 
@@ -50,12 +49,12 @@ namespace eExNetworkLibrary.ICMP
         /// Gets the ICMP redirect code for ICMP redirect frames.
         /// This operation is only supported if this ICMP frame is a redirect frame.
         /// </summary>
-        public ICMPv4RedirectCode ICMPRedirectCode
+        public ICMPRedirectCode ICMPRedirectCode
         {
             get
             {
-                if (this.icmpType != ICMPv4Type.Redirect) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.Redirect.ToString());
-                return (ICMPv4RedirectCode)icmpCode;
+                if (this.icmpType != ICMPType.Redirect) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPType.Redirect.ToString());
+                return (ICMPRedirectCode)icmpCode;
             }
         }
 
@@ -63,12 +62,12 @@ namespace eExNetworkLibrary.ICMP
         /// Gets the ICMP time exceeded code for ICMP time exceeded frames.
         /// This operation is only supported if this ICMP frame is a time exceeded frame.
         /// </summary>
-        public ICMPv4TimeExceededCode ICMPTimeExceededCode
+        public ICMPTimeExceededCode ICMPTimeExceededCode
         {
             get
             {
-                if (this.icmpType != ICMPv4Type.TimeExceeded) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.TimeExceeded.ToString()); 
-                return (ICMPv4TimeExceededCode)icmpCode;
+                if (this.icmpType != ICMPType.TimeExceeded) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPType.TimeExceeded.ToString()); 
+                return (ICMPTimeExceededCode)icmpCode;
             }
         }
 
@@ -76,12 +75,12 @@ namespace eExNetworkLibrary.ICMP
         /// Gets the ICMP unreachable code for ICMP unreachable frames.
         /// This operation is only supported if this ICMP frame is a unreachable frame.
         /// </summary>
-        public ICMPv4UnreachableCode UnreachableCode
+        public ICMPUnreachableCode UnreachableCode
         {
             get
             {
-                if (this.icmpType != ICMPv4Type.DestinationUnreachable) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.DestinationUnreachable.ToString()); 
-                return (ICMPv4UnreachableCode)icmpCode;
+                if (this.icmpType != ICMPType.DestinationUnreachable) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPType.DestinationUnreachable.ToString()); 
+                return (ICMPUnreachableCode)icmpCode;
             }
         }
 
@@ -89,26 +88,26 @@ namespace eExNetworkLibrary.ICMP
         /// Creates a new instance of this class by parsing the given data
         /// </summary>
         /// <param name="bICMPData">The data to parse</param>
-        public ICMPv4Frame(byte[] bICMPData)
+        public ICMPFrame(byte[] bICMPData)
         {
             cCalc = new ChecksumCalculator();
-            icmpType = (ICMPv4Type)bICMPData[0];
+            icmpType = (ICMPType)bICMPData[0];
             icmpCode = (int)bICMPData[1];
             //2 bytes checksum
-            bData = new byte[bICMPData.Length - 4];
+            byte[] bData = new byte[bICMPData.Length - 4];
             for (int iC1 = 4; iC1 < bICMPData.Length; iC1++)
             {
                 bData[iC1 - 4] = bICMPData[iC1];
             }
+            fEncapsulatedFrame = new RawDataFrame(bData);
         }
 
         /// <summary>
         /// Creates a new instance of this class
         /// </summary>
-        public ICMPv4Frame()
+        public ICMPFrame()
         {
             cCalc = new ChecksumCalculator();
-            bData = new byte[0];
         }
 
         /// <summary>
@@ -130,7 +129,10 @@ namespace eExNetworkLibrary.ICMP
                 bICMPData[0] = (byte)icmpType;
                 bICMPData[1] = (byte)icmpCode;
 
-                bData.CopyTo(bICMPData, 4);
+                if (fEncapsulatedFrame != null)
+                {
+                    fEncapsulatedFrame.FrameBytes.CopyTo(bICMPData, 4);
+                }
 
                 byte[] bChecksum = cCalc.CalculateChecksum(bICMPData);
 
@@ -147,7 +149,11 @@ namespace eExNetworkLibrary.ICMP
         /// </summary>
         public override int Length
         {
-            get { return (4 + bData.Length) % 2 == 0 ? 4 + bData.Length : 5 + bData.Length; }
+            get
+            {
+                int iDataLen = fEncapsulatedFrame == null ? 0 : fEncapsulatedFrame.Length;
+                return (4 + iDataLen) % 2 == 0 ? 4 + iDataLen : 5 + iDataLen;
+            }
         }
 
         /// <summary>
@@ -156,14 +162,14 @@ namespace eExNetworkLibrary.ICMP
         /// <returns>A new identical instance of this class</returns>
         public override Frame Clone()
         {
-            return new ICMPv4Frame(this.FrameBytes);
+            return new ICMPFrame(this.FrameBytes);
         }
     }
 
     /// <summary>
     /// An enumeration for ICMPv4 types
     /// </summary>
-    public enum ICMPv4Type
+    public enum ICMPType
     {
         /// <summary>
         /// Unknown - do not try to send a frame with this type set
@@ -272,9 +278,9 @@ namespace eExNetworkLibrary.ICMP
     }
 
     /// <summary>
-    /// An enumeration for ICMPv4 unreachable codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.DestinationUnreachable
+    /// An enumeration for ICMP unreachable codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.DestinationUnreachable
     /// </summary>
-    public enum ICMPv4UnreachableCode
+    public enum ICMPUnreachableCode
     {
         /// <summary>
         /// Unknown - do not try to send a frame with this type set
@@ -341,7 +347,7 @@ namespace eExNetworkLibrary.ICMP
     /// <summary>
     /// An enumeration for ICMPv4 redirect codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.Redirect
     /// </summary>
-    public enum ICMPv4RedirectCode
+    public enum ICMPRedirectCode
     {
         /// <summary>
         /// Forces the source to redirect all datagrams for the corresponding network. 
@@ -362,9 +368,9 @@ namespace eExNetworkLibrary.ICMP
     }
 
     /// <summary>
-    /// An enumeration for ICMPv4 time exceeded codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.TimeExceeded
+    /// An enumeration for ICMP time exceeded codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.TimeExceeded
     /// </summary>
-    public enum ICMPv4TimeExceededCode
+    public enum ICMPTimeExceededCode
     {
         /// <summary>
         /// The TTL (Time to Live) exceeded during transmit
@@ -377,9 +383,9 @@ namespace eExNetworkLibrary.ICMP
     }
 
     /// <summary>
-    /// An enumeration for ICMPv4 parameter problem codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.ParameterProblem
+    /// An enumeration for ICMP parameter problem codes. These codes can be get or set if the ICMP type of the corresponding frame is ICMPv4Type.ParameterProblem
     /// </summary>
-    public enum ICMPv4ParameterProblemCode
+    public enum ICMPParameterProblemCode
     {
         /// <summary>
         /// A pointer indicates an error

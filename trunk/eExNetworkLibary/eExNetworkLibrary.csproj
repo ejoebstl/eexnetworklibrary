@@ -101,7 +101,7 @@
     <Compile Include="Monitoring\DNSQueryLogger.cs" />
     <Compile Include="DNS\DNSQuestion.cs" />
     <Compile Include="DNS\DNSResourceRecord.cs" />
-    <Compile Include="ICMP\ICMPv4Frame.cs" />
+    <Compile Include="ICMP\ICMPFrame.cs" />
     <Compile Include="IHelperStructure.cs" />
     <Compile Include="IPInterface.cs" />
     <Compile Include="Attacks\Spoofing\APRAttack.cs" />

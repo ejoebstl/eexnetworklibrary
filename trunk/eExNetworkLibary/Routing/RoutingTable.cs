@@ -79,25 +79,26 @@ namespace eExNetworkLibrary.Routing
         {
             int iMetric = int.MaxValue;
             uint iMask = 0;
-            uint iMaskFav = 0;
+            int iMaskFav = 0;
             RoutingEntry reFavourite = null;
             lock (lAllRoutes)
             {
                 foreach (RoutingEntry re in lAllRoutes)
                 {
-                    if (ipaAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
+                    if (ipa.AddressFamily == re.Destination.AddressFamily && 
+                        ipaAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
                     {
                         if (iMask > iMaskFav)
                         {
                             iMetric = re.Metric;
                             reFavourite = re;
-                            iMaskFav = reFavourite.Subnetmask.IntNotation;
+                            iMaskFav = reFavourite.Subnetmask.SlashNotation;
                         }
                         else if (re.Metric < iMetric && iMask == iMaskFav)
                         {
                             iMetric = re.Metric;
                             reFavourite = re;
-                            iMaskFav = reFavourite.Subnetmask.IntNotation;
+                            iMaskFav = reFavourite.Subnetmask.SlashNotation;
                         }
                     }
                 }
@@ -138,7 +139,8 @@ namespace eExNetworkLibrary.Routing
             {
                 foreach (RoutingEntry re in lAllRoutes)
                 {
-                    if (ipaAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
+                    if (ipa.AddressFamily == re.Destination.AddressFamily &&
+                        ipaAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
                     {
                         lRe.Add(re);
                     }

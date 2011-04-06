@@ -47,51 +47,59 @@ namespace eExNetworkLibrary.ARP
             arpProtocolAddressType = (EtherType)((int)((bData[2] << 8) + bData[3]));
             int iHardwareAddressLength = bData[4];
             int iProtocolAddressLength = bData[5];
-            if (iHardwareAddressLength != 6)
-            {
-                throw new Exception("MAC address must be 6 bytes long");
-            }
-            if (iProtocolAddressLength != 4)
-            {
-                throw new Exception("IP address must be 4 bytes long");
-            }
             arpOperation = (ARPOperation)((int)((bData[6] << 8) + bData[7]));
 
-            macSource = new MACAddress();
-            macSource.AddressBytes[0] = bData[8];
-            macSource.AddressBytes[1] = bData[9];
-            macSource.AddressBytes[2] = bData[10];
-            macSource.AddressBytes[3] = bData[11];
-            macSource.AddressBytes[4] = bData[12];
-            macSource.AddressBytes[5] = bData[13];
 
-            byte[] bSourceIP = new byte[4];
-            bSourceIP[0] = bData[14];
-            bSourceIP[1] = bData[15];            bSourceIP[2] = bData[16];
-            bSourceIP[3] = bData[17];
-
-            ipaSource = new IPAddress(bSourceIP);
-
-            macDestination = new MACAddress();
-            macDestination.AddressBytes[0] = bData[18];
-            macDestination.AddressBytes[1] = bData[19];
-            macDestination.AddressBytes[2] = bData[20];
-            macDestination.AddressBytes[3] = bData[21];
-            macDestination.AddressBytes[4] = bData[22];
-            macDestination.AddressBytes[5] = bData[23];
-
-            byte[] bDestinationIP = new byte[4];
-            bDestinationIP[0] = bData[24];
-            bDestinationIP[1] = bData[25];
-            bDestinationIP[2] = bData[26];
-            bDestinationIP[3] = bData[27];
-
-            ipaDestination = new IPAddress(bDestinationIP);
-            byte[] bPad = new byte[bData.Length - 28];
-
-            for (int iC1 = 0; iC1 < bPad.Length; iC1++)
+            if(arpHardwareAddressType != HardwareAddressType.Ethernet || (arpProtocolAddressType != EtherType.IPv4 && arpProtocolAddressType != EtherType.IPv6))
             {
-                bPad[iC1] = bData[iC1 + 28];
+                throw new ArgumentException("Only IPv6 and IPv4 in conjunction with ethernet is supported at the moment.");
+            }
+
+            if (iHardwareAddressLength != 6 && arpHardwareAddressType != HardwareAddressType.Ethernet)
+            {
+                throw new ArgumentException("The hardware address type of the ARP frame indicates Ethernet, but the address data is not 6 bytes long.");
+            }
+
+            if (iProtocolAddressLength != 4 && EtherType.IPv4 == arpProtocolAddressType)
+            {
+                throw new ArgumentException("The protocol address type of the ARP frame indicates IPv4, but the address data is not 4 bytes long.");
+            }
+            if (iProtocolAddressLength != 16 && EtherType.IPv6 == arpProtocolAddressType)
+            {
+                throw new ArgumentException("The protocol address type of the ARP frame indicates IPv6, but the address data is not 16 bytes long.");
+            }
+            
+            int iC1 = 8;
+
+            byte[] bAddress = new byte[iHardwareAddressLength];
+
+            for(int iC2 = 0; iC2 < iHardwareAddressLength; iC2++)
+            Array.Copy(bData, iC1, bAddress, 0, iHardwareAddressLength); 
+            iC1 += iHardwareAddressLength;
+            macSource = new MACAddress(bAddress);
+
+            
+            bAddress = new byte[iProtocolAddressLength];
+            Array.Copy(bData, iC1, bAddress, 0, iProtocolAddressLength); 
+            iC1 += iProtocolAddressLength;
+            ipaSource = new IPAddress(bAddress);
+
+
+            bAddress = new byte[iHardwareAddressLength];
+            Array.Copy(bData, iC1, bAddress, 0, iHardwareAddressLength); 
+            iC1 += iHardwareAddressLength;
+            macDestination = new MACAddress(bAddress);
+
+            bAddress = new byte[iProtocolAddressLength];
+            Array.Copy(bData, iC1, bAddress, 0, iProtocolAddressLength); 
+            iC1 += iProtocolAddressLength;
+            ipaDestination = new IPAddress(bAddress);
+
+            byte[] bPad = new byte[bData.Length - iC1];
+
+            for (int iC2 = 0; iC2 < bPad.Length; iC2++)
+            {
+                bPad[iC2] = bData[iC2 + iC1];
             }
 
             this.fEncapsulatedFrame = new RawDataFrame(bPad);
@@ -150,7 +158,14 @@ namespace eExNetworkLibrary.ARP
         public IPAddress SourceIP
         {
             get { return ipaSource; }
-            set { ipaSource = value; }
+            set
+            {
+                if (value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork && value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    throw new ArgumentException("Only IPv4 and IPv6 are supported at the moment.");
+                }
+                ipaSource = value;
+            }
         }
 
         /// <summary>
@@ -159,7 +174,14 @@ namespace eExNetworkLibrary.ARP
         public IPAddress DestinationIP
         {
             get { return ipaDestination; }
-            set { ipaDestination = value; }
+            set
+            {
+                if (value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork && value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    throw new ArgumentException("Only IPv4 and IPv6 are supported at the moment.");
+                }
+                ipaDestination = value;
+            }
         }
 
         /// <summary>
@@ -180,57 +202,37 @@ namespace eExNetworkLibrary.ARP
         {
             get 
             {
+                if (ipaSource.AddressFamily != ipaDestination.AddressFamily)
+                {
+                    throw new InvalidOperationException("Cannot mix up IPv4 and IPv6 within one ARP frame.");
+                }
+
+                int iProtocolAddressLength = ipaSource.GetAddressBytes().Length;
+
                 byte[] bData = new byte[this.Length];
                 bData[0] = (byte)((((uint)arpHardwareAddressType) >> 8) & 0xFF);
                 bData[1] = (byte)((((uint)arpHardwareAddressType)) & 0xFF);
                 bData[2] = (byte)((((uint)arpProtocolAddressType) >> 8) & 0xFF);
                 bData[3] = (byte)((((uint)arpProtocolAddressType)) & 0xFF);
                 bData[4] = 6;
-                bData[5] = 4;
+                bData[5] = (byte)iProtocolAddressLength;
                 bData[6] = (byte)((((uint)arpOperation) >> 8) & 0xFF);
                 bData[7] = (byte)((((uint)arpOperation)) & 0xFF);
 
-                bData[8] = macSource.AddressBytes[0];
-                bData[9] = macSource.AddressBytes[1];
-                bData[10] = macSource.AddressBytes[2];
-                bData[11] = macSource.AddressBytes[3];
-                bData[12] = macSource.AddressBytes[4];
-                bData[13] = macSource.AddressBytes[5];
+                int iC1 = 8;
 
-                byte[] bSourceIP = ipaSource.GetAddressBytes();
-                
-                if (bSourceIP.Length != 4)
-                {
-                    throw new Exception("IP address must be 4 bytes long");
-                }
-
-                bData[14] = bSourceIP[0];
-                bData[15] = bSourceIP[1];
-                bData[16] = bSourceIP[2];
-                bData[17] = bSourceIP[3];
-
-                bData[18] = macDestination.AddressBytes[0];
-                bData[19] = macDestination.AddressBytes[1];
-                bData[20] = macDestination.AddressBytes[2];
-                bData[21] = macDestination.AddressBytes[3];
-                bData[22] = macDestination.AddressBytes[4];
-                bData[23] = macDestination.AddressBytes[5];
-
-                byte[] bDestinationIP = ipaDestination.GetAddressBytes();
-
-                if (bDestinationIP.Length != 4)
-                {
-                    throw new Exception("IP address must be 4 bytes long");
-                }
-
-                bData[24] = bDestinationIP[0];
-                bData[25] = bDestinationIP[1];
-                bData[26] = bDestinationIP[2];
-                bData[27] = bDestinationIP[3];
+                Array.Copy(macSource.AddressBytes, 0, bData, iC1, 6);
+                iC1 += 6;
+                Array.Copy(ipaSource.GetAddressBytes(), 0, bData, iC1, iProtocolAddressLength);
+                iC1 += iProtocolAddressLength;
+                Array.Copy(macDestination.AddressBytes, 0, bData, iC1, 6);
+                iC1 += 6;
+                Array.Copy(ipaDestination.GetAddressBytes(), 0, bData, iC1, iProtocolAddressLength);
+                iC1 += iProtocolAddressLength;
 
                 if (fEncapsulatedFrame != null)
                 {
-                    fEncapsulatedFrame.FrameBytes.CopyTo(bData, 28);
+                    fEncapsulatedFrame.FrameBytes.CopyTo(bData, iC1);
                 }
 
                 return bData;
@@ -244,7 +246,7 @@ namespace eExNetworkLibrary.ARP
         {
             get 
             {
-                return 28 + (fEncapsulatedFrame == null ? 0 : fEncapsulatedFrame.Length);
+                return 20 + (2 * ipaSource.GetAddressBytes().Length) + (fEncapsulatedFrame == null ? 0 : fEncapsulatedFrame.Length);
             }
         }
 

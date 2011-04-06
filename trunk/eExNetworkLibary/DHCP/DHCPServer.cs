@@ -54,6 +54,10 @@ namespace eExNetworkLibrary.DHCP
             {
                 throw new Exception("There are currently no interfaces present.");
             }
+            if (ipaStart.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork || ipaEnd.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                throw new ArgumentException("Only IPv4 is supported at the moment");
+            }
             foreach (IPInterface ipi in lInterfaces)
             {
                 for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
@@ -89,6 +93,10 @@ namespace eExNetworkLibrary.DHCP
         /// <param name="dhItem">The item to add.</param>
         public void AddToPool(DHCPPoolItem dhItem)
         {
+            if (dhItem.Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                throw new ArgumentException("Only IPv4 is supported at the moment");
+            }
             foreach (IPInterface ipi in lInterfaces)
             {
                 for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
@@ -113,6 +121,11 @@ namespace eExNetworkLibrary.DHCP
         /// <param name="iAddrCounter">The index of the address of the interface to use if the interface has multiple IP addresses assigned</param>
         protected virtual void CreatePool(IPAddress ipaStart, IPAddress ipaEnd, IPInterface ipi, int iAddrCounter)
         {
+            if (ipaStart.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork || ipaEnd.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                throw new ArgumentException("Only IPv4 is supported at the moment");
+            }
+
             DHCPPool dhPool = GetPoolForInterface(ipi);
 
             IPAddress[] ipRange = ipAnalysis.GetIPRange(ipaStart, ipaEnd);
@@ -285,7 +298,8 @@ namespace eExNetworkLibrary.DHCP
         }
 
         /// <summary>
-        /// The gateway IP address. Setting this property to null will cause this DHCP server to announce the outgoing interface address as gateway.
+        /// The gateway IP address. Setting this property to null will cause this DHCP server to announce the outgoing interface address as gateway.<br />
+        /// The assigned gateway address is set for all DHCP pool entries which are newly created, not for existing ones. 
         /// </summary>
         public IPAddress GatewayAddress
         {
@@ -299,6 +313,7 @@ namespace eExNetworkLibrary.DHCP
 
         /// <summary>
         /// The DNS server IP address. Setting this property to null will cause this DHCP server to announce the outgoing interface address as DNS server.
+        /// The assigned DNS address is set for all DHCP pool entries which are newly created, not for existing ones. 
         /// </summary>
         public IPAddress DNSAddress
         {
