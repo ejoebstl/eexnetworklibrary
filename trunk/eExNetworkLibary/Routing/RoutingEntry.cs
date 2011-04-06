@@ -32,7 +32,10 @@ namespace eExNetworkLibrary.Routing
         public IPInterface NextHopInterface
         {
             get { return ipiNextHop; }
-            set { ipiNextHop = value; }
+            set
+            {
+                ipiNextHop = value;
+            }
         }
 
         /// <summary>
@@ -57,11 +60,21 @@ namespace eExNetworkLibrary.Routing
         /// <param name="reoOwner">The owner of this route</param>
         public RoutingEntry(IPAddress ipaDestination, IPAddress ipaNextHop, int iMetric, Subnetmask bSubnetMask, RoutingEntryOwner reoOwner)
         {
+            CheckValid(ipaDestination, ipaNextHop, bSubnetMask);
+
             this.ipaDestination = ipaDestination;
             this.ipaNextHop = ipaNextHop;
             this.iMetric = iMetric;
             this.bSubnetMask = bSubnetMask;
             this.reoOwner = reoOwner;
+        }
+
+        private void CheckValid(IPAddress ipaDestination, IPAddress ipaNextHop, Subnetmask bSubnetMask)
+        {
+            if (ipaDestination.AddressFamily != ipaNextHop.AddressFamily || ipaDestination.AddressFamily != bSubnetMask.AddressFamily)
+            {
+                throw new ArgumentException("Cannot mix up addresses of a different type into one routing entry.");
+            }
         }
 
         /// <summary>
@@ -70,7 +83,12 @@ namespace eExNetworkLibrary.Routing
         public IPAddress Destination
         {
             get { return ipaDestination; }
-            set { ipaDestination = value; }
+            set
+            {
+                CheckValid(value, ipaNextHop, bSubnetMask);
+                ipaDestination = value;
+
+            }
         }
 
         /// <summary>
@@ -79,7 +97,11 @@ namespace eExNetworkLibrary.Routing
         public IPAddress NextHop
         {
             get { return ipaNextHop; }
-            set { ipaNextHop = value; }
+            set
+            {
+                CheckValid(ipaDestination, value, bSubnetMask);
+                ipaNextHop = value;
+            }
         }
 
         /// <summary>
@@ -97,7 +119,11 @@ namespace eExNetworkLibrary.Routing
         public Subnetmask Subnetmask
         {
             get { return bSubnetMask; }
-            set { bSubnetMask = value; }
+            set
+            {
+                CheckValid(ipaDestination, ipaNextHop, value);
+                bSubnetMask = value;
+            }
         }
 
         /// <summary>

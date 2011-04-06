@@ -26,6 +26,7 @@ namespace eExNetworkLibrary
         private bool bExcludeOwnTraffic;
         private bool bExcludeLocalHostTraffic;
         private object oInterfaceStartStopLock;
+        private IPAddressAnalysis ipaAnalysis;
 
         private MACAddress maMacAddress;
 
@@ -202,6 +203,8 @@ namespace eExNetworkLibrary
                 throw new ArgumentException("Cannot create an interface instance for an interface not properly recognised by WinPcap."); 
             }
 
+            ipaAnalysis = new IPAddressAnalysis();
+
             oInterfaceStartStopLock = new object();
             bExcludeOwnTraffic = true;
             bExcludeLocalHostTraffic = true;
@@ -272,7 +275,7 @@ namespace eExNetworkLibrary
 
         private bool IsLocalHostTraffic(EthernetFrame fFrame)
         {
-            IPFrame ipFrame = GetIPv4Frame(fFrame);
+            IPFrame ipFrame = GetIPFrame(fFrame);
             return ipFrame != null && (InterfaceConfiguration.IsLocalAddress(ipFrame.SourceAddress) || InterfaceConfiguration.IsLocalAddress(ipFrame.DestinationAddress));
         }        
         
@@ -503,11 +506,11 @@ namespace eExNetworkLibrary
         {
             EthernetFrame ethFrame = this.GetEthernetFrame(fFrame);
             TrafficDescriptionFrame tdfFrame = (TrafficDescriptionFrame)this.GetFrameByType(fFrame, FrameType.TrafficDescriptionFrame);
-            IPFrame ipv4Frame = GetIPv4Frame(fFrame);
+            IPFrame ipFrame = GetIPFrame(fFrame);
 
-            if (ipv4Frame == null)
+            if (ipFrame == null)
             {
-                throw new InvalidOperationException("Cannot send an non-ip frame via the Send(Frame, IPAddress) method. In this case you have to implement data link handling yourself and use the Send(fFrame) or Send(byte[]) method");
+                throw new InvalidOperationException("Cannot send an non-ip frame via the Send(Frame, IPAddress) method. In this case you have to implement data link handling by overriding this method and use the Send(fFrame) or Send(byte[]) method");
             }
 
             if (ethFrame == null)
@@ -533,13 +536,19 @@ namespace eExNetworkLibrary
                 SendARPRequest(ipaDestination);
                 ethFrame.Destination = new MACAddress(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
             }
-
-            ethFrame.EtherType = EtherType.IPv4;
+            if (ipFrame.Version == 4)
+            {
+                ethFrame.EtherType = EtherType.IPv4;
+            }
+            else if (ipFrame.Version == 6)
+            {
+                ethFrame.EtherType = EtherType.IPv6;
+            }
             if (!lmacSpoofAdresses.Contains(ethFrame.Destination))
             {
                 ethFrame.Source = this.PrimaryMACAddress;
             }
-            ethFrame.EncapsulatedFrame = ipv4Frame;
+            ethFrame.EncapsulatedFrame = ipFrame;
             tdfFrame.EncapsulatedFrame = ethFrame;
 
             Send(tdfFrame);
@@ -609,30 +618,62 @@ namespace eExNetworkLibrary
 
         private void SendARPRequest(IPAddress ipaQuery)
         {
-            if (this.IpAddresses.Length > 0)
+            IPAddress[] ipaSources = GetSourceIPsForARPRequest(ipaQuery);
+            if (ipaSources.Length > 0)
             {
-                eExNetworkLibrary.ARP.ARPFrame arpRequest = new eExNetworkLibrary.ARP.ARPFrame();
-                arpRequest.SourceIP = this.IpAddresses[0];
-                arpRequest.SourceMAC = this.PrimaryMACAddress;
-                arpRequest.DestinationMAC = MACAddress.Empty;
-                arpRequest.DestinationIP = ipaQuery;
+                foreach (IPAddress ipa in ipaSources)
+                {
+                    eExNetworkLibrary.ARP.ARPFrame arpRequest = new eExNetworkLibrary.ARP.ARPFrame();
+                    arpRequest.SourceIP = ipa;
+                    arpRequest.SourceMAC = this.PrimaryMACAddress;
+                    arpRequest.DestinationMAC = MACAddress.Empty;
+                    arpRequest.HardwareAddressType = HardwareAddressType.Ethernet;
+                    arpRequest.DestinationIP = ipaQuery;
 
-                EthernetFrame ethFrame = new EthernetFrame();
-                ethFrame.Source = this.PrimaryMACAddress;
-                ethFrame.Destination = new MACAddress(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
-                ethFrame.EncapsulatedFrame = arpRequest;
-                ethFrame.EtherType = eExNetworkLibrary.EtherType.ARP;
+                    if (ipa.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        arpRequest.ProtocolAddressType = EtherType.IPv4;
+                    }
+                    else if (ipa.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                    {
+                        arpRequest.ProtocolAddressType = EtherType.IPv6;
+                    }
 
-                TrafficDescriptionFrame tdf = new TrafficDescriptionFrame(null, DateTime.Now);
+                    EthernetFrame ethFrame = new EthernetFrame();
+                    ethFrame.Source = this.PrimaryMACAddress;
+                    ethFrame.Destination = new MACAddress(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                    ethFrame.EncapsulatedFrame = arpRequest;
+                    ethFrame.EtherType = eExNetworkLibrary.EtherType.ARP;
 
-                tdf.EncapsulatedFrame = ethFrame;
+                    TrafficDescriptionFrame tdf = new TrafficDescriptionFrame(null, DateTime.Now);
 
-                this.Send(ethFrame);
+                    tdf.EncapsulatedFrame = ethFrame;
+
+                    this.Send(ethFrame);
+                }
             }
             else
             {
-                throw new Exception("An ARP request could not be send for the following destination and interface, because the interface has no IP addresses assigned: " + ipaQuery + ", " + this.Description);
+                throw new ArgumentException("An ARP request could not be send for the following destination and interface, because the interface has no IP addresses assigned for this subnet: " + ipaQuery + ", " + this.Description);
             }
+        }
+
+        private IPAddress[] GetSourceIPsForARPRequest(IPAddress ipaQuery)
+        {
+            List<IPAddress> lAddresses = new List<IPAddress>();
+
+            foreach (IPAddress ipa in this.IpAddresses)
+            {
+                if (ipa.AddressFamily == ipaQuery.AddressFamily)
+                {
+                    if (ipaAnalysis.GetClasslessNetworkAddress(ipa, this.GetMaskForAddress(ipa)).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipaQuery, this.GetMaskForAddress(ipa))))
+                    {
+                        lAddresses.Add(ipa);
+                    }
+                }
+            }
+
+            return lAddresses.ToArray();
         }
 
         /// <summary>

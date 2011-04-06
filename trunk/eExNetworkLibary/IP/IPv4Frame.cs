@@ -110,7 +110,7 @@ namespace eExNetworkLibrary.IP
             }
             else if (this.iProtocol == IPProtocol.ICMP)
             {
-                this.fEncapsulatedFrame = new ICMPv4Frame(bData);
+                this.fEncapsulatedFrame = new ICMPFrame(bData);
             }
             else if (this.iProtocol == IPProtocol.OSPF)
             {

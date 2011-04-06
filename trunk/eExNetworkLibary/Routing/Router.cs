@@ -21,6 +21,7 @@ namespace eExNetworkLibrary.Routing
         private RoutingTable rtRoutingtable;
         private int iRoutedPackets;
         private IP.IPAddressAnalysis ipv4Analysis;
+        private bool bExcludeMulticast;
 
         /// <summary>
         /// Gets or sets the count of overall routed packets.
@@ -89,6 +90,7 @@ namespace eExNetworkLibrary.Routing
             lRoutedTrafficAnalyzer = new List<TrafficAnalyzer>();
             rtRoutingtable = new RoutingTable();
             iRoutedPackets = 0;
+            bExcludeMulticast = true;
             ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             if (bInsertOSRoutesOnStrartup)
             {
@@ -152,10 +154,36 @@ namespace eExNetworkLibrary.Routing
         /// <param name="fInputFrame">The frame to route.</param>
         protected override void HandleTraffic(Frame fInputFrame)
         {
-            if (RoutingNeeded(fInputFrame))
+            if(IsMulticast(fInputFrame) && bExcludeMulticast)
+            {
+                iDroppedPackets++;
+                PushDroppedFrame(fInputFrame);
+            }
+            else if (RoutingNeeded(fInputFrame))
             {
                 RouteFrame(fInputFrame);
             }
+        }
+
+        private bool IsMulticast(Frame fInputFrame)
+        {
+            IPFrame ipFrame = GetIPFrame(fInputFrame);
+
+            if (ipFrame != null)
+            {
+                byte bFirstByte = ipFrame.DestinationAddress.GetAddressBytes()[0];
+
+                if (ipFrame.Version == 6 && bFirstByte == 0xFF)
+                {
+                    return true;
+                }
+                if (ipFrame.Version == 4 && bFirstByte >= 224 && bFirstByte <= 239)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -241,15 +269,15 @@ namespace eExNetworkLibrary.Routing
 
         private void RouteFrame(Frame fInputFrame)
         {
-            IPFrame ipv4Frame = GetIPv4Frame(fInputFrame);
+            IPFrame ipFrame = GetIPFrame(fInputFrame);
 
             IPInterface ipintOutInt = null;
             IPAddress ipaDestination = null;
             IPAddress ipaNextHop = null;
 
-            if (ipv4Frame != null) // If it is an IP frame
+            if (ipFrame != null) // If it is an IP frame
             {
-                ipaDestination = ipv4Frame.DestinationAddress;
+                ipaDestination = ipFrame.DestinationAddress;
 
                 if (IsInLocalSubnet(ipaDestination)) // If destination is in the local subnet
                 {
@@ -267,7 +295,7 @@ namespace eExNetworkLibrary.Routing
                         //*FRAMEDROP/Interface error*
                         iDroppedPackets++;
                         PushDroppedFrame(fInputFrame);
-                        throw new RoutingExcpetion("The destination is known to be in a local subnet, but no valid interface was available for routing (" + ipaDestination + ").");
+                        throw new RoutingException("The destination is known to be in a local subnet, but no valid interface was available for routing (" + ipaDestination + ").");
                     }
                     #endregion
                 }
@@ -306,7 +334,7 @@ namespace eExNetworkLibrary.Routing
                         //*FRAMEDROP/Route error*
                         iDroppedPackets++;
                         PushDroppedFrame(fInputFrame);
-                        throw new RoutingExcpetion("No route is known for the given destination (" + ipaDestination + ").");
+                        throw new RoutingException("No route is known for the given destination (" + ipaDestination + ").");
                     }
                     #endregion
                 }
@@ -348,6 +376,12 @@ namespace eExNetworkLibrary.Routing
         {
             get { return base.Name; }
         }
+
+        public bool DropMulticastFrames
+        {
+            get { return bExcludeMulticast; }
+            set { bExcludeMulticast = value; }
+        }
     }
 
     /// <summary>
@@ -355,18 +389,18 @@ namespace eExNetworkLibrary.Routing
     /// This excpetion occours on errors during the forwarding process of a frame, e.g. no route or no ARP entry for the destination.
     /// See the message of the exception for more details
     /// </summary>
-    public class RoutingExcpetion : Exception
+    public class RoutingException : Exception
     {
         /// <summary>
         /// Creates a new instance of this class with the given params
         /// </summary>
         /// <param name="strMessage">The message of this exception</param>
-        public RoutingExcpetion(string strMessage) : base(strMessage) { }
+        public RoutingException(string strMessage) : base(strMessage) { }
         /// <summary>
         /// Creates a new instance of this class with the given params
         /// </summary>
         /// <param name="strMessage">The message of this exception</param>
         /// <param name="exInnerException">The inner exception of this exception</param>
-        public RoutingExcpetion(string strMessage, Exception exInnerException) : base(strMessage, exInnerException) { }
+        public RoutingException(string strMessage, Exception exInnerException) : base(strMessage, exInnerException) { }
     }
 }
