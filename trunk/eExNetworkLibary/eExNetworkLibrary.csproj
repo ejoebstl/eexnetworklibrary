@@ -61,8 +61,12 @@
     <Compile Include="HTTP\HTTPConversationParser.cs" />
     <Compile Include="HTTP\HTTPRequest.cs" />
     <Compile Include="HTTP\HTTPResponse.cs" />
+    <Compile Include="ICMP\V6\NeighborDiscoveryOption.cs" />
+    <Compile Include="ICMP\V6\NeighborSolicitationMessage.cs" />
+    <Compile Include="ICMP\V6\NeighborAdvertisment.cs" />
+    <Compile Include="ICMP\V6\ICMPv6Type.cs" />
     <Compile Include="IP\IIPFrame.cs" />
-    <Compile Include="IP\IPv6Frame.cs" />
+    <Compile Include="IP\V6\IPv6Frame.cs" />
     <Compile Include="Monitoring\SpeedMeter.cs" />
     <Compile Include="Monitoring\HTTPMonitor.cs" />
     <Compile Include="Monitoring\StreamMonitoring\HTTPReaders.cs" />

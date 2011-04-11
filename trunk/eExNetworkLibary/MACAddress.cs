@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Net;
 
 namespace eExNetworkLibrary
 {
@@ -109,6 +110,27 @@ namespace eExNetworkLibrary
             }
 
             return macReturn;
+        }
+
+        /// <summary>
+        /// Creates a multicast MAC address for the given IPv6 address. 
+        /// For example, the IP address fdcb:e462:34c9:5ad6::2 would result in a MAC address of 33:33:ff:00:00:02
+        /// </summary>
+        /// <param name="ipaAddress">The IPv6 address to get the multicast MAC for</param>
+        /// <returns>The multicast MAC for the given address</returns>
+        public static MACAddress MulticastFromIPv6Address(IPAddress ipaAddress)
+        {
+            if (ipaAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+            {
+                throw new ArgumentException("Only IPv6 addresses are supported.");
+            }
+
+            byte[] bAddressBytes = ipaAddress.GetAddressBytes();
+            byte[] bMACBytes = new byte[]{0x33, 0x33, 0xFF, 0x00, 0x00, 0x00};
+
+            Array.Copy(bAddressBytes, 13, bMACBytes, 3, 3);
+
+            return new MACAddress(bMACBytes);
         }
 
         /// <summary>

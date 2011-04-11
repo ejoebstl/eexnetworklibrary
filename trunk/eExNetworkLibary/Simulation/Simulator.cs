@@ -73,11 +73,20 @@ namespace eExNetworkLibrary.Simulation
         }
 
         /// <summary>
-        /// Stops all simulation items.
+        /// Stops all simulation items and the handler itself.
+        /// </summary>
+        public override void Stop()
+        {
+            StopRecourse(tsmiRoot);
+            base.Stop();
+        }
+
+        /// <summary>
+        /// Does nothing. 
         /// </summary>
         public override void Cleanup()
         {
-            StopRecourse(tsmiRoot);
+
         }
 
         /// <summary>

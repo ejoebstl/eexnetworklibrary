@@ -430,6 +430,30 @@ namespace eExNetworkLibrary.IP
 
             return bAddress;
         }
+
+        /// <summary>
+        /// Converts the given address into a solicited node multicast address.
+        /// For example, the address fdcb:e462:34c9:5ad6::2 would result in the multicast address FF02::1:FF:2.
+        /// </summary>
+        /// <param name="ipaAddress">The IP address to convert</param>
+        /// <returns>The solicited note multicast address.</returns>
+        public IPAddress GetSolicitedNodeMulticastAddress(IPAddress ipaAddress)
+        {
+            if (ipaAddress.AddressFamily != AddressFamily.InterNetworkV6)
+            {
+                throw new ArgumentException("Only IPv6 addresses can be converted into solicited node multicast addresses.");
+            }
+
+            byte[] bAddressBytes = new byte[] {
+                0xFF, 0x02, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 
+                0x00, 0x00, 0x00, 0x00, 
+                0xFF, 0x00, 0x00, 0x00};
+
+            Array.Copy(ipaAddress.GetAddressBytes(), 13, bAddressBytes, 13, 3);
+
+            return new IPAddress(bAddressBytes);
+        }
     }
 
     /// <summary>

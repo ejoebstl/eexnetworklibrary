@@ -75,7 +75,8 @@ namespace eExNetworkLibrary.Attacks.Scanning
                 {
                     for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
                     {
-                        if (ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(fARPFrame.DestinationIP, ipi.Subnetmasks[iC1])))
+                        if (ipi.IpAddresses[iC1].AddressFamily == fARPFrame.DestinationIP.AddressFamily &&
+                            ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(fARPFrame.DestinationIP, ipi.Subnetmasks[iC1])))
                         {
                             ipi.Send(fInputFrame);
                         }
@@ -222,8 +223,9 @@ namespace eExNetworkLibrary.Attacks.Scanning
             {
                 for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
                 {
-                    if (ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaStart, ipi.Subnetmasks[iC1])) ||
-                        ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaEnd, ipi.Subnetmasks[iC1])))
+                    if (ipi.IpAddresses[iC1].AddressFamily == ipaStart.AddressFamily && ipi.Subnetmasks[iC1].AddressFamily == ipaStart.AddressFamily && 
+                        (ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaStart, ipi.Subnetmasks[iC1])) ||
+                        ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaEnd, ipi.Subnetmasks[iC1]))))
                     {
                         this.AddARPScanTask(new ARPScanTask(ipaStart, ipaEnd, ipi.PrimaryMACAddress, ipi.IpAddresses[iC1], this));
                     }
