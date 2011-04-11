@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 
-namespace eExNetworkLibrary.IP
+namespace eExNetworkLibrary.IP.V6
 {
     public class IPv6Frame : IPFrame
     {
-
         private int iVersion;
         private ushort sTrafficClass;
         private uint iFlowLabel;

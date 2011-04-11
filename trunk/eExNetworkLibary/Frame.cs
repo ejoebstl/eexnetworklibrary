@@ -9,7 +9,6 @@ namespace eExNetworkLibrary
     /// </summary>
     public abstract class Frame
     {
-
         /// <summary>
         /// The frame encapsulated in this frame.
         /// </summary>
@@ -32,6 +31,23 @@ namespace eExNetworkLibrary
         {
             get { return fEncapsulatedFrame; }
             set { fEncapsulatedFrame = value; }
+        }
+
+        /// <summary>
+        /// Copies the given data into a raw data frame and sets it as the encapsulated frame. If the given parameters would result in an empty frame, the encapsulated frame is set to null instead.
+        /// </summary>
+        /// <param name="bData">The data to copy.</param>
+        /// <param name="iStartIndex">The index at which copying begins.</param>
+        protected void Encapsulate(byte[] bData, int iStartIndex)
+        {
+            if (bData.Length - iStartIndex == 0)
+            {
+                this.fEncapsulatedFrame = null;
+            }
+            else
+            {
+                this.fEncapsulatedFrame = new RawDataFrame(bData, iStartIndex, bData.Length - iStartIndex);
+            }
         }
 
         /// <summary>
