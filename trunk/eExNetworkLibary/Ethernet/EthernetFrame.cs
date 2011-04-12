@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using eExNetworkLibrary.IP;
 using eExNetworkLibrary.ARP;
+using eExNetworkLibrary.IP.V6;
 
 namespace eExNetworkLibrary.Ethernet
 {

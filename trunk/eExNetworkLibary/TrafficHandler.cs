@@ -6,6 +6,7 @@ using eExNetworkLibrary.IP;
 using eExNetworkLibrary.CommonTrafficAnalysis;
 using System.ComponentModel;
 using eExNetworkLibrary.Threading;
+using eExNetworkLibrary.IP.V6;
 
 namespace eExNetworkLibrary
 {
@@ -174,9 +175,9 @@ namespace eExNetworkLibrary
         /// </summary>
         /// <param name="fInputFrame">The abstract input frame</param>
         /// <returns>An IPv6 frame</returns>
-        protected IP.IPv6Frame GetIPv6Frame(Frame fInputFrame)
+        protected IPv6Frame GetIPv6Frame(Frame fInputFrame)
         {
-            IP.IPv6Frame fResultFrame = null;
+            IPv6Frame fResultFrame = null;
             Frame fFrame = fInputFrame;
 
             while (fFrame != null) //Get the frames
@@ -185,7 +186,7 @@ namespace eExNetworkLibrary
                 {
                     if (((IPFrame)fFrame).Version == 6)
                     {
-                        fResultFrame = (IP.IPv6Frame)fFrame;
+                        fResultFrame = (IPv6Frame)fFrame;
                         break;
                     }
                 }
