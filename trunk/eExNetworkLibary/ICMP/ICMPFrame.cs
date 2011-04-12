@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using eExNetworkLibrary.Utilities;
+using eExNetworkLibrary.ICMP.V6;
 
 namespace eExNetworkLibrary.ICMP
 {

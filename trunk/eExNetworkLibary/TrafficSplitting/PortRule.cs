@@ -56,7 +56,6 @@ namespace eExNetworkLibrary.TrafficSplitting
             iSourcePort = 80;
             iDestinationPort = 80;
             tProtocol = TransportProtocol.Any;
-            lLogic = Logic.Or;
         }
 
         /// <summary>
@@ -73,14 +72,7 @@ namespace eExNetworkLibrary.TrafficSplitting
             {
                 if (tcpFrame != null)
                 {
-                    if (lLogic == Logic.And)
-                    {
-                        return tcpFrame.DestinationPort == iDestinationPort && tcpFrame.SourcePort == iSourcePort;
-                    }
-                    else
-                    {
-                        return tcpFrame.DestinationPort == iDestinationPort || tcpFrame.SourcePort == iSourcePort;
-                    }
+                    return tcpFrame.DestinationPort == iDestinationPort || tcpFrame.SourcePort == iSourcePort;
                 }
                 else
                 {
@@ -91,14 +83,7 @@ namespace eExNetworkLibrary.TrafficSplitting
             {
                 if (udpFrame != null)
                 {
-                    if (lLogic == Logic.And)
-                    {
-                        return udpFrame.DestinationPort == iDestinationPort && udpFrame.SourcePort == iSourcePort;
-                    }
-                    else
-                    {
-                        return udpFrame.DestinationPort == iDestinationPort || udpFrame.SourcePort == iSourcePort;
-                    }
+                    return udpFrame.DestinationPort == iDestinationPort || udpFrame.SourcePort == iSourcePort;
                 }
                 else
                 {
@@ -123,7 +108,7 @@ namespace eExNetworkLibrary.TrafficSplitting
         /// <returns>A long description of this rules function</returns>
         public override string GetLongDescription()
         {
-            return "If " + tProtocol.ToString() + " Source Port is " + this.iSourcePort.ToString() + " " + lLogic.ToString() + " " + tProtocol.ToString() + " Destination Port is " + iDestinationPort.ToString() + " then " + this.Action.ToString();
+            return "If " + tProtocol.ToString() + " Source Port is " + this.iSourcePort.ToString() + " or " + tProtocol.ToString() + " Destination Port is " + iDestinationPort.ToString() + " then " + this.Action.ToString();
         }
 
         /// <summary>
@@ -153,20 +138,5 @@ namespace eExNetworkLibrary.TrafficSplitting
         /// Any
         /// </summary>
         Any = 3
-    }
-
-    /// <summary>
-    /// The rule logic for source and destination
-    /// </summary>
-    public enum Logic
-    {
-        /// <summary>
-        /// Logic.And will cause the rule to only return a match if the rule applies for source and destination.
-        /// </summary>
-        And = 0,
-        /// <summary>
-        /// Logic.Or will cause to rule to return a match method if the rule applies for source or destination.
-        /// </summary>
-        Or = 1
     }
 }

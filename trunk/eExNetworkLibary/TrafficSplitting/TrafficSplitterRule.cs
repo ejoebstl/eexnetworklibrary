@@ -15,24 +15,6 @@ namespace eExNetworkLibrary.TrafficSplitting
         protected TrafficSplitterActions tsaAction;
 
         /// <summary>
-        /// The logic relation for source and destination. 
-        /// Logic.And will cause the rule to only return true from the IsMatch method if the rule applies for source and destination.
-        /// Logic.Or will cause to rule to return true from the IsMatch method if the rule applies for source or destination.
-        /// </summary>
-        protected Logic lLogic;
-
-        /// <summary>
-        /// The logic relation for source and destination. 
-        /// Logic.And will cause the rule to only return true from the IsMatch method if the rule applies for source and destination.
-        /// Logic.Or will cause to rule to return true from the IsMatch method if the rule applies for source or destination.
-        /// </summary>
-        public Logic Logic
-        {
-            get { return lLogic; }
-            set { lLogic = value; }
-        }
-
-        /// <summary>
         /// The action to do on a match(drop, send to a, send to b)
         /// </summary>
         public TrafficSplitterActions Action

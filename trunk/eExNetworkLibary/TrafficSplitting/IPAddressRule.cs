@@ -70,7 +70,6 @@ namespace eExNetworkLibrary.TrafficSplitting
             smSourceWildcard = new Subnetmask();
             smDestinationWildcard = new Subnetmask();
             ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
-            lLogic = Logic.Or;
         }
 
         /// <summary>
@@ -85,16 +84,8 @@ namespace eExNetworkLibrary.TrafficSplitting
         {
             if (ipv4Frame != null)
             {
-                if (lLogic == Logic.Or)
-                {
-                    return MatchWildcard(ipv4Frame.SourceAddress, ipaSource, smSourceWildcard) ||
-                        MatchWildcard(ipv4Frame.DestinationAddress, ipaDestination, smDestinationWildcard);
-                }
-                else
-                {
-                    return MatchWildcard(ipv4Frame.SourceAddress, ipaSource, smSourceWildcard) &&
-                        MatchWildcard(ipv4Frame.DestinationAddress, ipaDestination, smDestinationWildcard);
-                }
+                return MatchWildcard(ipv4Frame.SourceAddress, ipaSource, smSourceWildcard) &&
+                    MatchWildcard(ipv4Frame.DestinationAddress, ipaDestination, smDestinationWildcard);
             }
             return false;
         }
@@ -133,7 +124,7 @@ namespace eExNetworkLibrary.TrafficSplitting
         /// <returns>A long description of this rules function</returns>
         public override string GetLongDescription()
         {
-            return "If Source is " + ipaSource.ToString() + " " + lLogic.ToString() + " Destination is " + ipaDestination.ToString() + " then " + this.Action.ToString();
+            return "If Source is " + ipaSource.ToString() + " or Destination is " + ipaDestination.ToString() + " then " + this.Action.ToString();
         }
 
         /// <summary>
@@ -142,7 +133,7 @@ namespace eExNetworkLibrary.TrafficSplitting
         /// <returns>A short description of this rules function</returns>
         public override string GetShortDescription()
         {
-            return ipaSource.ToString() + " " + lLogic.ToString() + " " + ipaDestination.ToString() + ":" + Action.ToString();
+            return ipaSource.ToString() + "/" + ipaDestination.ToString() + ":" + Action.ToString();
         }
     }
 }
