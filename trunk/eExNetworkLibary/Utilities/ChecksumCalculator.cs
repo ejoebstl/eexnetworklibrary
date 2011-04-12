@@ -6,7 +6,6 @@ namespace eExNetworkLibrary.Utilities
 {
     /// <summary>
     /// A simple checksum calculator, which can be used to calculate IP checksums and so on.
-    /// This check sum calculator is a little bit buggy and not always works right.
     /// </summary>
     public class ChecksumCalculator
     {
@@ -29,9 +28,12 @@ namespace eExNetworkLibrary.Utilities
             {
                 iChecksum += Convert.ToUInt32(BitConverter.ToUInt16(bData, iIndex));
                 iIndex += 2;
+                if (iChecksum > 0xffff)
+                {
+                    iChecksum = (iChecksum >> 16) + (iChecksum & 0xffff);
+                    iChecksum += (iChecksum >> 16);
+                }
             }
-            iChecksum = (iChecksum >> 16) + (iChecksum & 0xffff);
-            iChecksum += (iChecksum >> 16);
 
             return BitConverter.GetBytes((UInt16)~iChecksum);
         }

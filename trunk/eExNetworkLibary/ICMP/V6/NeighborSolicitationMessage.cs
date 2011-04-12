@@ -32,11 +32,11 @@ namespace eExNetworkLibrary.ICMP.V6
         {
             byte[] bAddressBytes = new byte[16];
 
-            Array.Copy(bData, 8, bAddressBytes, 0, 16);
+            Array.Copy(bData, 4, bAddressBytes, 0, 16);
 
             this.ipaTargetAddress = new IPAddress(bAddressBytes);
 
-            Encapsulate(bData, 24);
+            Encapsulate(bData, 20);
         }
 
         public override FrameType FrameType
@@ -50,11 +50,11 @@ namespace eExNetworkLibrary.ICMP.V6
             {
                 byte[] bData = new byte[Length];
 
-                Array.Copy(ipaTargetAddress.GetAddressBytes(), 0, bData, 8, 16);
+                Array.Copy(ipaTargetAddress.GetAddressBytes(), 0, bData, 4, 16);
 
                 if (fEncapsulatedFrame != null)
                 {
-                    Array.Copy(fEncapsulatedFrame.FrameBytes, 0, bData, 24, fEncapsulatedFrame.Length);
+                    Array.Copy(fEncapsulatedFrame.FrameBytes, 0, bData, 20, fEncapsulatedFrame.Length);
                 }
 
                 return bData;
@@ -63,7 +63,7 @@ namespace eExNetworkLibrary.ICMP.V6
 
         public override int Length
         {
-            get { return 24 + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
+            get { return 20 + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
         }
 
         public override Frame Clone()

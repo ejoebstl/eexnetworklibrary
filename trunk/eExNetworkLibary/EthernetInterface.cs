@@ -68,7 +68,7 @@ namespace eExNetworkLibrary
         /// <summary>
         /// Gets or sets the type of IPv6 hardware address resolution to use. The default value is ICMP, since it is more commonly used. 
         /// </summary>
-        public IPv6AddressResolution IPv6AddressResolution
+        public IPv6AddressResolution IPv6AddressResolutionMethod
         {
             get { return ipv6AddressResolution; }
             set
@@ -225,6 +225,7 @@ namespace eExNetworkLibrary
             ipaAnalysis = new IPAddressAnalysis();
 
             oInterfaceStartStopLock = new object();
+            IPv6AddressResolutionMethod = IPv6AddressResolution.ICMP;
             bExcludeOwnTraffic = true;
             bExcludeLocalHostTraffic = true;
             arpHostTable = new HostTable();
@@ -783,6 +784,8 @@ namespace eExNetworkLibrary
             ipFrame.EncapsulatedFrame = icmpFrame;
             icmpFrame.EncapsulatedFrame = icmpDiscoveryMessage;
             icmpDiscoveryMessage.EncapsulatedFrame = icmpDiscoveryOption;
+
+            icmpFrame.Checksum = icmpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
 
             this.Send(ethFrame);
         }
