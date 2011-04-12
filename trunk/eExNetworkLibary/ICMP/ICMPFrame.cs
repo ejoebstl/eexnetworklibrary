@@ -24,6 +24,7 @@ namespace eExNetworkLibrary.ICMP
     {
         int icmpType;
         int icmpCode;
+        byte[] bICMPChecksum;
         ChecksumCalculator cCalc;
 
         /// <summary>
@@ -61,6 +62,59 @@ namespace eExNetworkLibrary.ICMP
         {
             get { return icmpCode; }
             set { icmpCode = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the ICMP checksum, which has to be 2 bytes long. 
+        /// Don't forget to set this property to a valid value before sending the frame. 
+        /// Also don't forget to set this property to a byte array full of zeros before calculating the cecksum. 
+        /// <br />
+        /// <br />
+        /// For calculating IPv4 checksums use:
+        /// <code>
+        /// icmpFrame.Checksum = new byte[2];
+        /// icmpFrame.Checksum = icmpFrame.CalculateChecksum();
+        /// </code>
+        /// For calculating IPv6 checksums use:
+        /// <code>
+        /// icmpFrame.Checksum = new byte[2];
+        /// icmpFrame.Checksum = icmpFrame.CalculateChecksum(ipv6Frame.GetPseudoHeader)
+        /// </code>
+        /// </summary>
+        public byte[] Checksum
+        {
+            get { return bICMPChecksum; }
+            set
+            {
+                if (value.Length != 2)
+                {
+                    throw new ArgumentException("The ICMP checksum has to be 2 bytes long.");
+                }
+                bICMPChecksum = value;
+            }
+        }
+
+        /// <summary>
+        /// Calculates an IPv4 ICMP checksum from this frame.
+        /// </summary>
+        /// <returns>The ICMPv4 checksum.</returns>
+        public byte[] CalculateChecksum()
+        {
+            return CalculateChecksum(new byte[0]);
+        }
+
+        /// <summary>
+        /// Calculates an IPv6 ICMP checksum from this frame.
+        /// </summary>
+        /// <param name="bPseudoHeader">The IPv6 pseudo header to use for the calculation.</param>
+        /// <returns>The ICMPv6 checksum.</returns>
+        public byte[] CalculateChecksum(byte[] bPseudoHeader)
+        {
+            byte[] bChecksumData = new byte[bPseudoHeader.Length + this.Length];
+            Array.Copy(bPseudoHeader, 0, bChecksumData, 0, bPseudoHeader.Length);
+            Array.Copy(this.FrameBytes, 0, bChecksumData, bPseudoHeader.Length, this.Length);
+
+            return cCalc.CalculateChecksum(bChecksumData);
         }
 
         /// <summary>
@@ -122,9 +176,15 @@ namespace eExNetworkLibrary.ICMP
         public ICMPFrame(byte[] bICMPData)
         {
             cCalc = new ChecksumCalculator();
+
             icmpType = (int)bICMPData[0];
             icmpCode = (int)bICMPData[1];
-            //2 bytes checksum
+
+            bICMPChecksum = new byte[2];
+
+            bICMPChecksum[0] = bICMPData[2];
+            bICMPChecksum[1] = bICMPData[3];
+
             byte[] bData = new byte[bICMPData.Length - 4];
             for (int iC1 = 4; iC1 < bICMPData.Length; iC1++)
             {
@@ -138,6 +198,7 @@ namespace eExNetworkLibrary.ICMP
         /// </summary>
         public ICMPFrame()
         {
+            bICMPChecksum = new byte[2];
             cCalc = new ChecksumCalculator();
         }
 
@@ -165,10 +226,8 @@ namespace eExNetworkLibrary.ICMP
                     fEncapsulatedFrame.FrameBytes.CopyTo(bICMPData, 4);
                 }
 
-                byte[] bChecksum = cCalc.CalculateChecksum(bICMPData);
-
-                bICMPData[2] = bChecksum[0];
-                bICMPData[3] = bChecksum[1];
+                bICMPData[2] = bICMPChecksum[0];
+                bICMPData[3] = bICMPChecksum[1];
 
                 return bICMPData;
             

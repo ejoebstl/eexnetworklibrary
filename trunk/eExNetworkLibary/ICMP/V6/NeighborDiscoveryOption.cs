@@ -17,19 +17,18 @@ namespace eExNetworkLibrary.ICMP.V6
 
         public NeighborDiscoveryOption(byte[] bData)
         {
-            int iOptionType = bData[0] << 8;;
-            iOptionType |= bData[1];
+            int iOptionType = bData[0];
+            int iOptionLength = bData[1];
+
+            iOptionLength = (iOptionLength * 8) - 2;
 
             OptionType = (NeighborDiscoveryOptionType)iOptionType;
 
-            int iOptionLength = bData[2] << 8;
-            iOptionLength |= bData[3];
-
             OptionData = new byte[iOptionLength];
 
-            Array.Copy(bData, 4, OptionData, 0, iOptionLength);
+            Array.Copy(bData, 2, OptionData, 0, iOptionLength);
 
-            Encapsulate(bData, 4 + iOptionLength);
+            Encapsulate(bData, 2);
  
         }
 
@@ -44,17 +43,14 @@ namespace eExNetworkLibrary.ICMP.V6
             {
                 byte[] bData = new byte[Length];
 
-                bData[0] = (byte)((((int)OptionType) >> 8) & 0xFF);
-                bData[1] = (byte)(((int)OptionType) & 0xFF);
+                bData[0] = (byte)(((int)OptionType) & 0xFF);
+                bData[1] = (byte)(((OptionData.Length + 2) / 8) & 0xFF);
 
-                bData[2] = (byte)((OptionData.Length >> 8) & 0xFF);
-                bData[3] = (byte)(OptionData.Length & 0xFF);
-
-                Array.Copy(OptionData, 0, bData, 4, OptionData.Length);
+                Array.Copy(OptionData, 0, bData, 2, OptionData.Length);
 
                 if (fEncapsulatedFrame != null)
                 {
-                    Array.Copy(fEncapsulatedFrame.FrameBytes, 0, bData, 4 + OptionData.Length, fEncapsulatedFrame.Length);
+                    Array.Copy(fEncapsulatedFrame.FrameBytes, 0, bData, 2 + OptionData.Length, fEncapsulatedFrame.Length);
                 }
 
                 return bData;
@@ -63,7 +59,7 @@ namespace eExNetworkLibrary.ICMP.V6
 
         public override int Length
         {
-            get { return 4 + OptionData.Length + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
+            get { return 2 + OptionData.Length + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
         }
 
         public override Frame Clone()

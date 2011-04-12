@@ -66,7 +66,7 @@ namespace eExNetworkLibrary.IP.V6
             get { return ipaDestination; }
             set
             {
-                if (value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                if (value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
                 {
                     throw new ArgumentException("Only assigning IPv6 addresses to an IPv6 frame is possible.");
                 }
@@ -82,7 +82,7 @@ namespace eExNetworkLibrary.IP.V6
             get { return ipaSource; }
             set
             {
-                if (value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                if (value.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
                 {
                     throw new ArgumentException("Only assigning IPv6 addresses to an IPv6 frame is possible.");
                 }
@@ -104,6 +104,41 @@ namespace eExNetworkLibrary.IP.V6
                 }
                 iVersion = value;
             }
+        }
+        
+        /// <summary>
+        /// Returns the IPv6 pseudo header for this frame.<br />
+        /// This pseudo header can be used to calculate TCP, ICMP and UDP checksums.
+        /// </summary>
+        /// <returns>The IPv6 pseudo header as byte[].</returns>
+        public override byte[] GetPseudoHeader()
+        {
+            return GetPseudoHeader(SourceAddress, DestinationAddress, fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0, bNextHeader);
+        }
+
+        /// <summary>
+        /// Returns the IPv6 pseudo header from the given params.<br />
+        /// This pseudo header can be used to calculate TCP, ICMP and UDP checksums.
+        /// </summary>
+        /// <param name="bNextHeader">A byte defining the type of the payload protocol.</param>
+        /// <param name="ipaDestination">The destination address to use in the checksum calculation.</param>
+        /// <param name="ipaSource">The source address to use in the checksum calculation.</param>
+        /// <param name="iPayloadLen">The payload len to use in the checksum calculation.</param>
+        /// <returns>The IPv6 pseudo header as byte[].</returns>
+        static byte[] GetPseudoHeader(IPAddress ipaSource, IPAddress ipaDestination, int iPayloadLen, byte bNextHeader)
+        {
+            byte[] bPseudoHeader = new byte[40];
+
+            Array.Copy(ipaSource.GetAddressBytes(), 0, bPseudoHeader, 0, 16);
+            Array.Copy(ipaDestination.GetAddressBytes(), 0, bPseudoHeader, 16, 16);
+            
+            bPseudoHeader[32] = (byte)((iPayloadLen >> 24) & 0xFF);
+            bPseudoHeader[33] = (byte)((iPayloadLen >> 16) & 0xFF);
+            bPseudoHeader[34] = (byte)((iPayloadLen >> 8) & 0xFF);
+            bPseudoHeader[35] = (byte)((iPayloadLen) & 0xFF);
+            bPseudoHeader[39] = (byte)bNextHeader;
+
+            return bPseudoHeader;
         }
 
         public override byte[] FrameBytes
@@ -156,31 +191,6 @@ namespace eExNetworkLibrary.IP.V6
             get { return (IPProtocol)bNextHeader; }
             set { bNextHeader = (byte)value; }
         }
-
-        
-        /// <summary>
-        /// Returns the pseudo header for this frame.
-        /// This header can be used to calculate TCP and UDP checksums.
-        /// </summary>
-        /// <returns>The IP pseudo header of this instance.</returns>
-        public override byte[] GetPseudoHeader()
-        {
-            byte[] bRaw = new byte[40];
-
-
-            ushort sPayloadLength = (ushort)(fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0);
-
-            Array.Copy(ipaSource.GetAddressBytes(), 0, bRaw, 0, 16);
-            Array.Copy(ipaDestination.GetAddressBytes(), 0, bRaw, 16, 16);
-
-            bRaw[32] |= (byte)((sPayloadLength >> 8) & 0xFF);
-            bRaw[33] = (byte)(sPayloadLength & 0xFF);
-
-            bRaw[39] = bNextHeader;
-
-            return bRaw;
-        }
-
 
         /// <summary>
         /// Gets or sets the time to live. This value is exactly the same as the value encapsulated by the HopLimit property.
