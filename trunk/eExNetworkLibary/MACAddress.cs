@@ -42,6 +42,19 @@ namespace eExNetworkLibrary
             get { return new MACAddress(new byte[] { 0xBA, 0xD0, 0xCA, 0xB7, 0xE0, 0x00 }); }
         }
 
+        /// <summary>
+        /// Returns a random MACAddress
+        /// </summary>
+        public static MACAddress Random
+        {
+            get {
+                Random r = new Random();
+                byte b = new byte[6];
+                r.NextBytes(b);
+                return new MACAddress(b);
+            }
+        }
+
         private byte[] bAddressBytes;
 
         /// <summary>

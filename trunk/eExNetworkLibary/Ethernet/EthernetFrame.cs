@@ -151,7 +151,7 @@ namespace eExNetworkLibrary.Ethernet
         }
 
         /// <summary>
-        /// Gets or sets a bool indicating whether the cnaocial format indicator has been set
+        /// Gets or sets a bool indicating whether the canocial format indicator has been set
         /// </summary>
         public bool CanocialFormatIndicator
         {
