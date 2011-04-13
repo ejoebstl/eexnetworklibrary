@@ -9,6 +9,7 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class OSPFLSAAcknowledgementMessage : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFLSAAcknowledgementMessage"; } }
         private List<LSAHeader> lLSAHeaders;
 
         /// <summary>
@@ -57,11 +58,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFLSAcknowledgement 
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFLSAcknowledgement; }
+            get { return OSPFLSAAcknowledgementMessage.DefaultFrameType; }
         }
 
         /// <summary>

@@ -16,6 +16,8 @@ namespace eExNetworkLibrary.IP
     /// </summary>
     public class IPv4Frame : IPFrame
     {
+        public static string DefaultFrameType { get { return FrameTypes.IPv4; } }
+
         private int iVersion;
         private IPTypeOfService tosTypeOfService;
         private uint iIdentification;
@@ -29,12 +31,15 @@ namespace eExNetworkLibrary.IP
         private ChecksumCalculator clCalc;
         private int iHeaderLength;
 
+
         /// <summary>
         /// Creates a new instance of this class by parsing the given data.
         /// </summary>
         /// <param name="bRaw">The data to parse</param>
         public IPv4Frame(byte[] bRaw)
         {
+            this.clCalc = new ChecksumCalculator();
+
             int iHeaderLength;
             int iTotalLength;
 
@@ -94,34 +99,7 @@ namespace eExNetworkLibrary.IP
                 this.ipoOptions = new IPv4Options();
             }
 
-            byte[] bData = new byte[iTotalLength - iHeaderLength];
-            for (int iC1 = iHeaderLength; iC1 < iTotalLength; iC1++)
-            {
-                bData[iC1 - iHeaderLength] = bRaw[iC1];
-            }
-
-            if (this.iProtocol == IPProtocol.TCP)
-            {
-                this.fEncapsulatedFrame = new TCPFrame(bData);
-            }
-            else if (this.iProtocol == IPProtocol.UDP)
-            {
-                this.fEncapsulatedFrame = new UDPFrame(bData);
-            }
-            else if (this.iProtocol == IPProtocol.ICMP)
-            {
-                this.fEncapsulatedFrame = new ICMPFrame(bData);
-            }
-            else if (this.iProtocol == IPProtocol.OSPF)
-            {
-                this.fEncapsulatedFrame = new OSPFCommonHeader(bData);
-            }
-            else
-            {
-                this.fEncapsulatedFrame = new RawDataFrame(bData);
-            }
-
-            this.clCalc = new ChecksumCalculator();
+            Encapsulate(bRaw, iHeaderLength);
         }
 
         /// <summary>
@@ -134,7 +112,7 @@ namespace eExNetworkLibrary.IP
             this.iIdentification = 0;
             this.ifFlags = new IPFlags(false, false);
             this.iFragmentOffset = 0;
-            this.iTimeToLive = 128;
+            this.iTimeToLive = 0xFF;
             this.iProtocol = IPProtocol.Other;
             this.ipaSource = IPAddress.Any;
             this.ipaDestination = IPAddress.Any;
@@ -165,6 +143,11 @@ namespace eExNetworkLibrary.IP
         }
 
         #region Props
+
+        public override string FrameType
+        {
+            get { return IPv4Frame.DefaultFrameType; }
+        }
 
         /// <summary>
         /// Gets or sets the fragment offset

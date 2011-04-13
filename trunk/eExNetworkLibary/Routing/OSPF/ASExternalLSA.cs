@@ -10,6 +10,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class ASExternalLSA : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFASExternalLSA"; } }
+
         private List<ASExternalItem> lItems;
         private Subnetmask smNetmask;
 
@@ -103,11 +105,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFExternalLSA
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFExternalLSA; }
+            get { return ASExternalLSA.DefaultFrameType; }
         }
 
         /// <summary>

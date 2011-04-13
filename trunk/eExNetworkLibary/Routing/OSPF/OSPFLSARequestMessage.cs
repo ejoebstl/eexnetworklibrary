@@ -9,6 +9,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class OSPFLSARequestMessage : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFLSARequestMessage"; } }
+
         private List<LSARequestItem> lLSARequestList;
 
         /// <summary>
@@ -84,11 +86,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFLSARequest
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFLSARequest; }
+            get { return OSPFLSARequestMessage.DefaultFrameType; }
         }
 
         /// <summary>

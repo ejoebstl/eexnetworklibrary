@@ -7,6 +7,7 @@ using eExNetworkLibrary.CommonTrafficAnalysis;
 using System.ComponentModel;
 using eExNetworkLibrary.Threading;
 using eExNetworkLibrary.IP.V6;
+using eExNetworkLibrary.ProtocolParsing;
 
 namespace eExNetworkLibrary
 {
@@ -26,6 +27,11 @@ namespace eExNetworkLibrary
         private List<TrafficAnalyzer> lDroppedTrafficAnalyzer;
         private Queue<TrafficHandlerWorkItem> qwiWorkItems;
         private AutoResetEvent areWorkToDo;
+
+        /// <summary>
+        /// Gets or sets the protocol parser of this traffic handler. By changing it, it is possible to change the way the traffic handler parses protocols.
+        /// </summary>
+        public ProtocolParser ProtocolParser { get; set; }
 
         /// <summary>
         /// This traffic handlers default output handler. All forwarded frames will be pushed to this handlers queue. 
@@ -117,6 +123,7 @@ namespace eExNetworkLibrary
             qwiWorkItems = new Queue<TrafficHandlerWorkItem>();
             lDroppedTrafficAnalyzer = new List<TrafficAnalyzer>();
             bIsRunning = false;
+            ProtocolParser = new ProtocolParser();
         }
 
         /// <summary>
@@ -151,23 +158,7 @@ namespace eExNetworkLibrary
         /// <returns>An IPv4 frame</returns>
         protected IP.IPv4Frame GetIPv4Frame(Frame fInputFrame)
         {
-            IP.IPv4Frame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.IP)
-                {
-                    if (((IPFrame)fFrame).Version == 4)
-                    {
-                        fResultFrame = (IP.IPv4Frame)fFrame;
-                        break;
-                    }
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            return (IPv4Frame)GetFrameByType(fInputFrame, FrameTypes.IPv4);
         }
 
         /// <summary>
@@ -177,23 +168,7 @@ namespace eExNetworkLibrary
         /// <returns>An IPv6 frame</returns>
         protected IPv6Frame GetIPv6Frame(Frame fInputFrame)
         {
-            IPv6Frame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.IP)
-                {
-                    if (((IPFrame)fFrame).Version == 6)
-                    {
-                        fResultFrame = (IPv6Frame)fFrame;
-                        break;
-                    }
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            return (IPv6Frame)GetFrameByType(fInputFrame, FrameTypes.IPv6);
         }    
         
         /// <summary>
@@ -203,20 +178,10 @@ namespace eExNetworkLibrary
         /// <returns>An IP frame</returns>
         protected IP.IPFrame GetIPFrame(Frame fInputFrame)
         {
-            IP.IPFrame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.IP)
-                {
-                    fResultFrame = (IP.IPFrame)fFrame;
-                    break;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            IPFrame fFrame = GetIPv4Frame(fInputFrame);
+            if (fFrame == null)
+                fFrame = GetIPv6Frame(fInputFrame);
+            return fFrame;
         }
 
         /// <summary>
@@ -224,23 +189,23 @@ namespace eExNetworkLibrary
         /// </summary>
         /// <param name="fInputFrame">The abstract input frame</param>
         /// <param name="fFrameType">The frame type to search for</param>
-        /// <returns>An frame with the specified type</returns>
-        protected Frame GetFrameByType(Frame fInputFrame, FrameType fFrameType)
+        /// <returns>The parsed frame or null, if the frame did not contain a frame with the specified type.</returns>
+        protected Frame GetFrameByType(Frame fInputFrame, string strFrameType)
         {
-            Frame fResultFrame = null;
-            Frame fFrame = fInputFrame;
+            return ProtocolParser.GetFrameByType(fInputFrame, strFrameType);
+        }
 
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == fFrameType)
-                {
-                    fResultFrame = fFrame;
-                    break;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
 
-            return fResultFrame;
+        /// <summary>
+        /// Gets the a frame specified by its type from an abstract frame or returns null in case no frame with this type exists.
+        /// </summary>
+        /// <param name="fInputFrame">The abstract input frame</param>
+        /// <param name="fFrameType">The frame type to search for</param>
+        /// <param name="bReturnRawData">A bool indicating whether raw data frames can be returned, if the protocol is known but no protocol provider is available.</param>
+        /// <returns>The parsed frame, a raw data frame with the searched frame's data or null, if the frame did not contain a frame with the specified type.</returns>
+        protected Frame GetFrameByType(Frame fInputFrame, string strFrameType, bool bReturnRawData)
+        {
+            return ProtocolParser.GetFrameByType(fInputFrame, strFrameType, bReturnRawData);
         }
 
         /// <summary>
@@ -263,20 +228,7 @@ namespace eExNetworkLibrary
         /// <returns>An arp frame</returns>
         protected ARP.ARPFrame GetARPFrame(Frame fInputFrame)
         {
-            ARP.ARPFrame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.ARP)
-                {
-                    fResultFrame = (ARP.ARPFrame)fFrame;
-                    break;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            return (ARP.ARPFrame)GetFrameByType(fInputFrame, FrameTypes.ARP);
         }
 
         /// <summary>
@@ -286,20 +238,7 @@ namespace eExNetworkLibrary
         /// <returns>An ethernet frame</returns>
         protected Ethernet.EthernetFrame GetEthernetFrame(Frame fInputFrame)
         {
-            Ethernet.EthernetFrame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.Ethernet)
-                {
-                    fResultFrame = (Ethernet.EthernetFrame)fFrame;
-                    break;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            return (Ethernet.EthernetFrame)GetFrameByType(fInputFrame, FrameTypes.Ethernet);
         }
 
         /// <summary>
@@ -309,20 +248,7 @@ namespace eExNetworkLibrary
         /// <returns>An TCP frame</returns>
         protected TCP.TCPFrame GetTCPFrame(Frame fInputFrame)
         {
-            TCP.TCPFrame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.TCP)
-                {
-                    fResultFrame = (TCP.TCPFrame)fFrame;
-                    break;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            return (TCP.TCPFrame)GetFrameByType(fInputFrame, FrameTypes.TCP);
         }
 
         /// <summary>
@@ -332,20 +258,7 @@ namespace eExNetworkLibrary
         /// <returns>An UDP frame</returns>
         protected UDP.UDPFrame GetUDPFrame(Frame fInputFrame)
         {
-            UDP.UDPFrame fResultFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (fFrame.FrameType == FrameType.UDP)
-                {
-                    fResultFrame = (UDP.UDPFrame)fFrame;
-                    break;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
-
-            return fResultFrame;
+            return (UDP.UDPFrame)GetFrameByType(fInputFrame, FrameTypes.UDP);
         }
 
 

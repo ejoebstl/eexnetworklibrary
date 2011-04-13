@@ -69,12 +69,12 @@ namespace eExNetworkLibrary.Simulation
         {
             if (iMaxErrorCount > 0)
             {
-                while (f != null && f.FrameType != FrameType.IP)
+                while (f != null && FrameTypes.IsIP(f))
                 {
                     f = f.EncapsulatedFrame;
                 }
 
-                if (f != null && f.FrameType == FrameType.IP)
+                if (f != null && FrameTypes.IsIP(f))
                 {
                     f.EncapsulatedFrame = new RawDataFrame(DoErrors(f.EncapsulatedFrame.FrameBytes));
                 }

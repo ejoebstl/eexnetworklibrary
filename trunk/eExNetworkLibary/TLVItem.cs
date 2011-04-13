@@ -9,6 +9,8 @@ namespace eExNetworkLibrary
     /// </summary>
     public class TLVItem : Frame
     {
+        public static string DefaultFrameType { get { return "TLVItem"; } }
+
         private int tlvType;
         private byte[] bData;
 
@@ -66,9 +68,9 @@ namespace eExNetworkLibrary
         /// <summary>
         /// Gets the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.TLVItem; }
+            get { return TLVItem.DefaultFrameType; }
         }
 
         /// <summary>

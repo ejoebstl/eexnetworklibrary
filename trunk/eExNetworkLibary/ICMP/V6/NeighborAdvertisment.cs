@@ -6,6 +6,8 @@ namespace eExNetworkLibrary.ICMP.V6
 {
     public class NeighborAdvertisment : NeighborSolicitation
     {
+        public static string DefaultFrameType { get { return "ICMPv6NeighborAdvertisment"; } }
+
         public bool RouterFlag { get; set; }
         public bool SolicitedFlag { get; set; }
         public bool OverrideFlag { get; set; }
@@ -36,9 +38,9 @@ namespace eExNetworkLibrary.ICMP.V6
             }
         }
 
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.ICMP; }
+            get { return NeighborAdvertisment.DefaultFrameType; }
         }
 
         public override Frame Clone()

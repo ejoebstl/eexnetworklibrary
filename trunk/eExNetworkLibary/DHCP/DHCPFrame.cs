@@ -10,6 +10,8 @@ namespace eExNetworkLibrary.DHCP
     /// </summary>
     public class DHCPFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.DHCP; } }
+
         private DHCPType dhtMessageType; //1 Byte
         private HardwareAddressType dhtHardwareType; //1 Byte
         private short sHardwarelen; //1 Byte
@@ -310,11 +312,11 @@ namespace eExNetworkLibrary.DHCP
         }
 
         /// <summary>
-        /// Returns FrameType.DHCP
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.DHCP; }
+            get { return DHCPFrame.DefaultFrameType; }
         }
 
         /// <summary>

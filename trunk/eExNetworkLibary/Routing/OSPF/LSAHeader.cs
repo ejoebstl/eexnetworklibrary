@@ -11,6 +11,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class LSAHeader : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFLSAHeader"; } }
+
         private short iLSAge; // 2 byte
         private OSPFOptionsField ospfOptions;
         private LSType lsType; // 2 bytes
@@ -199,11 +201,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFLSAHeader
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFLSAHeader; }
+            get { return LSAHeader.DefaultFrameType; }
         }
 
         /// <summary>

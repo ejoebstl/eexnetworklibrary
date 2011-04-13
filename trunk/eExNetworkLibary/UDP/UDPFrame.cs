@@ -15,6 +15,7 @@ namespace eExNetworkLibrary.UDP
     /// </summary>
     public class UDPFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.UDP; } }
         private int iSourcePort;
         private int iDestinationPort;
         private byte[] bChecksum;
@@ -37,6 +38,8 @@ namespace eExNetworkLibrary.UDP
         /// <param name="bData">The data to parse</param>
         public UDPFrame(byte[] bData)
         {
+            clCalc = new ChecksumCalculator();
+
             iSourcePort = bData[0] * 256 + bData[1];
             iDestinationPort = bData[2] * 256 + bData[3];
             int iLen = bData[4] * 256 + bData[5];
@@ -44,15 +47,9 @@ namespace eExNetworkLibrary.UDP
             bChecksum[0] = bData[6];
             bChecksum[1] = bData[7];
 
-            byte[] bEncapsulatedData = new byte[iLen - 8];
 
-            for (int iC1 = 8; iC1 < iLen && iC1 < bData.Length; iC1++)
-            {
-                bEncapsulatedData[iC1 - 8] = bData[iC1];
-            }
+            Encapsulate(bData, 8);
 
-            this.fEncapsulatedFrame = new RawDataFrame(bEncapsulatedData);
-            clCalc = new ChecksumCalculator();
         }
 
         /// <summary>
@@ -122,9 +119,9 @@ namespace eExNetworkLibrary.UDP
         /// <summary>
         /// Gets the frame type for this frame
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.UDP; }
+            get { return UDPFrame.DefaultFrameType; }
         }
 
         /// <summary>

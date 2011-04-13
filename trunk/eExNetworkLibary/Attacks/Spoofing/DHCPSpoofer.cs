@@ -413,7 +413,7 @@ namespace eExNetworkLibrary.Attacks.Spoofing
             base.HandleTraffic(fInputFrame);
 
             ARP.ARPFrame arpFrame = GetARPFrame(fInputFrame);
-            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameType.TrafficDescriptionFrame);
+            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameTypes.TrafficDescriptionFrame);
 
             #region Reply to ARP Requests
 

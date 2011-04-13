@@ -7,6 +7,8 @@ namespace eExNetworkLibrary.IP.V6
 {
     public class IPv6Frame : IPFrame
     {
+        public static string DefaultFrameType { get { return FrameTypes.IPv6; } }
+
         private int iVersion;
         private ushort sTrafficClass;
         private uint iFlowLabel;
@@ -24,14 +26,19 @@ namespace eExNetworkLibrary.IP.V6
             sTrafficClass = 0;
             iFlowLabel = 0;
             bNextHeader = 0;
-            bHopLimit = 128;
+            bHopLimit = (byte)0xFF;
+        }
+
+        public override string FrameType
+        {
+            get { return IPv6Frame.DefaultFrameType; }
         }
 
         public IPv6Frame(byte[] bRaw)
         {
             if (bRaw.Length < 40)
             {
-                throw new ArgumentException("Invalid raw data. An IPv6 header has hat least 40 bytes of data, but the raw data array contains only " + bRaw.Length + ".");
+                throw new ArgumentException("Invalid raw data. An IPv6 header has at least 40 bytes of data, but the raw data array contains only " + bRaw.Length + ".");
             }
 
             ushort sPayloadLength = 0;

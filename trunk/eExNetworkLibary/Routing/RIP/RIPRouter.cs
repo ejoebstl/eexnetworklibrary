@@ -317,7 +317,7 @@ namespace eExNetworkLibrary.Routing.RIP
         {
             IRouter rtRouterToManage = this.RouterToManage;
 
-            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameType.TrafficDescriptionFrame);
+            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameTypes.TrafficDescriptionFrame);
             if (!bShutdownPending)
             {
                 UDP.UDPFrame udpFrame = GetUDPFrame(fInputFrame);

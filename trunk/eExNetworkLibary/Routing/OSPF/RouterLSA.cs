@@ -9,6 +9,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class RouterLSA : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFRouterLSA"; } }
+
         // 5 bit pad
         private bool bIsVirtualEndpoint;
         private bool bIsASBoundaryRouter;
@@ -127,11 +129,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFRouterLSA
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFRouterLSA; }
+            get { return RouterLSA.DefaultFrameType; }
         }
 
         /// <summary>

@@ -10,6 +10,8 @@ namespace eExNetworkLibrary.Routing.RIP
     /// </summary>
     public class RIPFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.RIP; } }
+
         private RipCommand ripCommand;
         private uint iVersion;
         private byte[] bReservedField;
@@ -112,11 +114,11 @@ namespace eExNetworkLibrary.Routing.RIP
         }
 
         /// <summary>
-        /// Returns FrameType.RIP
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.RIP; }
+            get { return RIPFrame.DefaultFrameType; }
         }
 
         /// <summary>

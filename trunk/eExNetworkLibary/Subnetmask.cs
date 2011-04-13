@@ -79,9 +79,9 @@ namespace eExNetworkLibrary
 
 
         /// <summary>
-        /// Gets the slash notation of this subnetmask, e.g. 24 for 255.255.255.0
+        /// Gets the prefix length of this subnetmask, e.g. 24 for 255.255.255.0
         /// </summary>
-        public int SlashNotation
+        public int PrefixLength
         {
             get 
             {
@@ -165,14 +165,14 @@ namespace eExNetworkLibrary
         }
 
         /// <summary>
-        /// Parses an integer to a subnetmask. Possible inputs are: <br />
+        /// Parses a given prefix length to a subnetmask. Possible inputs are: <br />
         /// A number between 0 and 32 for an IPv4 address (InterNetwork) <br />
         /// A number between 0 and 128 for an IPv6 address (InterNetworkV6)
         /// </summary>
-        /// <param name="iSlashNotation">The short slash notation of the subnetmask, e.g /24 as integer.</param>
+        /// <param name="iPrefixLength">The prefix length of the subnetmask, e.g /24 as integer.</param>
         /// <param name="afDesiredAddress">The address family of the subnet mask, InterNetwork or InterNetworkV6</param>
         /// <returns></returns>
-        public static Subnetmask Parse(int iSlashNotation, AddressFamily afDesiredAddress)
+        public static Subnetmask Parse(int iPrefixLength, AddressFamily afDesiredAddress)
         {
             Subnetmask smMask;
 
@@ -181,7 +181,7 @@ namespace eExNetworkLibrary
                 throw new ArgumentException("Only IPv4 and IPv6 addresses are supported at the moment.");
             }
 
-            if (!TryParse(iSlashNotation, afDesiredAddress, out smMask))
+            if (!TryParse(iPrefixLength, afDesiredAddress, out smMask))
             {
                 throw new ArgumentException("Input number was in the wrong range.");
             }
@@ -264,7 +264,7 @@ namespace eExNetworkLibrary
         /// <returns>The hash code</returns>
         public override int GetHashCode()
         {
-            return (int)this.SlashNotation;
+            return (int)this.PrefixLength;
         }
 
         /// <summary>

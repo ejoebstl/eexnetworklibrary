@@ -15,6 +15,8 @@ namespace eExNetworkLibrary.TCP
     /// </summary>
     public class TCPFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.TCP; } }
+
         private int iSourcePort;
         private int iDestinationPort;
         private uint iSequenceNumber;
@@ -307,11 +309,11 @@ namespace eExNetworkLibrary.TCP
         }
 
         /// <summary>
-        /// Returns FrameType.TCP
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.TCP; }
+            get { return TCPFrame.DefaultFrameType; }
         }
 
         /// <summary>

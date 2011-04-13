@@ -10,6 +10,7 @@ namespace eExNetworkLibrary
     public class RawDataFrame : Frame
     {
         private byte[] bData;
+        public static string DefaultFrameType { get { return FrameTypes.Raw; } }
 
         /// <summary>
         /// A constructor which stores the given byte array.
@@ -34,11 +35,11 @@ namespace eExNetworkLibrary
         }
 
         /// <summary>
-        /// Gets the type of this frame.
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.ByteData; }
+            get { return RawDataFrame.DefaultFrameType; }
         }
 
         /// <summary>
@@ -61,7 +62,10 @@ namespace eExNetworkLibrary
         public byte[] Data
         {
             get { return bData; }
-            set { bData = value; }
+            set
+            {
+                bData = value;
+            }
         }
 
         /// <summary>
