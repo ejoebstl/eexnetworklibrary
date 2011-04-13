@@ -12,6 +12,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class OSPFCommonHeader : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.OSPF; } }
+
         private byte bVersion; //1 byte version
         private OSPFFrameType tType; //1 byte type
         //2 byte packet len
@@ -158,11 +160,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFHeader
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFHeader; }
+            get { return OSPFCommonHeader.DefaultFrameType; }
         }
 
         /// <summary>

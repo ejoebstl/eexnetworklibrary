@@ -222,7 +222,7 @@ namespace eExNetworkLibrary.CommonTrafficAnalysis
         protected void WritePacketHeader(Frame fFrame, BinaryWriter bw)
         {
             iLogByteCount += 16;
-            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fFrame, FrameType.TrafficDescriptionFrame);
+            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fFrame, FrameTypes.TrafficDescriptionFrame);
             uint ts_sec;
             uint ts_usec;
             if (tdf != null)

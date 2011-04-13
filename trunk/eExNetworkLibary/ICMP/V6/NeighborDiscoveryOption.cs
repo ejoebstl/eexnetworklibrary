@@ -9,6 +9,8 @@ namespace eExNetworkLibrary.ICMP.V6
         public NeighborDiscoveryOptionType OptionType { get; set; }
         public byte[] OptionData { get; set; }
 
+        public static string DefaultFrameType { get { return "ICMPv6NeighborDiscoveryOption"; } }
+
         public NeighborDiscoveryOption()
         {
             OptionType = NeighborDiscoveryOptionType.TargetLinkLayerAddress;
@@ -32,9 +34,9 @@ namespace eExNetworkLibrary.ICMP.V6
  
         }
 
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.ICMP; }
+            get { return NeighborDiscoveryOption.DefaultFrameType; }
         }
 
         public override byte[] FrameBytes

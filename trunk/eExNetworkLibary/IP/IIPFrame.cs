@@ -10,14 +10,6 @@ namespace eExNetworkLibrary.IP
     public abstract class IPFrame : Frame
     {
         /// <summary>
-        /// Returns FrameType.IP
-        /// </summary>
-        public override FrameType FrameType
-        {
-            get { return FrameType.IP; }
-        }
-
-        /// <summary>
         /// Gets or sets the destination IP-address of this frame.
         /// </summary>
         public abstract IPAddress DestinationAddress { get; set; }

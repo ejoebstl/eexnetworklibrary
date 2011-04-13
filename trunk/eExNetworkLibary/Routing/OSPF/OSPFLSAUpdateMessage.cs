@@ -9,6 +9,7 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class OSPFLSAUpdateMessage : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFLSAUpdateMessage"; } }
         private List<LSAHeader> lsaMessages;
 
         /// <summary>
@@ -57,11 +58,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFLSAUpdate
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFLSAUpdate; }
+            get { return OSPFLSAUpdateMessage.DefaultFrameType; }
         }
 
         /// <summary>

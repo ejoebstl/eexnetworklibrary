@@ -44,7 +44,7 @@ namespace eExNetworkLibrary.Sockets
         /// <returns>A bool indicating whether the given frame matched the binding of this socket</returns>
         public override bool PushUp(Frame fFrame, bool bPush)
         {
-            if (fFrame.FrameType != FrameType.UDP)
+            if (fFrame.FrameType != FrameTypes.UDP)
             {
                 try
                 {

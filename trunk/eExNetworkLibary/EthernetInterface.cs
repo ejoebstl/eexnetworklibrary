@@ -29,7 +29,7 @@ namespace eExNetworkLibrary
         private bool bExcludeLocalHostTraffic;
         private object oInterfaceStartStopLock;
         private IPAddressAnalysis ipaAnalysis;
-        private IPv6AddressResolution ipv6AddressResolution;
+        private AddressResolution ipAddressResolution;
 
         private MACAddress maMacAddress;
 
@@ -66,16 +66,16 @@ namespace eExNetworkLibrary
         }
 
         /// <summary>
-        /// Gets or sets the type of IPv6 hardware address resolution to use. The default value is ICMP, since it is more commonly used. 
+        /// Gets or sets the type of hardware address resolution to use. The default value is NDP for IPv6 and ARP for IPv4, since this combination is commonly used. 
         /// </summary>
-        public IPv6AddressResolution IPv6AddressResolutionMethod
+        public AddressResolution AddressResolutionMethod
         {
-            get { return ipv6AddressResolution; }
+            get { return ipAddressResolution; }
             set
             {
-                if (ipv6AddressResolution != value)
+                if (ipAddressResolution != value)
                 {
-                    ipv6AddressResolution = value;
+                    ipAddressResolution = value;
                     InvokePropertyChanged();
                 }
             }
@@ -225,7 +225,7 @@ namespace eExNetworkLibrary
             ipaAnalysis = new IPAddressAnalysis();
 
             oInterfaceStartStopLock = new object();
-            IPv6AddressResolutionMethod = IPv6AddressResolution.ICMP;
+            AddressResolutionMethod = AddressResolution.NDP;
             bExcludeOwnTraffic = true;
             bExcludeLocalHostTraffic = true;
             arpHostTable = new HostTable();
@@ -299,7 +299,20 @@ namespace eExNetworkLibrary
 
         private void HandleICMP(EthernetFrame fFrame)
         {
-            //TODO: ICMP response handling
+            //TODO: Cleanup protocl parsing.
+            IPFrame ipFrame = GetIPFrame(fFrame);
+            if (ipFrame != null && ipFrame.Protocol == IPProtocol.IPv6_ICMP)
+            {
+                ICMPv6Frame icmpFrame = new ICMPv6Frame(ipFrame.EncapsulatedFrame.FrameBytes); 
+                if (icmpFrame.ICMPv6Type == ICMPv6Type.NeighborSolicitation && ipFrame.Version == 6)
+                {
+                    NeighborSolicitation ndSolicitation = new NeighborSolicitation(icmpFrame.EncapsulatedFrame.FrameBytes);
+                    if (this.ContainsAddress(ndSolicitation.TargetAddress))
+                    {
+                        SendICMPNeighborAdvertisment(ipFrame.SourceAddress, ndSolicitation.TargetAddress);
+                    }
+                }
+            }
         }
 
         private void AnalyzeICMP(TrafficDescriptionFrame tdf)
@@ -308,7 +321,7 @@ namespace eExNetworkLibrary
             IPFrame ipFrame = GetIPFrame(tdf);
             if (ipFrame != null && ipFrame.Protocol == IPProtocol.IPv6_ICMP)
             {
-                ICMP.ICMPFrame icmpFrame = new ICMP.ICMPFrame(ipFrame.EncapsulatedFrame.FrameBytes);
+                ICMPv6Frame icmpFrame = new ICMPv6Frame(ipFrame.EncapsulatedFrame.FrameBytes);
                 if (icmpFrame.ICMPv6Type == ICMPv6Type.NeighborAdvertisement)
                 {
                     NeighborAdvertisment ndAdvertisment = new NeighborAdvertisment(icmpFrame.EncapsulatedFrame.FrameBytes);
@@ -320,7 +333,10 @@ namespace eExNetworkLibrary
                             MACAddress macTarget = new MACAddress(ndOption.OptionData);
                             if (!UsesSpoofedAddress(macTarget))
                             {
-                                UpdateAddressTable(macprimarySpoofAddress, ndAdvertisment.TargetAddress);
+                                if (!(arpHostTable.Contains(ndAdvertisment.TargetAddress) && !ndAdvertisment.OverrideFlag))
+                                {
+                                    UpdateAddressTable(macTarget, ndAdvertisment.TargetAddress);
+                                }
                             }
                         }
                     }
@@ -336,7 +352,7 @@ namespace eExNetworkLibrary
                             MACAddress macTarget = new MACAddress(ndOption.OptionData);
                             if (!UsesSpoofedAddress(macTarget))
                             {
-                                UpdateAddressTable(macprimarySpoofAddress, ipFrame.SourceAddress);
+                                UpdateAddressTable(macTarget, ipFrame.SourceAddress);
                             }
                         }
                     }
@@ -479,7 +495,7 @@ namespace eExNetworkLibrary
                         catch (Exception ex)
                         {
                             TrafficDescriptionFrame tdf = new TrafficDescriptionFrame(this, DateTime.Now);
-                            tdf.EncapsulatedFrame = new EthernetFrame(bFrameBytes);
+                            tdf.EncapsulatedFrame = new RawDataFrame(bFrameBytes);
                             PushDroppedFrame(tdf);
                             InvokeExceptionThrown(ex);
                         }
@@ -576,7 +592,6 @@ namespace eExNetworkLibrary
         public override void Send(Frame fFrame, IPAddress ipaDestination)
         {
             EthernetFrame ethFrame = this.GetEthernetFrame(fFrame);
-            TrafficDescriptionFrame tdfFrame = (TrafficDescriptionFrame)this.GetFrameByType(fFrame, FrameType.TrafficDescriptionFrame);
             IPFrame ipFrame = GetIPFrame(fFrame);
 
             if (ipFrame == null)
@@ -587,11 +602,6 @@ namespace eExNetworkLibrary
             if (ethFrame == null)
             {
                 ethFrame = new EthernetFrame();
-            }
-
-            if (tdfFrame == null)
-            {
-                tdfFrame = new TrafficDescriptionFrame(null, DateTime.Now);
             }
 
             if (ipaDestination.Equals(IPAddress.Broadcast))
@@ -607,6 +617,7 @@ namespace eExNetworkLibrary
                 StartResolve(ipaDestination);
                 ethFrame.Destination = new MACAddress(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
             }
+
             if (ipFrame.Version == 4)
             {
                 ethFrame.EtherType = EtherType.IPv4;
@@ -615,14 +626,14 @@ namespace eExNetworkLibrary
             {
                 ethFrame.EtherType = EtherType.IPv6;
             }
-            if (!lmacSpoofAdresses.Contains(ethFrame.Destination))
+
+            if (!lmacSpoofAdresses.Contains(ethFrame.Source))
             {
                 ethFrame.Source = this.PrimaryMACAddress;
             }
             ethFrame.EncapsulatedFrame = ipFrame;
-            tdfFrame.EncapsulatedFrame = ethFrame;
 
-            Send(tdfFrame);
+            Send(ethFrame);
         }
 
 
@@ -693,6 +704,11 @@ namespace eExNetworkLibrary
 
         private void StartResolve(IPAddress ipaQuery)
         {
+            if (ipAddressResolution == AddressResolution.None)
+            {
+                return;
+            }
+
             IPAddress[] ipaSources = GetSourceIPsForARPRequest(ipaQuery);
             if (ipaSources.Length > 0)
             {
@@ -704,11 +720,11 @@ namespace eExNetworkLibrary
                     }
                     else if (ipaQuery.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
                     {
-                        if (ipv6AddressResolution == IPv6AddressResolution.ARP || ipv6AddressResolution == IPv6AddressResolution.Both)
+                        if (ipAddressResolution == AddressResolution.ARP || ipAddressResolution == AddressResolution.Both)
                         {
                             SendARPRequest(ipaQuery, ipa);
                         }
-                        if (ipv6AddressResolution == IPv6AddressResolution.ICMP || ipv6AddressResolution == IPv6AddressResolution.Both)
+                        if (ipAddressResolution == AddressResolution.NDP || ipAddressResolution == AddressResolution.Both)
                         {
                             SendICMPNeighborSolicitation(ipaQuery, ipa);
                         }
@@ -759,7 +775,7 @@ namespace eExNetworkLibrary
                 throw new InvalidOperationException("Cannot send an ICMP Neighbor Solicitation for a non IPv6 address.");
             }
 
-            ICMP.ICMPFrame icmpFrame = new ICMP.ICMPFrame();
+            ICMPv6Frame icmpFrame = new ICMPv6Frame();
             icmpFrame.ICMPv6Type = ICMPv6Type.NeighborSolicitation;
             icmpFrame.ICMPCode = 0;
 
@@ -789,7 +805,40 @@ namespace eExNetworkLibrary
 
             this.Send(ethFrame);
         }
+       
+        private void SendICMPNeighborAdvertisment(IPAddress ipaDestination, IPAddress ipaSource)
+        {
+            if (ipaDestination.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+            {
+                throw new InvalidOperationException("Cannot send an ICMP Neighbor Advertisement for a non IPv6 address.");
+            }
 
+            ICMPv6Frame icmpFrame = new ICMPv6Frame();
+            icmpFrame.ICMPv6Type = ICMPv6Type.NeighborAdvertisement;
+            icmpFrame.ICMPCode = 0;
+
+            NeighborAdvertisment icmpDiscoveryMessage = new NeighborAdvertisment();
+            icmpDiscoveryMessage.SolicitedFlag = true;
+            icmpDiscoveryMessage.OverrideFlag = true;
+            icmpDiscoveryMessage.TargetAddress = ipaSource;
+
+            NeighborDiscoveryOption icmpDiscoveryOption = new NeighborDiscoveryOption();
+            icmpDiscoveryOption.OptionType = ICMP.V6.NeighborDiscoveryOptionType.TargetLinkLayerAddress;
+            icmpDiscoveryOption.OptionData = this.PrimaryMACAddress.AddressBytes;
+
+            IPv6Frame ipFrame = new IPv6Frame();
+            ipFrame.SourceAddress = ipaSource;
+            ipFrame.DestinationAddress = ipaDestination;
+            ipFrame.NextHeader = IPProtocol.IPv6_ICMP;
+
+            ipFrame.EncapsulatedFrame = icmpFrame;
+            icmpFrame.EncapsulatedFrame = icmpDiscoveryMessage;
+            icmpDiscoveryMessage.EncapsulatedFrame = icmpDiscoveryOption;
+
+            icmpFrame.Checksum = icmpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
+
+            this.Send(ipFrame, ipaDestination);
+        }
         private IPAddress[] GetSourceIPsForARPRequest(IPAddress ipaQuery)
         {
             List<IPAddress> lAddresses = new List<IPAddress>();
@@ -819,21 +868,25 @@ namespace eExNetworkLibrary
     }
 
     /// <summary>
-    /// An enum which defines diffrent types of hardware address resolution methods for IPv6.
+    /// An enum which defines diffrent types of hardware address resolution methods.
     /// </summary>
-    public enum IPv6AddressResolution
+    public enum AddressResolution
     {
         /// <summary>
-        /// Use ARP for active IPv6 address resolution.
+        /// Use ARP for active IPv6 and IPv4 address resolution.
         /// </summary>
         ARP = 0,
         /// <summary>
-        /// Use ICMP neighbor solicitation and advertisements for active IPv6 address resolution.
+        /// Use IPv6 NDP and advertisements for active IPv6 address resolution and ARP for IPv4 address resolution.
         /// </summary>
-        ICMP = 1,
+        NDP = 1,
         /// <summary>
-        /// Use both, ICMP and ARP for IPv6 address resolution. 
+        /// Use both, NDP and ARP for IPv6 address resolution and ARP for IPv4 address resolution.
         /// </summary>
-        Both = 2
+        Both = 2,
+        /// <summary>
+        /// Decativate address resolution completely.
+        /// </summary>
+        None = 3
     }
 }

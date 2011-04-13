@@ -10,6 +10,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class OSPFHelloMessage : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFHello"; } }
+
         private Subnetmask nNetmask; //4 byte
         private int iHelloInterval; //2 byte
         private OSPFOptionsField ospfOptions;
@@ -199,11 +201,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFHello
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFHello; }
+            get { return OSPFHelloMessage.DefaultFrameType; }
         }
 
         /// <summary>

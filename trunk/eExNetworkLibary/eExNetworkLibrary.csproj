@@ -61,6 +61,8 @@
     <Compile Include="HTTP\HTTPConversationParser.cs" />
     <Compile Include="HTTP\HTTPRequest.cs" />
     <Compile Include="HTTP\HTTPResponse.cs" />
+    <Compile Include="ICMP\ICMPv4Frame.cs" />
+    <Compile Include="ICMP\V6\ICMPv6Frame.cs" />
     <Compile Include="ICMP\V6\NeighborDiscoveryOption.cs" />
     <Compile Include="ICMP\V6\NeighborSolicitationMessage.cs" />
     <Compile Include="ICMP\V6\NeighborAdvertisment.cs" />
@@ -72,6 +74,17 @@
     <Compile Include="Monitoring\StreamMonitoring\HTTPReaders.cs" />
     <Compile Include="Monitoring\StreamMonitoring\NetworkStreamMonitor.cs" />
     <Compile Include="Monitoring\TCPStreamMonitor.cs" />
+    <Compile Include="ProtocolParsing\IProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\ProtocolParser.cs" />
+    <Compile Include="ProtocolParsing\Providers\ARPProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\EthernetProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\ICMPv4ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\ICMPv6ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\IPv4ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\IPv6ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\TCPProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\TrafficDescriptionFrameProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\UDPProtocolProvider.cs" />
     <Compile Include="Sockets\TCPIPListenerStack.cs" />
     <Compile Include="Sockets\TCPListenerSocket.cs" />
     <Compile Include="Routing\NetworkAddressTranslationHandler.cs" />

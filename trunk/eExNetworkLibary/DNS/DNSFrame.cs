@@ -10,6 +10,8 @@ namespace eExNetworkLibrary.DNS
     /// </summary>
     public class DNSFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.DNS; } }
+
         private short sIdentifier; // 2 byte;
         private bool bQRFlag;
         private DNSOptCode dnsOperationCode; // 4 bit
@@ -339,11 +341,11 @@ namespace eExNetworkLibrary.DNS
         }
 
         /// <summary>
-        /// Returns FrameType.DNS
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.DNS; }
+            get { return DNSFrame.DefaultFrameType; }
         }
 
         /// <summary>

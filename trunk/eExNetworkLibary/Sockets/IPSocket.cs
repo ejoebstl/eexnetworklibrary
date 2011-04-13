@@ -99,7 +99,7 @@ namespace eExNetworkLibrary.Sockets
         {
             if (iIPVersion == 4)
             {
-                if (fFrame.FrameType != FrameType.IP)
+                if (fFrame.FrameType != FrameTypes.IPv4)
                 {
                     fFrame = new IPv4Frame(fFrame.FrameBytes);
                 }

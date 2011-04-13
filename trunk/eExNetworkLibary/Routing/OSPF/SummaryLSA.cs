@@ -12,6 +12,8 @@ namespace eExNetworkLibrary.Routing.OSPF
         private List<SummaryLSAItem> lItems;
         private Subnetmask smNetmask;
 
+        public static string DefaultFrameType { get { return "OSPFSummaryLSA"; } }
+
         /// <summary>
         /// Gets or sets the subnetmask for the summary LSA
         /// </summary>
@@ -102,11 +104,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFSummaryLSA
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFSummaryLSA; }
+            get { return SummaryLSA.DefaultFrameType; }
         }
 
         /// <summary>

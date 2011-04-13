@@ -12,6 +12,8 @@ namespace eExNetworkLibrary.ARP
     /// </summary>
     public class ARPFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.ARP; } }
+
         private HardwareAddressType arpHardwareAddressType;
         private EtherType arpProtocolAddressType;
         private ARPOperation arpOperation;
@@ -185,13 +187,13 @@ namespace eExNetworkLibrary.ARP
         }
 
         /// <summary>
-        /// Returns FrameType.ARP
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
             get 
             {
-                return FrameType.ARP;
+                return ARPFrame.DefaultFrameType;
             }
         }
 

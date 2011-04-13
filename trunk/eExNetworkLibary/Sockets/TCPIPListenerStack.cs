@@ -77,9 +77,9 @@ namespace eExNetworkLibrary.Sockets
 
             do
             {
-                if (fEncapsulatedFrame.FrameType == FrameType.TCP)
+                if (fEncapsulatedFrame.FrameType == FrameTypes.TCP)
                     tcpFrame = (TCPFrame)fEncapsulatedFrame;
-                if (fEncapsulatedFrame.FrameType == FrameType.IP)
+                if (FrameTypes.IsIP(fEncapsulatedFrame))
                     ipFrame = (IPFrame)fEncapsulatedFrame;
                 fEncapsulatedFrame = fEncapsulatedFrame.EncapsulatedFrame;
             } while (fEncapsulatedFrame != null);

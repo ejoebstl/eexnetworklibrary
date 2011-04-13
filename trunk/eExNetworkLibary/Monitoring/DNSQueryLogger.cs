@@ -75,15 +75,15 @@ namespace eExNetworkLibrary.Monitoring
         protected override void HandleTraffic(Frame fInputFrame)
         {
             DNSFrame dFrame;
-            Frame fUDP = GetFrameByType(fInputFrame, FrameType.UDP);
-            Frame fIP = GetFrameByType(fInputFrame, FrameType.IP);
+            Frame fUDP = GetFrameByType(fInputFrame, FrameTypes.UDP);
+            Frame fIP = GetFrameByType(fInputFrame, FrameTypes.IPv4);
             if (fUDP != null && fIP != null)
             {
                 UDPFrame uFrame = (UDPFrame)fUDP;
                 IPFrame ipFrame = (IPFrame)fIP;
                 if(uFrame.DestinationPort == iDNSPort || uFrame.SourcePort == iDNSPort)
                 {
-                    if (uFrame.EncapsulatedFrame.FrameType == FrameType.DNS)
+                    if (uFrame.EncapsulatedFrame.FrameType == FrameTypes.DNS)
                     {
                         dFrame = (DNSFrame)uFrame.EncapsulatedFrame;
                     }

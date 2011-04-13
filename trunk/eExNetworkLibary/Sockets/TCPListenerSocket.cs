@@ -87,7 +87,7 @@ namespace eExNetworkLibrary.Sockets
         /// <returns>A bool indicating whether the given frame is matching the binding of this socket</returns>
         public override bool PushUp(Frame fFrame, bool bPush)
         {
-            if (fFrame.FrameType != FrameType.TCP)
+            if (fFrame.FrameType != FrameTypes.TCP)
             {
                 fFrame = new TCPFrame(fFrame.FrameBytes);
             }

@@ -7,23 +7,12 @@ using eExNetworkLibrary.ICMP.V6;
 namespace eExNetworkLibrary.ICMP
 {
     /// <summary>
-    /// Represents an ICMPv4 frame.
+    /// Represents an abstract ICMP frame
     /// </summary>
-    [Obsolete("This class is here for backwards compatibility.", false)]
-    public class ICMPv4Frame : ICMPFrame
+    public abstract class ICMPFrame : Frame
     {
-        public ICMPv4Frame(byte[] bData) : base(bData) { }
-        public ICMPv4Frame() : base() { }
-
-    }
-
-    /// <summary>
-    /// Represents an ICMP frame
-    /// </summary>
-    public class ICMPFrame : Frame
-    {
-        int icmpType;
-        int icmpCode;
+        protected int icmpType;
+        protected int icmpCode;
         byte[] bICMPChecksum;
         ChecksumCalculator cCalc;
 
@@ -35,25 +24,6 @@ namespace eExNetworkLibrary.ICMP
             get { return icmpType; }
             set { icmpType = value; }
         }
-
-        /// <summary>
-        /// Gets or sets the type of this ICMP frame
-        /// </summary>
-        public ICMPv4Type ICMPv4Type
-        {
-            get { return (ICMPv4Type)icmpType; }
-            set { icmpType = (int)value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the type of this ICMP frame
-        /// </summary>
-        public ICMPv6Type ICMPv6Type
-        {
-            get { return (ICMPv6Type)icmpType; }
-            set { icmpType = (int)value; }
-        }
-
 
         /// <summary>
         /// Gets or sets the code of this ICMP frame
@@ -117,57 +87,6 @@ namespace eExNetworkLibrary.ICMP
             return cCalc.CalculateChecksum(bChecksumData);
         }
 
-        /// <summary>
-        /// Gets the ICMP parameter problem code for ICMP parameter problem frames.
-        /// This operation is only supported if this ICMP frame is a parameter problem frame.
-        /// </summary>
-        public ICMPv4ParameterProblemCode ICMPParameterProblemCode
-        {
-            get
-            {
-                if (this.ICMPv4Type != ICMPv4Type.ParameterProblem) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.ParameterProblem.ToString());
-                return (ICMPv4ParameterProblemCode)icmpCode;
-            }
-        }
-
-        /// <summary>
-        /// Gets the ICMP redirect code for ICMP redirect frames.
-        /// This operation is only supported if this ICMP frame is a redirect frame.
-        /// </summary>
-        public ICMPv4RedirectCode ICMPRedirectCode
-        {
-            get
-            {
-                if (this.ICMPv4Type != ICMPv4Type.Redirect) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.Redirect.ToString());
-                return (ICMPv4RedirectCode)icmpCode;
-            }
-        }
-
-        /// <summary>
-        /// Gets the ICMP time exceeded code for ICMP time exceeded frames.
-        /// This operation is only supported if this ICMP frame is a time exceeded frame.
-        /// </summary>
-        public ICMPv4TimeExceededCode ICMPTimeExceededCode
-        {
-            get
-            {
-                if (this.ICMPv4Type != ICMPv4Type.TimeExceeded) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.TimeExceeded.ToString()); 
-                return (ICMPv4TimeExceededCode)icmpCode;
-            }
-        }
-
-        /// <summary>
-        /// Gets the ICMP unreachable code for ICMP unreachable frames.
-        /// This operation is only supported if this ICMP frame is a unreachable frame.
-        /// </summary>
-        public ICMPv4UnreachableCode UnreachableCode
-        {
-            get
-            {
-                if (this.ICMPv4Type != ICMPv4Type.DestinationUnreachable) throw new ArgumentException("The ICMPType of this ICMP frame is not " + ICMPv4Type.DestinationUnreachable.ToString()); 
-                return (ICMPv4UnreachableCode)icmpCode;
-            }
-        }
 
         /// <summary>
         /// Creates a new instance of this class by parsing the given data
@@ -185,12 +104,7 @@ namespace eExNetworkLibrary.ICMP
             bICMPChecksum[0] = bICMPData[2];
             bICMPChecksum[1] = bICMPData[3];
 
-            byte[] bData = new byte[bICMPData.Length - 4];
-            for (int iC1 = 4; iC1 < bICMPData.Length; iC1++)
-            {
-                bData[iC1 - 4] = bICMPData[iC1];
-            }
-            fEncapsulatedFrame = new RawDataFrame(bData);
+            Encapsulate(bICMPData, 4);
         }
 
         /// <summary>
@@ -200,14 +114,6 @@ namespace eExNetworkLibrary.ICMP
         {
             bICMPChecksum = new byte[2];
             cCalc = new ChecksumCalculator();
-        }
-
-        /// <summary>
-        /// Returns FrameType.ICMP
-        /// </summary>
-        public override FrameType FrameType
-        {
-            get { return FrameType.ICMP; }
         }
 
         /// <summary>
@@ -244,15 +150,6 @@ namespace eExNetworkLibrary.ICMP
                 int iDataLen = fEncapsulatedFrame == null ? 0 : fEncapsulatedFrame.Length;
                 return (4 + iDataLen) % 2 == 0 ? 4 + iDataLen : 5 + iDataLen;
             }
-        }
-
-        /// <summary>
-        /// Creates a new identical instance of this class
-        /// </summary>
-        /// <returns>A new identical instance of this class</returns>
-        public override Frame Clone()
-        {
-            return new ICMPFrame(this.FrameBytes);
         }
     }
 

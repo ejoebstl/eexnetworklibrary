@@ -20,6 +20,8 @@ namespace eExNetworkLibrary.Ethernet
         private bool bCanocialFormatIndicator;
         private EtherType etEtherType;
 
+        public static string DefaultFrameType { get { return FrameTypes.Ethernet; } }
+
         /// <summary>
         /// Creates a new instance of this class
         /// </summary>
@@ -70,36 +72,12 @@ namespace eExNetworkLibrary.Ethernet
                 etEtherType = (EtherType)(bData[16] * 256 + bData[17]);
 
                 bEncapsulatedData = new byte[bData.Length - 18];
-                for (int iC1 = 0; iC1 < bEncapsulatedData.Length; iC1++)
-                {
-                    bEncapsulatedData[iC1] = bData[iC1 + 18];
-                }
+                Encapsulate(bData, 18);
             }
             else
             {
                 bVlanTagExists = false;
-                bEncapsulatedData = new byte[bData.Length - 14];
-                for (int iC1 = 0; iC1 < bEncapsulatedData.Length; iC1++)
-                {
-                    bEncapsulatedData[iC1] = bData[iC1 + 14];
-                }
-            }
-
-            if (this.etEtherType == EtherType.IPv4)
-            {
-                this.EncapsulatedFrame = new IPv4Frame(bEncapsulatedData);
-            } 
-            else if (this.etEtherType == EtherType.IPv6)
-            {
-                this.EncapsulatedFrame = new IPv6Frame(bEncapsulatedData);
-            }
-            else if (this.etEtherType == EtherType.ARP)
-            {
-                this.EncapsulatedFrame = new ARPFrame(bEncapsulatedData);
-            }
-            else
-            {
-                this.EncapsulatedFrame = new RawDataFrame(bEncapsulatedData);
+                Encapsulate(bData, 14);
             }
         }
 
@@ -171,9 +149,9 @@ namespace eExNetworkLibrary.Ethernet
         /// <summary>
         /// Returns FrameType.Ethernet. 
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.Ethernet; }
+            get { return EthernetFrame.DefaultFrameType; }
         }
 
         /// <summary>

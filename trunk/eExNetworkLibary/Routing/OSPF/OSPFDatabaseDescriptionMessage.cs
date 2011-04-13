@@ -9,6 +9,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class OSPFDatabaseDescriptionMessage : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFDatabaseDescriptionMessage"; } }
+
         // 2 byte MTU
         private short sInterfaceMTU;
         // 1 byte options
@@ -134,11 +136,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFDatabaseDescription
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFDatabaseDescription; }
+            get { return OSPFDatabaseDescriptionMessage.DefaultFrameType; }
         }
 
         #endregion

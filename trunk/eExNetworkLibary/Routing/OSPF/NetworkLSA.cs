@@ -9,6 +9,8 @@ namespace eExNetworkLibrary.Routing.OSPF
     /// </summary>
     public class NetworkLSA : Frame
     {
+        public static string DefaultFrameType { get { return "OSPFNetworkLSA"; } }
+
         private List<NetworkLSAItem> lItems; 
         private Subnetmask smNetmask;
 
@@ -101,11 +103,11 @@ namespace eExNetworkLibrary.Routing.OSPF
         }
 
         /// <summary>
-        /// Returns FrameType.OSPFNetworkLSA
+        /// Returns the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.OSPFNetworkLSA; }
+            get { return NetworkLSA.DefaultFrameType; }
         }
 
         /// <summary>

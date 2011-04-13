@@ -126,7 +126,7 @@ namespace eExNetworkLibrary.Attacks.Modification
                 if (udpFrame.DestinationPort == iDNSPort || udpFrame.SourcePort == iDNSPort)
                 {
                     DNSFrame dnsFrame;
-                    if (udpFrame.EncapsulatedFrame.FrameType == FrameType.DNS)
+                    if (udpFrame.EncapsulatedFrame.FrameType == FrameTypes.DNS)
                     {
                         dnsFrame = (DNSFrame)udpFrame.EncapsulatedFrame;
                     }

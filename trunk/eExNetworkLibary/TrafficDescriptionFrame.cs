@@ -14,6 +14,8 @@ namespace eExNetworkLibrary
     /// </summary>
     public class TrafficDescriptionFrame : Frame
     {
+        public static string DefaultFrameType { get { return FrameTypes.TrafficDescriptionFrame; } }
+
         private IPInterface iSourceInterface;
         private DateTime dtCaptureTime;
         
@@ -61,9 +63,9 @@ namespace eExNetworkLibrary
         /// <summary>
         /// Gets the type of this frame.
         /// </summary>
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.TrafficDescriptionFrame; }
+            get { return TrafficDescriptionFrame.DefaultFrameType; }
         }
 
         /// <summary>

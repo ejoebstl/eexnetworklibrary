@@ -244,11 +244,11 @@ namespace eExNetworkLibrary.Routing
 
             while (fFrame != null) //Get the frames
             {
-                if (fFrame.FrameType == FrameType.IP)
+                if (FrameTypes.IsIP(fFrame))
                 {
                     fIpFrame = (IP.IPFrame)fFrame;
                 }
-                if (fFrame.FrameType == FrameType.TrafficDescriptionFrame)
+                if (fFrame.FrameType == FrameTypes.TrafficDescriptionFrame)
                 {
                     fDescFrame = (TrafficDescriptionFrame)fFrame;
                 }

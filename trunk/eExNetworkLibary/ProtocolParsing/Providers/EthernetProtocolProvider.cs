@@ -1,0 +1,64 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using eExNetworkLibrary.Ethernet;
+
+namespace eExNetworkLibrary.ProtocolParsing.Providers
+{
+    public class EthernetProtocolProvider : IProtocolProvider
+    {
+        public string Protocol
+        {
+            get { return FrameTypes.Ethernet; }
+        }
+
+        public string[] KnownPayloads
+        {
+            get { return new string[] { FrameTypes.IPv4, FrameTypes.IPv6, FrameTypes.ARP,
+                                        FrameTypes.RARP, FrameTypes.IPX, FrameTypes.AppleTalk, 
+                                        FrameTypes.AARP, FrameTypes.Novell, FrameTypes.EthernetVlanTag}; }
+        }
+
+        public Frame Parse(Frame fFrame)
+        {
+            if (fFrame.FrameType == this.Protocol)
+            {
+                return fFrame;
+            }
+
+            return new EthernetFrame(fFrame.FrameBytes);
+        }
+
+        public string PayloadType(Frame fFrame)
+        {
+            if (fFrame.FrameType != this.Protocol)
+            {
+                fFrame = Parse(fFrame);
+            }
+
+            switch (((EthernetFrame)fFrame).EtherType)
+            {
+                case EtherType.IPv4: return FrameTypes.IPv4;
+                    break;
+                case EtherType.IPv6: return FrameTypes.IPv6;
+                    break;
+                case EtherType.ARP: return FrameTypes.ARP;
+                    break;
+                case EtherType.RARP: return FrameTypes.RARP;
+                    break;
+                case EtherType.IPX: return FrameTypes.IPX;
+                    break;
+                case EtherType.AppleTalk: return FrameTypes.AppleTalk;
+                    break;
+                case EtherType.AARP: return FrameTypes.AARP;
+                    break;
+                case EtherType.Novell: return FrameTypes.Novell;
+                    break;
+                case EtherType.VLANTag: return FrameTypes.EthernetVlanTag;
+                    break;
+            }
+
+            return "";
+        }
+    }
+}

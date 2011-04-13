@@ -9,6 +9,8 @@ namespace eExNetworkLibrary.ICMP.V6
     {
         private IPAddress ipaTargetAddress;
 
+        public static string DefaultFrameType { get { return "ICMPv6NeighborSolicitation"; } }
+
         public IPAddress TargetAddress
         {
             get
@@ -39,9 +41,9 @@ namespace eExNetworkLibrary.ICMP.V6
             Encapsulate(bData, 20);
         }
 
-        public override FrameType FrameType
+        public override string FrameType
         {
-            get { return FrameType.ICMP; }
+            get { return NeighborSolicitation.DefaultFrameType; }
         }
 
         public override byte[] FrameBytes

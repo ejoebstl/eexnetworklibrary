@@ -415,7 +415,7 @@ namespace eExNetworkLibrary.DHCP
                 return; //Shutdown pending.
             }
             UDP.UDPFrame udpFrame = GetUDPFrame(fInputFrame);
-            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameType.TrafficDescriptionFrame);    
+            TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameTypes.TrafficDescriptionFrame);    
             IP.IPFrame ipv4Frame = GetIPv4Frame(fInputFrame);
 
             if (udpFrame != null && ((udpFrame.DestinationPort == iDHCPInPort && udpFrame.SourcePort == iDHCPOutPort) || (udpFrame.DestinationPort == iDHCPOutPort && udpFrame.SourcePort == iDHCPInPort)))

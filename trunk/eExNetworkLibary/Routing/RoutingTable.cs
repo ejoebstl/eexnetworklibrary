@@ -92,13 +92,13 @@ namespace eExNetworkLibrary.Routing
                         {
                             iMetric = re.Metric;
                             reFavourite = re;
-                            iMaskFav = reFavourite.Subnetmask.SlashNotation;
+                            iMaskFav = reFavourite.Subnetmask.PrefixLength;
                         }
                         else if (re.Metric < iMetric && iMask == iMaskFav)
                         {
                             iMetric = re.Metric;
                             reFavourite = re;
-                            iMaskFav = reFavourite.Subnetmask.SlashNotation;
+                            iMaskFav = reFavourite.Subnetmask.PrefixLength;
                         }
                     }
                 }
