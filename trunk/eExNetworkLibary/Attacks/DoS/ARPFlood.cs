@@ -12,7 +12,7 @@ using eExNetworkLibrary.CommonTrafficAnalysis;
 namespace eExNetworkLibrary.Attacks.DoS
 {
     /// <summary>
-    /// This class is capable of converting a Switch into a Router by flooding
+    /// This class is capable of converting a Switch into a Hub by flooding
     /// it with spoofed ARP reply packets and filling its ARP cache.
     /// </summary>
     public class ARPFlood : DirectInterfaceIOHandler
