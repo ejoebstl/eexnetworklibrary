@@ -49,7 +49,7 @@ namespace eExNetworkLibrary
         {
             get {
                 Random r = new Random();
-                byte b = new byte[6];
+                byte [] b = new byte[6];
                 r.NextBytes(b);
                 return new MACAddress(b);
             }
