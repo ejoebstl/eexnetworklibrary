@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using eExNetworkLibrary.TCP;
 using eExNetworkLibrary.IP;
+using eExNetworkLibrary.IP.V6;
 
 namespace eExNetworkLibrary.Sockets
 {
@@ -85,32 +86,14 @@ namespace eExNetworkLibrary.Sockets
     
         public override bool PushUp(Frame fFrame, bool bPush)
         {
-            TCPFrame tcpFrame = null;
-            IP.IPFrame ipFrame = null;
-
-            Frame fEncapsulatedFrame = fFrame;
-
-            do
-            {
-                if (fEncapsulatedFrame.FrameType == FrameTypes.TCP)
-                    tcpFrame = (TCPFrame)fEncapsulatedFrame;
-                if (FrameTypes.IsIP(fEncapsulatedFrame))
-                    ipFrame = (IPFrame)fEncapsulatedFrame;
-                fEncapsulatedFrame = fEncapsulatedFrame.EncapsulatedFrame;
-            } while (fEncapsulatedFrame != null);
-
+            TCPFrame tcpFrame = (TCPFrame)ProtocolParser.GetFrameByType(fFrame, TCPFrame.DefaultFrameType);
+            IP.IPFrame ipFrame = (IPFrame)ProtocolParser.GetFrameByType(fFrame, IPv4Frame.DefaultFrameType);
             if (ipFrame == null)
             {
-                return false;
+                ipFrame = (IPFrame)ProtocolParser.GetFrameByType(fFrame, IPv6Frame.DefaultFrameType);
             }
 
-            if (tcpFrame == null && ipFrame.Protocol == IPProtocol.TCP && ipFrame.EncapsulatedFrame != null)
-            {
-                tcpFrame = new TCPFrame(ipFrame.EncapsulatedFrame.FrameBytes);
-                ipFrame.EncapsulatedFrame = tcpFrame;
-            }
-
-            if (tcpFrame == null)
+            if (ipFrame == null || tcpFrame == null)
             {
                 return false;
             }
