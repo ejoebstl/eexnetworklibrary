@@ -38,7 +38,13 @@ namespace eExNetworkLibrary.ICMP.V6
 
             this.ipaTargetAddress = new IPAddress(bAddressBytes);
 
-            Encapsulate(bData, 20);
+            byte[] bPayload = new byte[bData.Length - 20];
+            Array.Copy(bData, 20, bPayload, 0, bPayload.Length);
+
+            if (bPayload.Length > 0)
+            {
+                this.fEncapsulatedFrame = new NeighborDiscoveryOption(bPayload);
+            }
         }
 
         public override string FrameType

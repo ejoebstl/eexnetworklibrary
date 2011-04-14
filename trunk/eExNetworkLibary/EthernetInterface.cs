@@ -31,6 +31,7 @@ namespace eExNetworkLibrary
         private AddressResolution ipAddressResolution;
 
         private MACAddress maMacAddress;
+        private const int MTU = 1500;
 
 
         private bool bAutoAnswerARPRequests;
@@ -315,7 +316,7 @@ namespace eExNetworkLibrary
 
             if (ipFrame!= null && icmpNeighborAdvertisment != null && icmpNeighborAdvertisment.EncapsulatedFrame != null)
             {
-                NeighborDiscoveryOption ndOption = new NeighborDiscoveryOption(icmpNeighborAdvertisment.EncapsulatedFrame.FrameBytes);
+                NeighborDiscoveryOption ndOption = (NeighborDiscoveryOption)GetFrameByType(icmpNeighborAdvertisment, NeighborDiscoveryOption.DefaultFrameType);
                 if (ndOption.OptionType == NeighborDiscoveryOptionType.TargetLinkLayerAddress)
                 {
                     MACAddress macTarget = new MACAddress(ndOption.OptionData);
@@ -331,7 +332,7 @@ namespace eExNetworkLibrary
             }
             else if (ipFrame != null && icmpNeighborSolicitation != null && icmpNeighborSolicitation.EncapsulatedFrame != null)
             {
-                NeighborDiscoveryOption ndOption = new NeighborDiscoveryOption(icmpNeighborSolicitation.EncapsulatedFrame.FrameBytes);
+                NeighborDiscoveryOption ndOption = (NeighborDiscoveryOption)GetFrameByType(icmpNeighborSolicitation, NeighborDiscoveryOption.DefaultFrameType);
                 if (ndOption.OptionType == NeighborDiscoveryOptionType.SourceLinkLayerAddress)
                 {
                     MACAddress macTarget = new MACAddress(ndOption.OptionData);
@@ -582,17 +583,20 @@ namespace eExNetworkLibrary
                 throw new ArgumentException("Cannot send a non IP frame, because the ether-type cannot be guessed. Please use the Send(Frame, IPAddress, EtherType) method instead.");
             }
 
-            if (ipFrame.Version == 4)
+            foreach (IPFrame fFragment in IPFragmenter.Fragment(ipFrame, MTU))
             {
-                Send(fFrame, ipaDestination, EtherType.IPv4);
-            }
-            else if (ipFrame.Version == 6)
-            {
-                Send(fFrame, ipaDestination, EtherType.IPv6);
-            }
-            else
-            {
-                throw new ArgumentException("The given IP frame has an invalid IP version specified.");
+                if (ipFrame.Version == 4)
+                {
+                    Send(fFragment, ipaDestination, EtherType.IPv4);
+                }
+                else if (ipFrame.Version == 6)
+                {
+                    Send(fFragment, ipaDestination, EtherType.IPv6);
+                }
+                else
+                {
+                    throw new ArgumentException("The given IP frame has an invalid IP version specified.");
+                }
             }
         }
 

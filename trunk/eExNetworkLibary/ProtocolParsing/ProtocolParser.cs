@@ -16,20 +16,25 @@ namespace eExNetworkLibrary.ProtocolParsing
             if (bIncludeDefaultProviders)
             {
                 IProtocolProvider[] arDefaultProviders
-                    = new IProtocolProvider[]{new Providers.ARPProtocolProvider(), 
-                    new Providers.EthernetProtocolProvider(), 
-                    new Providers.IPv4ProtocolProvider(),
-                    new Providers.TCPProtocolProvider(),
+                    = new IProtocolProvider[]{
                     new Providers.TrafficDescriptionFrameProtocolProvider(),
+
+                    new Providers.EthernetProtocolProvider(), 
+
+                    new Providers.ARPProtocolProvider(), 
+                    
+                    new Providers.TCPProtocolProvider(),
                     new Providers.UDPProtocolProvider(),
+
                     new Providers.OSPFProtocolProvider(),
+                    new Providers.DHCPProtocolProvider(),
+                    new Providers.DNSProtocolProvider(),
                     
                     new Providers.ICMPv4ProtocolProvider(),
                     new Providers.ICMPv6ProtocolProvider(),
-
-                    new Providers.IPv6ProtocolProvider(),
-                    new Providers.IPv6FragmentExtensionProtocolProvider(),
-                    new Providers.IPv6RoutingExtensionProtocolProvider()};
+                    
+                    new Providers.IPv4ProtocolProvider(),
+                    new Providers.IPv6ProtocolProvider()};
 
                 arProviders = new IProtocolProvider[arUserProviders.Length + arDefaultProviders.Length];
 
@@ -113,13 +118,32 @@ namespace eExNetworkLibrary.ProtocolParsing
         /// <returns>The parsed frame, a raw data frame with the searched frame's data or null, if the frame did not contain a frame with the specified type.</returns>
         public Frame GetFrameByType(Frame fFrame, string strFrameType, bool bReturnRawDataFrame)
         {
+            return GetFrameByType(fFrame, strFrameType, bReturnRawDataFrame, new List<string>());
+        }
+
+        /// <summary>
+        /// Gets a frame by it's type.
+        /// </summary>
+        /// <param name="fFrame">The frame which should be searched.</param>
+        /// <param name="strFrameType">The type to search for.</param>
+        /// <param name="bReturnRawDataFrame">A bool indicating whether raw data frames can be returned, if the protocol is known but no protocol provider is available.</param>
+        /// <param name="lParsedProtocols">A list containing all protocols for which parsing was tried in the current recursion. This is needed for infinite recursion prevention.</param>
+        /// <returns>The parsed frame, a raw data frame with the searched frame's data or null, if the frame did not contain a frame with the specified type.</returns>
+        private Frame GetFrameByType(Frame fFrame, string strFrameType, bool bReturnRawDataFrame, List<string> lParsedProtocols)
+        {
             Frame fResult = GetKnownFrameByType(fFrame, strFrameType);
+
+            if (lParsedProtocols.Contains(strFrameType))
+            {
+                return null; //Avoid infinite recursive parsing.
+            }
+            lParsedProtocols.Add(strFrameType);
 
             if (fResult == null)
             {
                 foreach (IProtocolProvider ipCarrier in GetCarrierProtocols(strFrameType))
                 {
-                    Frame fCarrier = GetFrameByType(fFrame, ipCarrier.Protocol, false);
+                    Frame fCarrier = GetFrameByType(fFrame, ipCarrier.Protocol, false, lParsedProtocols);
                     if (fCarrier != null)
                     {
                         if (ipCarrier.PayloadType(fCarrier) == strFrameType)
@@ -127,8 +151,12 @@ namespace eExNetworkLibrary.ProtocolParsing
                             if (dictProtocolProviders.ContainsKey(strFrameType))
                             {
                                 fCarrier.EncapsulatedFrame = dictProtocolProviders[strFrameType].Parse(fCarrier.EncapsulatedFrame);
+                                fResult = fCarrier.EncapsulatedFrame;
                             }
-                            fResult = fCarrier.EncapsulatedFrame;
+                            else if (bReturnRawDataFrame)
+                            {
+                                fResult = fCarrier.EncapsulatedFrame;
+                            }
                         }
                         break;
                     }

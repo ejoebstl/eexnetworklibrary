@@ -63,10 +63,10 @@ namespace eExNetworkLibrary.IP
             }
 
             this.iIdentification = bRaw[4] * (uint)256 + bRaw[5];
-            this.ifFlags = new IPFlags(((bRaw[6] & 0x40) >> 6) == 1, ((bRaw[6] & 0x20)) == 1);
+            this.ifFlags = new IPFlags((bRaw[6] & 0x40) != 0, ((bRaw[6] & 0x20)) != 0);
             this.iFragmentOffset = 0;
-            this.iFragmentOffset += (byte)((bRaw[6] & 0x1F) << 3);
-            this.iFragmentOffset = (byte)(bRaw[7] >> 5);
+            this.iFragmentOffset |= (byte)((bRaw[6] & 0x1F) << 8);
+            this.iFragmentOffset |= (byte)(bRaw[7]);
             this.iTimeToLive = bRaw[8];
 
             if (Enum.IsDefined(typeof(IPProtocol), (int)bRaw[9]))
@@ -171,8 +171,8 @@ namespace eExNetworkLibrary.IP
                 bPacket[5] = (byte)(this.iIdentification & 0xFF);
                 bPacket[6] = (byte)(Convert.ToInt32(this.ifFlags.DontFragment) << 6);
                 bPacket[6] |= (byte)(Convert.ToInt32(this.ifFlags.MoreFragments) << 5);
-                bPacket[6] |= (byte)((FragmentOffset >> 3) & 0x0F);
-                bPacket[7] = (byte)((FragmentOffset << 5) & 0x0F);
+                bPacket[6] |= (byte)((FragmentOffset >> 8) & 0x1F);
+                bPacket[7] = (byte)((FragmentOffset) & 0xFF);
                 bPacket[8] = (byte)(this.iTimeToLive);
                 bPacket[9] = (byte)((int)this.iProtocol);
 
@@ -258,8 +258,8 @@ namespace eExNetworkLibrary.IP
                 bHeader[5] = (byte)(this.iIdentification & 0xFF);
                 bHeader[6] = (byte)(Convert.ToInt32(this.ifFlags.DontFragment) << 6);
                 bHeader[6] |= (byte)(Convert.ToInt32(this.ifFlags.MoreFragments) << 5);
-                bHeader[6] |= (byte)((FragmentOffset >> 3) & 0x0F);
-                bHeader[7] = (byte)((FragmentOffset << 5) & 0x0F);
+                bHeader[6] |= (byte)((FragmentOffset >> 8) & 0x1F);
+                bHeader[7] = (byte)((FragmentOffset) & 0xFF);
                 bHeader[8] = (byte)(this.iTimeToLive);
                 bHeader[9] = (byte)((int)this.iProtocol);
                 bHeader[10] = 0;
