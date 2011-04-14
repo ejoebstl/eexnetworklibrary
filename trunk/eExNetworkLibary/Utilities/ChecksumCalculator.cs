@@ -26,8 +26,9 @@ namespace eExNetworkLibrary.Utilities
 
             while (iIndex < bData.Length)
             {
-                iChecksum += Convert.ToUInt32(BitConverter.ToUInt16(bData, iIndex));
+                iChecksum += (uint)BitConverter.ToUInt16(bData, iIndex);
                 iIndex += 2;
+
                 if (iChecksum > 0xffff)
                 {
                     iChecksum = (iChecksum >> 16) + (iChecksum & 0xffff);

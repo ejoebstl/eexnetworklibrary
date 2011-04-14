@@ -26,7 +26,7 @@ namespace eExNetworkLibrary.IP
             Frame fFrame = ipv4Frame.EncapsulatedFrame;
             List<IPv4Frame> lIPv4Frames = new List<IPv4Frame>();
 
-            if (fFrame.Length + (ipv4Frame.InternetHeaderLength * 4) > iMaximumTransmissionUnit)
+            if (ipv4Frame.Length > iMaximumTransmissionUnit)
             {
                 byte[][] bChunks = CreateChunks(fFrame.FrameBytes, iMaximumTransmissionUnit - (ipv4Frame.InternetHeaderLength * 4));
 
@@ -37,7 +37,7 @@ namespace eExNetworkLibrary.IP
                     IPv4Frame ipv4Clone = (IPv4Frame)ipv4Frame.Clone();
 
                     ipv4Clone.EncapsulatedFrame = new RawDataFrame(bChunks[iC1]);
-                    ipv4Clone.FragmentOffset = (ushort)((iDataCounter) / 2);
+                    ipv4Clone.FragmentOffset = (ushort)((iDataCounter) / 8);
                     ipv4Clone.PacketFlags.MoreFragments = iC1 != bChunks.Length - 1;
 
                     iDataCounter += bChunks[iC1].Length;
@@ -63,7 +63,7 @@ namespace eExNetworkLibrary.IP
             Frame fFrame = ipv6Frame.EncapsulatedFrame;
             List<IPv6Frame> lIPv6Frames = new List<IPv6Frame>();
 
-            if (fFrame.Length + ipv6Frame.Length > iMaximumTransmissionUnit)
+            if (ipv6Frame.Length > iMaximumTransmissionUnit)
             {
                 ipv6Frame.EncapsulatedFrame = null;
                 byte[][] bChunks = CreateChunks(fFrame.FrameBytes, iMaximumTransmissionUnit - ipv6Frame.Length);
@@ -76,14 +76,14 @@ namespace eExNetworkLibrary.IP
                     FragmentExtensionHeader fragHeader = new FragmentExtensionHeader();
 
                     fragHeader.EncapsulatedFrame = new RawDataFrame(bChunks[iC1]);
-                    ipv6Frame.EncapsulatedFrame = fragHeader;
+                    ipv6Clone.EncapsulatedFrame = fragHeader;
 
-                    fragHeader.FragmentOffset = ((iDataCounter) / 2);
+                    fragHeader.FragmentOffset = ((iDataCounter) / 8);
                     fragHeader.MoreFragments = iC1 != bChunks.Length - 1;
                     fragHeader.Identification = iIdentification;
 
-                    fragHeader.Protocol = ipv6Frame.Protocol;
-                    ipv6Frame.Protocol = IPProtocol.IPv6_Frag;
+                    fragHeader.Protocol = ipv6Clone.Protocol;
+                    ipv6Clone.Protocol = IPProtocol.IPv6_Frag;
 
                     iDataCounter += bChunks[iC1].Length;
 
@@ -106,7 +106,7 @@ namespace eExNetworkLibrary.IP
             {
                 byte[] bChunk = new byte[Math.Min(iChunkSize, (bBuffer.Length - iC1))];
 
-                for (int iC2 = iC1; iC2 < iC1 + iChunkSize && iC2 < bBuffer.Length; iC1++)
+                for (int iC2 = iC1; iC2 < iC1 + iChunkSize && iC2 - iC1 < bChunk.Length; iC2++)
                 {
                     bChunk[iC2 - iC1] = bBuffer[iC2];
                 }

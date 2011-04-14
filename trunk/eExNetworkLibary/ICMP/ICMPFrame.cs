@@ -100,8 +100,6 @@ namespace eExNetworkLibrary.ICMP
 
             bICMPChecksum[0] = bICMPData[2];
             bICMPChecksum[1] = bICMPData[3];
-
-            Encapsulate(bICMPData, 4);
         }
 
         /// <summary>

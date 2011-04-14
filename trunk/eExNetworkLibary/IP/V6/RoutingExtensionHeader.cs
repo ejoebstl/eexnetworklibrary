@@ -45,6 +45,8 @@ namespace eExNetworkLibrary.IP.V6
                 Array.Copy(bData, 8 + (8 * iC1), bAddressData, 0, 16);
                 lAddresses.Add(new IPAddress(bAddressData));
             }
+
+            Encapsulate(bData, Length);
         }
 
         public void AddAddress(IPAddress ipaAddress)
@@ -100,13 +102,18 @@ namespace eExNetworkLibrary.IP.V6
                     iC1 += 16;
                 }
 
+                if (fEncapsulatedFrame != null)
+                {
+                    fEncapsulatedFrame.FrameBytes.CopyTo(bData, iC1);
+                }
+
                 return bData;
             }
         }
 
         public override int Length
         {
-            get { return 8 + (lAddresses.Count * 16); }
+            get { return 8 + (lAddresses.Count * 16) + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
         }
 
 
