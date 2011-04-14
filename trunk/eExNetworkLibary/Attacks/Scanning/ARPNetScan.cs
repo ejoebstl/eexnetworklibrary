@@ -211,6 +211,10 @@ namespace eExNetworkLibrary.Attacks.Scanning
             {
                 throw new Exception("There are currently no interfaces present.");
             }
+            if (ipaStart.AddressFamily != ipaEnd.AddressFamily)
+            {
+                throw new ArgumentException("Cannot mix up diffrent types of addresses.");
+            }
             foreach (EthernetInterface ipi in lInterfaces)
             {
                 for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)

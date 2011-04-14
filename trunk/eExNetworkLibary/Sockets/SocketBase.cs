@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using eExNetworkLibrary.ProtocolParsing;
 
 namespace eExNetworkLibrary.Sockets
 {
@@ -52,6 +53,22 @@ namespace eExNetworkLibrary.Sockets
     {
         ISocket sUnderlyingSocket;
         ISocket sParentSocket;
+
+        ProtocolParser ipProtocolParser;
+
+        /// <summary>
+        /// Gets or sets the protocol parser of this socket. By changing it, it is possible to change the way the socket parses protocols.
+        /// </summary>
+        public virtual ProtocolParser ProtocolParser
+        {
+            get
+            {
+                if (ipProtocolParser == null)
+                    ipProtocolParser = new ProtocolParser();
+                return ipProtocolParser;
+            }
+            set { ipProtocolParser = value; }
+        }
 
         /// <summary>
         /// A bool indicating whether the socken can receive or send data.

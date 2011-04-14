@@ -72,7 +72,11 @@
     <Compile Include="ICMP\V6\NeighborAdvertisment.cs" />
     <Compile Include="ICMP\V6\ICMPv6Type.cs" />
     <Compile Include="IP\IIPFrame.cs" />
+    <Compile Include="IP\V6\ExtensionHeader.cs" />
+    <Compile Include="IP\V6\FragmentExtensionHeader.cs" />
+    <Compile Include="IP\V6\IIPHeader.cs" />
     <Compile Include="IP\V6\IPv6Frame.cs" />
+    <Compile Include="IP\V6\RoutingExtensionHeader.cs" />
     <Compile Include="Monitoring\SpeedMeter.cs" />
     <Compile Include="Monitoring\HTTPMonitor.cs" />
     <Compile Include="Monitoring\StreamMonitoring\HTTPReaders.cs" />
@@ -85,7 +89,9 @@
     <Compile Include="ProtocolParsing\Providers\ICMPv4ProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\ICMPv6ProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\IPv4ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\IPv6FragmentExtensionProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\IPv6ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\IPv6RoutingExtensionProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\OSPFProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\TCPProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\TrafficDescriptionFrameProtocolProvider.cs" />

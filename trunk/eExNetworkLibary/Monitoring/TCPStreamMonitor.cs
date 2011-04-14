@@ -61,7 +61,9 @@ namespace eExNetworkLibrary.Monitoring
                         NetworkStreamMonitor[] arMonitors;
 
                         sBob = new TCPIPListenerStack(ipv4Frame.DestinationAddress, ipv4Frame.SourceAddress, tcpFrame.DestinationPort, tcpFrame.SourcePort);
+                        sBob.ProtocolParser = this.ProtocolParser;
                         sAlice = new TCPIPListenerStack(ipv4Frame.SourceAddress, ipv4Frame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort);
+                        sAlice.ProtocolParser = this.ProtocolParser;
 
                         sAlice.TCPSocket.StateChange += new EventHandler<TCPListenerSocketEventArgs>(TCPSocket_StateChange);
                         sBob.TCPSocket.StateChange += new EventHandler<TCPListenerSocketEventArgs>(TCPSocket_StateChange);

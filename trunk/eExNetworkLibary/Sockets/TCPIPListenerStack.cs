@@ -12,6 +12,21 @@ namespace eExNetworkLibrary.Sockets
         TCPListenerSocket tcpSocket;
         IPSocket ipSocket;
 
+
+        public override eExNetworkLibrary.ProtocolParsing.ProtocolParser ProtocolParser
+        {
+            get
+            {
+                return base.ProtocolParser;
+            }
+            set
+            {
+                base.ProtocolParser = value;
+                tcpSocket.ProtocolParser = value;
+                ipSocket.ProtocolParser = value;
+            }
+        }
+
         public override bool IsOpen
         {
             get { return tcpSocket.IsOpen && ipSocket.IsOpen; }

@@ -89,7 +89,9 @@ namespace eExNetworkLibrary.TrafficModifiers
                         NetworkStreamModifier[] arMods;
 
                         sAlice = new TCPIPStack(ipv4Frame.SourceAddress, ipv4Frame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort);
+                        sAlice.ProtocolParser = this.ProtocolParser;
                         sBob = new TCPIPStack(ipv4Frame.DestinationAddress, ipv4Frame.SourceAddress, tcpFrame.DestinationPort, tcpFrame.SourcePort);
+                        sBob.ProtocolParser = this.ProtocolParser;
                         sAlice.FrameEncapsulated += new FrameProcessedEventHandler(Stack_FrameEncapsulated);
                         sBob.FrameEncapsulated += new FrameProcessedEventHandler(Stack_FrameEncapsulated);
 

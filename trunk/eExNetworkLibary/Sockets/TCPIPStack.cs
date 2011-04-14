@@ -16,6 +16,20 @@ namespace eExNetworkLibrary.Sockets
         private bool bClosing;
         private object oCloseLock;
 
+        public override eExNetworkLibrary.ProtocolParsing.ProtocolParser ProtocolParser
+        {
+            get
+            {
+                return base.ProtocolParser;
+            }
+            set
+            {
+                base.ProtocolParser = value;
+                tcpSocket.ProtocolParser = value;
+                ipSocket.ProtocolParser = value;
+            }
+        }
+
         public override bool IsOpen
         {
             get { return tcpSocket.IsOpen && ipSocket.IsOpen; }
