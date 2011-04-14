@@ -7,7 +7,7 @@ using eExNetworkLibrary.IP.V6;
 
 namespace eExNetworkLibrary.IP
 {
-    public abstract class IPFrame : Frame
+    public abstract class IPFrame : Frame, IIPHeader
     {
         /// <summary>
         /// Gets or sets the destination IP-address of this frame.

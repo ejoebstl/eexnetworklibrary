@@ -31,7 +31,7 @@ namespace eExNetworkLibrary
         /// <summary>
         /// Gets or sets the protocol parser of this traffic handler. By changing it, it is possible to change the way the traffic handler parses protocols.
         /// </summary>
-        public ProtocolParser ProtocolParser { get; set; }
+        public virtual ProtocolParser ProtocolParser { get; set; }
 
         /// <summary>
         /// This traffic handlers default output handler. All forwarded frames will be pushed to this handlers queue. 

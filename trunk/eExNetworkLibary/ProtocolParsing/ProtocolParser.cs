@@ -18,14 +18,18 @@ namespace eExNetworkLibrary.ProtocolParsing
                 IProtocolProvider[] arDefaultProviders
                     = new IProtocolProvider[]{new Providers.ARPProtocolProvider(), 
                     new Providers.EthernetProtocolProvider(), 
-                    new Providers.ICMPv4ProtocolProvider(),
-                    new Providers.ICMPv6ProtocolProvider(),
                     new Providers.IPv4ProtocolProvider(),
-                    new Providers.IPv6ProtocolProvider(),
                     new Providers.TCPProtocolProvider(),
                     new Providers.TrafficDescriptionFrameProtocolProvider(),
                     new Providers.UDPProtocolProvider(),
-                    new Providers.OSPFProtocolProvider()};
+                    new Providers.OSPFProtocolProvider(),
+                    
+                    new Providers.ICMPv4ProtocolProvider(),
+                    new Providers.ICMPv6ProtocolProvider(),
+
+                    new Providers.IPv6ProtocolProvider(),
+                    new Providers.IPv6FragmentExtensionProtocolProvider(),
+                    new Providers.IPv6RoutingExtensionProtocolProvider()};
 
                 arProviders = new IProtocolProvider[arUserProviders.Length + arDefaultProviders.Length];
 
@@ -189,15 +193,15 @@ namespace eExNetworkLibrary.ProtocolParsing
                 throw new InvalidOperationException("The frame which carries the frame to parse cannot be a raw data frame, since the protocol cannot be guessed.");
             }
 
-            if (fFrame.EncapsulatedFrame.FrameType != FrameTypes.Raw)
-            {
-                return fFrame.EncapsulatedFrame.FrameType; //No need to parse, parsing is already done.
-            }
-
-            if (fFrame.EncapsulatedFrame.Length == 0)
+            if (fFrame.EncapsulatedFrame == null || fFrame.EncapsulatedFrame.Length == 0)
             {
                 fFrame.EncapsulatedFrame = null;
                 return "";
+            }
+
+            if (fFrame.EncapsulatedFrame.FrameType != FrameTypes.Raw)
+            {
+                return fFrame.EncapsulatedFrame.FrameType; //No need to parse, parsing is already done.
             }
 
             if (dictProtocolProviders.ContainsKey(fFrame.FrameType))

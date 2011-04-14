@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using eExNetworkLibrary.ARP;
 using System.Net;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Attacks
 {
@@ -23,7 +24,6 @@ namespace eExNetworkLibrary.Attacks
         public IPAddress VictimBob
         {
             get { return arphVictimBob; }
-            set { arphVictimBob = value; }
         }
 
         /// <summary>
@@ -32,7 +32,6 @@ namespace eExNetworkLibrary.Attacks
         public IPAddress VictimAlice
         {
             get { return arphVictimAlice; }
-            set { arphVictimAlice = value; }
         }
 
         /// <summary>
@@ -40,19 +39,14 @@ namespace eExNetworkLibrary.Attacks
         /// </summary>
         /// <param name="arphVictimBoB">The IP address of the first victim</param>
         /// <param name="arphVictimAlice">The IP address of the second victim</param>
-        public MITMAttackEntry(IPAddress arphVictimBoB, IPAddress arphVictimAlice)
+        public MITMAttackEntry(IPAddress arphVictimBob, IPAddress arphVictimAlice)
         {
-            this.arphVictimBob = arphVictimBoB;
+            if (arphVictimAlice.AddressFamily != arphVictimBob.AddressFamily)
+            {
+                throw new ArgumentException("Cannot mix up diffrent types of addresses.");
+            }
+            this.arphVictimBob = arphVictimBob;
             this.arphVictimAlice = arphVictimAlice;
-        }
-
-        /// <summary>
-        /// Creates a new instance of this class 
-        /// </summary>
-        public MITMAttackEntry()
-        {
-            this.arphVictimBob = IPAddress.Any;
-            this.arphVictimAlice = IPAddress.Any;
         }
 
         /// <summary>
