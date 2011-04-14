@@ -28,7 +28,11 @@ namespace eExNetworkLibrary.ICMP
             set { icmpType = (int)value; }
         }
 
-        public ICMPv4Frame(byte[] bData) : base(bData) { }
+        public ICMPv4Frame(byte[] bData)
+            : base(bData)
+        {
+            Encapsulate(bData, 4);
+        }
         public ICMPv4Frame() : base() { }
 
         /// <summary>

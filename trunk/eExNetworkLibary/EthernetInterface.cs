@@ -9,6 +9,7 @@ using eExNetworkLibrary.ARP;
 using eExNetworkLibrary.IP;
 using eExNetworkLibrary.ICMP.V6;
 using eExNetworkLibrary.IP.V6;
+using eExNetworkLibrary.ICMP;
 
 namespace eExNetworkLibrary
 {
@@ -31,7 +32,7 @@ namespace eExNetworkLibrary
         private AddressResolution ipAddressResolution;
 
         private MACAddress maMacAddress;
-        private const int MTU = 1500;
+        private const int MTU = 1474;
 
 
         private bool bAutoAnswerARPRequests;
@@ -317,7 +318,7 @@ namespace eExNetworkLibrary
             if (ipFrame!= null && icmpNeighborAdvertisment != null && icmpNeighborAdvertisment.EncapsulatedFrame != null)
             {
                 NeighborDiscoveryOption ndOption = (NeighborDiscoveryOption)GetFrameByType(icmpNeighborAdvertisment, NeighborDiscoveryOption.DefaultFrameType);
-                if (ndOption.OptionType == NeighborDiscoveryOptionType.TargetLinkLayerAddress)
+                if (ndOption.OptionData != null && ndOption.OptionType == NeighborDiscoveryOptionType.TargetLinkLayerAddress)
                 {
                     MACAddress macTarget = new MACAddress(ndOption.OptionData);
                     if (!UsesSpoofedAddress(macTarget))
@@ -333,7 +334,7 @@ namespace eExNetworkLibrary
             else if (ipFrame != null && icmpNeighborSolicitation != null && icmpNeighborSolicitation.EncapsulatedFrame != null)
             {
                 NeighborDiscoveryOption ndOption = (NeighborDiscoveryOption)GetFrameByType(icmpNeighborSolicitation, NeighborDiscoveryOption.DefaultFrameType);
-                if (ndOption.OptionType == NeighborDiscoveryOptionType.SourceLinkLayerAddress)
+                if (ndOption.OptionData != null && ndOption.OptionType == NeighborDiscoveryOptionType.SourceLinkLayerAddress)
                 {
                     MACAddress macTarget = new MACAddress(ndOption.OptionData);
                     if (!UsesSpoofedAddress(macTarget))

@@ -61,25 +61,8 @@ namespace eExNetworkLibrary.IP.V6
             ipaSource = new IPAddress(bAddress);
             Array.Copy(bRaw, 24, bAddress, 0, 16);
             ipaDestination = new IPAddress(bAddress);
-
-            //Automatically parse IPv6 headers
-
-            byte[] bPayload = new byte[sPayloadLength];
-            Array.Copy(bRaw, 40, bPayload, 0, sPayloadLength);
-
-            switch (NextHeader)
-            {
-                case IPProtocol.IPv6_Frag:
-                    this.fEncapsulatedFrame = new FragmentExtensionHeader(bPayload);
-                    break;
-                case IPProtocol.IPv6_Route:
-                    this.fEncapsulatedFrame = new RoutingExtensionHeader(bPayload);
-                    break;
-                default:
-                    this.fEncapsulatedFrame = new RawDataFrame(bPayload);
-                    break;
-            }
-
+            
+            Encapsulate(bRaw, 40);
         }
 
         /// <summary>

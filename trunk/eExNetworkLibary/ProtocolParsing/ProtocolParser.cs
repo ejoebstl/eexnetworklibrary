@@ -114,7 +114,7 @@ namespace eExNetworkLibrary.ProtocolParsing
         /// </summary>
         /// <param name="fFrame">The frame which should be searched.</param>
         /// <param name="strFrameType">The type to search for.</param>
-        /// <param name="bReturnRawDataFrame">A bool indicating whether raw data frames can be returned, if the protocol is known but no protocol provider is available.</param>
+        /// <param name="bReturnRawDataFrame">A bool indicating whether other frame types can be returned, if the protocol is known but no protocol provider is available and the searched frame is either a RawDataFrame or has already been parsed to a frame of another type.</param>
         /// <returns>The parsed frame, a raw data frame with the searched frame's data or null, if the frame did not contain a frame with the specified type.</returns>
         public Frame GetFrameByType(Frame fFrame, string strFrameType, bool bReturnRawDataFrame)
         {
@@ -126,7 +126,7 @@ namespace eExNetworkLibrary.ProtocolParsing
         /// </summary>
         /// <param name="fFrame">The frame which should be searched.</param>
         /// <param name="strFrameType">The type to search for.</param>
-        /// <param name="bReturnRawDataFrame">A bool indicating whether raw data frames can be returned, if the protocol is known but no protocol provider is available.</param>
+        /// <param name="bReturnRawDataFrame">A bool indicating whether other frame types can be returned, if the protocol is known but no protocol provider is available and the searched frame is either a RawDataFrame or has already been parsed to a frame of another type.</param>
         /// <param name="lParsedProtocols">A list containing all protocols for which parsing was tried in the current recursion. This is needed for infinite recursion prevention.</param>
         /// <returns>The parsed frame, a raw data frame with the searched frame's data or null, if the frame did not contain a frame with the specified type.</returns>
         private Frame GetFrameByType(Frame fFrame, string strFrameType, bool bReturnRawDataFrame, List<string> lParsedProtocols)
@@ -153,9 +153,13 @@ namespace eExNetworkLibrary.ProtocolParsing
                                 fCarrier.EncapsulatedFrame = dictProtocolProviders[strFrameType].Parse(fCarrier.EncapsulatedFrame);
                                 fResult = fCarrier.EncapsulatedFrame;
                             }
-                            else if (bReturnRawDataFrame)
+                            else
                             {
-                                fResult = fCarrier.EncapsulatedFrame;
+                                fResult = GetKnownFrameByType(fCarrier, strFrameType);
+                                if (fResult == null && bReturnRawDataFrame)
+                                {
+                                    fResult = fCarrier.EncapsulatedFrame;
+                                }
                             }
                         }
                         break;
@@ -168,7 +172,7 @@ namespace eExNetworkLibrary.ProtocolParsing
 
         private Frame GetKnownFrameByType(Frame fFrame, string strFrameType)
         {
-            while (fFrame.EncapsulatedFrame != null)
+            while (fFrame != null)
             {
                 if (fFrame.FrameType == strFrameType)
                 {

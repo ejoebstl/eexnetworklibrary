@@ -13,7 +13,7 @@ namespace eExNetworkLibrary.IP.V6
         public uint Identification { get; set; }
 
         public FragmentExtensionHeader()
-            : base(new byte[0])
+            : base(new byte[1])
         {
         }
 
@@ -28,6 +28,9 @@ namespace eExNetworkLibrary.IP.V6
             Identification |= (uint)bData[5] << 16;
             Identification |= (uint)bData[6] << 8;
             Identification |= (uint)bData[7];
+
+            Encapsulate(bData, 8);
+            
         }
 
 
@@ -46,6 +49,11 @@ namespace eExNetworkLibrary.IP.V6
                 bData[6] = (byte)((Identification >> 8) & 0xFF);
                 bData[7] = (byte)(Identification & 0xFF);
 
+                if (fEncapsulatedFrame != null)
+                {
+                    fEncapsulatedFrame.FrameBytes.CopyTo(bData, 8);
+                }
+
                 return bData;
             }
         }
@@ -57,7 +65,7 @@ namespace eExNetworkLibrary.IP.V6
 
         public override int Length
         {
-            get { return 8; }
+            get { return 8 + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
         }
 
         public override Frame Clone()

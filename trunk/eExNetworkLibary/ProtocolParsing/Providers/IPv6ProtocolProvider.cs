@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using eExNetworkLibrary.IP.V6;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.ProtocolParsing.Providers
 {
@@ -16,7 +18,33 @@ namespace eExNetworkLibrary.ProtocolParsing.Providers
 
         public override Frame Parse(Frame fFrame)
         {
-            return new IP.V6.IPv6Frame(fFrame.FrameBytes);
+            IPv6Frame ipFrame = new IPv6Frame(fFrame.FrameBytes);
+            
+            //Automatically parse IPv6 headers
+
+            Frame fLastFrame = ipFrame;
+
+            while (fLastFrame.FrameType != RawDataFrame.DefaultFrameType)
+            {
+                byte[] bPayload = fLastFrame.EncapsulatedFrame.FrameBytes;
+
+                switch (((IIPHeader)fLastFrame).Protocol)
+                {
+                    case IPProtocol.IPv6_Frag:
+                        fLastFrame.EncapsulatedFrame = new FragmentExtensionHeader(bPayload);
+                        break;
+                    case IPProtocol.IPv6_Route:
+                        fLastFrame.EncapsulatedFrame = new RoutingExtensionHeader(bPayload);
+                        break;
+                    default:
+                        fLastFrame.EncapsulatedFrame = new RawDataFrame(bPayload);
+                        break;
+                }
+
+                fLastFrame = fLastFrame.EncapsulatedFrame;
+            }
+
+            return ipFrame;
         }
     }
 }
