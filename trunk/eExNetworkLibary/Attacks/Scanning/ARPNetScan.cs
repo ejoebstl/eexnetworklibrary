@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using eExNetworkLibrary.ARP;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Attacks.Scanning
 {
@@ -17,7 +18,6 @@ namespace eExNetworkLibrary.Attacks.Scanning
         private bool bContinue;
         private AutoResetEvent areTasksAvailable;
         private int iInterval;
-        private IP.IPAddressAnalysis ipv4Analysis;
 
         /// <summary>
         /// Represents the method which is used to handle ARP net scanner events
@@ -57,7 +57,6 @@ namespace eExNetworkLibrary.Attacks.Scanning
             bContinue = false;
             areTasksAvailable = new AutoResetEvent(false);
             astScanTasks = new List<ARPScanTask>();
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             iInterval = 20;
         }
 
@@ -71,16 +70,9 @@ namespace eExNetworkLibrary.Attacks.Scanning
 
             if (fARPFrame != null)
             {
-                foreach (IPInterface ipi in lInterfaces)
+                foreach (EthernetInterface ipi in GetInterfacesForAddress(fARPFrame.DestinationIP))
                 {
-                    for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
-                    {
-                        if (ipi.IpAddresses[iC1].AddressFamily == fARPFrame.DestinationIP.AddressFamily &&
-                            ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(fARPFrame.DestinationIP, ipi.Subnetmasks[iC1])))
-                        {
-                            ipi.Send(fInputFrame);
-                        }
-                    }
+                    ipi.Send(fARPFrame, fARPFrame.DestinationIP, EtherType.ARP);
                 }
             }
         }
@@ -223,9 +215,9 @@ namespace eExNetworkLibrary.Attacks.Scanning
             {
                 for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
                 {
-                    if (ipi.IpAddresses[iC1].AddressFamily == ipaStart.AddressFamily && ipi.Subnetmasks[iC1].AddressFamily == ipaStart.AddressFamily && 
-                        (ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaStart, ipi.Subnetmasks[iC1])) ||
-                        ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaEnd, ipi.Subnetmasks[iC1]))))
+                    if (ipi.IpAddresses[iC1].AddressFamily == ipaStart.AddressFamily && ipi.Subnetmasks[iC1].AddressFamily == ipaStart.AddressFamily &&
+                        (IPAddressAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaStart, ipi.Subnetmasks[iC1])) ||
+                        IPAddressAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaEnd, ipi.Subnetmasks[iC1]))))
                     {
                         this.AddARPScanTask(new ARPScanTask(ipaStart, ipaEnd, ipi.PrimaryMACAddress, ipi.IpAddresses[iC1], this));
                     }

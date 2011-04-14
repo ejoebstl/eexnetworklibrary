@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using eExNetworkLibrary.ARP;
 using eExNetworkLibrary.Utilities;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Monitoring
 {
@@ -19,7 +20,6 @@ namespace eExNetworkLibrary.Monitoring
         private Dictionary<IPAddress, Host> dictIPHost;
         private Dictionary<MACAddress, Host> dictMACHost;
         private Host hLocalhost;
-        private IP.IPAddressAnalysis ipv4Analysis;
         private NetDiscoveryUtility ndiuUtility;
 
         /// <summary>
@@ -52,7 +52,6 @@ namespace eExNetworkLibrary.Monitoring
             lDataLinkNeighbours = new List<Host>();
             lUpperLayerNeighbours = new List<Host>();
             lDataLinkDistributors = new List<Host>();
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             ResolveHostnames = true;
 
             hLocalhost = CreateHost(System.Environment.MachineName);
@@ -82,8 +81,8 @@ namespace eExNetworkLibrary.Monitoring
                                     hNetwork = CreateHost("Network");
                                     SetAsDistributionDevice(hNetwork);
                                     hNetwork.Properties.Add("subnetmask", smMasks[iC1]);
-                                    hNetwork.Properties.Add("network", ipv4Analysis.GetClasslessNetworkAddress(ipa[iC1], smMasks[iC1]));
-                                    AddIPToHost(hNetwork, ipv4Analysis.GetClasslessNetworkAddress(ipa[iC1], smMasks[iC1]));
+                                    hNetwork.Properties.Add("network", IPAddressAnalysis.GetClasslessNetworkAddress(ipa[iC1], smMasks[iC1]));
+                                    AddIPToHost(hNetwork, IPAddressAnalysis.GetClasslessNetworkAddress(ipa[iC1], smMasks[iC1]));
                                     lDataLinkDistributors.Add(hNetwork);
                                     Connect(hNetwork, hLocalhost);
                                 }
@@ -328,7 +327,7 @@ namespace eExNetworkLibrary.Monitoring
             Host hFavourite = null;
             foreach (Host h in lDataLinkDistributors)
             {
-                if (((IPAddress)h.Properties["network"]).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipa, (Subnetmask)h.Properties["subnetmask"])))
+                if (((IPAddress)h.Properties["network"]).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipa, (Subnetmask)h.Properties["subnetmask"])))
                 {
                     iMask = SubnetmaskToInt((Subnetmask)h.Properties["subnetmask"]);
 

@@ -22,7 +22,6 @@ namespace eExNetworkLibrary.Routing.OSPF
         private int iOrigalLength;
         // 2 byte checksum
         // 2 byte length
-        private ChecksumCalculator cCalc;
         private byte[] bOriginalChecksum;
 
         /// <summary>
@@ -115,7 +114,6 @@ namespace eExNetworkLibrary.Routing.OSPF
             iLinkStateID = 0;
             iAdvertisingRouter = 0;
             iLSSequenceNumber = 0;
-            cCalc = new ChecksumCalculator();
             iOrigalLength = -1;
             bOriginalChecksum = new byte[0];
         }
@@ -137,7 +135,6 @@ namespace eExNetworkLibrary.Routing.OSPF
         /// <param name="bCreateBody">A bool indicating whether a LSA body should be created. Set this property to false for database descriptions and LS acknowledgements messages</param>
         public LSAHeader(byte[] bData, bool bCreateBody)
         {
-            cCalc = new ChecksumCalculator();
             iLSAge = (short)((bData[0] << 8) + bData[1]);
             ospfOptions = new OSPFOptionsField(bData[2]);
             lsType = (LSType)bData[3];
@@ -264,7 +261,7 @@ namespace eExNetworkLibrary.Routing.OSPF
                 byte[] bChecksum;
                 if(bOriginalChecksum.Length != 2)
                 {
-                    bChecksum = cCalc.CalculateChecksum(bData);
+                    bChecksum = ChecksumCalculator.CalculateChecksum(bData);
                 }
                 else
                 {

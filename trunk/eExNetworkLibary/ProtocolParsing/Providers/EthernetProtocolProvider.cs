@@ -16,7 +16,7 @@ namespace eExNetworkLibrary.ProtocolParsing.Providers
         {
             get { return new string[] { FrameTypes.IPv4, FrameTypes.IPv6, FrameTypes.ARP,
                                         FrameTypes.RARP, FrameTypes.IPX, FrameTypes.AppleTalk, 
-                                        FrameTypes.AARP, FrameTypes.Novell, FrameTypes.EthernetVlanTag}; }
+                                        FrameTypes.AARP, FrameTypes.Novell}; }
         }
 
         public Frame Parse(Frame fFrame)
@@ -53,8 +53,6 @@ namespace eExNetworkLibrary.ProtocolParsing.Providers
                 case EtherType.AARP: return FrameTypes.AARP;
                     break;
                 case EtherType.Novell: return FrameTypes.Novell;
-                    break;
-                case EtherType.VLANTag: return FrameTypes.EthernetVlanTag;
                     break;
             }
 

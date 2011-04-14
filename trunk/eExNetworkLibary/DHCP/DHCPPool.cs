@@ -12,14 +12,12 @@ namespace eExNetworkLibrary.DHCP
     public class DHCPPool
     {
         private List<DHCPPoolItem> lDHCPPool;
-        private IPAddressAnalysis ipv4Analyis;
 
         /// <summary>
         /// Creates a new instance of this class
         /// </summary>
         public DHCPPool()
         {
-            ipv4Analyis = new IPAddressAnalysis();
             lDHCPPool = new List<DHCPPoolItem>();
         }
 
@@ -33,7 +31,7 @@ namespace eExNetworkLibrary.DHCP
         /// <param name="smMask">The subnetmask</param>
         public DHCPPool(IPAddress ipaPoolStart, IPAddress ipaPoolEnd, IPAddress ipaStandardgateway, IPAddress ipaDNSServer, Subnetmask smMask) : this()
         {
-            IPAddress[] ipRange = ipv4Analyis.GetIPRange(ipaPoolStart, ipaPoolEnd);
+            IPAddress[] ipRange = IPAddressAnalysis.GetIPRange(ipaPoolStart, ipaPoolEnd);
             foreach (IPAddress ipa in ipRange)
             {
                 lDHCPPool.Add(new DHCPPoolItem(ipa, smMask, ipaStandardgateway, ipaDNSServer));

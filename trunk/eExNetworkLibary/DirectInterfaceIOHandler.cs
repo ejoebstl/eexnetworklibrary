@@ -5,6 +5,7 @@ using System.Threading;
 using eExNetworkLibrary.Threading;
 using System.Net;
 using System.ComponentModel;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary
 {
@@ -113,6 +114,30 @@ namespace eExNetworkLibrary
             {
                 lLocalAdresses.Add(ipInterface.IpAddresses[iC1]);
             }
+        }
+
+        /// <summary>
+        /// Returns all IPInterfaces connected with this DirectInterfaceIO and subnets matching the given address.
+        /// </summary>
+        /// <param name="ipaAddress">The address to search a match for.</param>
+        /// <returns>All IPInterfaces with subnets matching the given address</returns>
+        protected IPInterface[] GetInterfacesForAddress(IPAddress ipaAddress)
+        {
+            List<IPInterface> lReturnInterfaces = new List<IPInterface>();
+            foreach (IPInterface ipi in lInterfaces)
+            {
+                for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
+                {
+                    IPAddress[] ipaAddresses = ipi.IpAddresses;
+                    Subnetmask[] smMasks = ipi.Subnetmasks;
+                    if (ipaAddresses[iC1].AddressFamily == ipaAddress.AddressFamily &&
+                        IPAddressAnalysis.GetClasslessNetworkAddress(ipaAddresses[iC1], smMasks[iC1]).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaAddress, smMasks[iC1])))
+                    {
+                        lReturnInterfaces.Add(ipi);
+                    }
+                }
+            }
+            return lReturnInterfaces.ToArray();
         }
 
         void ipInterface_AddressRemoved(object sender, AddressEventArgs args)

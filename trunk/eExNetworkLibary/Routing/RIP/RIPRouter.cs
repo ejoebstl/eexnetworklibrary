@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Timers;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Routing.RIP
 {
@@ -17,7 +18,6 @@ namespace eExNetworkLibrary.Routing.RIP
         private int iVersion;
         private bool bRedistributeStatic;
         private IPAddress ipaRIPv2Address;
-        private IP.IPAddressAnalysis ipv4Analysis;
         private bool bShutdownPending;
         private Timer tPeriodicUpdate;
         private int iHoldDownTimer;
@@ -175,8 +175,6 @@ namespace eExNetworkLibrary.Routing.RIP
 
             lHolddownItems = new List<RIPHoldownItem>();
 
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
-
             ipiPassiveInterfaces = new List<IPInterface>();
 
 
@@ -316,8 +314,8 @@ namespace eExNetworkLibrary.Routing.RIP
         protected override void HandleTraffic(Frame fInputFrame)
         {
             IRouter rtRouterToManage = this.RouterToManage;
-
             TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameTypes.TrafficDescriptionFrame);
+
             if (!bShutdownPending)
             {
                 UDP.UDPFrame udpFrame = GetUDPFrame(fInputFrame);
@@ -365,7 +363,7 @@ namespace eExNetworkLibrary.Routing.RIP
                         {
                             if (ru.AddressFamilyIdentifier == RIPEntryAddressFamily.IPv4)
                             {
-                                bChanged |= UpdateEntry(ipFrame.SourceAddress, ru.Address, ipv4Analysis.GetClassfullSubnetMask(ru.Address), (int)ru.Metric);
+                                bChanged |= UpdateEntry(ipFrame.SourceAddress, ru.Address, IPAddressAnalysis.GetClassfullSubnetMask(ru.Address), (int)ru.Metric);
                             }
                         }
                     }

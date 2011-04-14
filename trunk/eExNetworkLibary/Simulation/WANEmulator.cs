@@ -5,7 +5,8 @@ using System.Text;
 namespace eExNetworkLibrary.Simulation
 {
     /// <summary>
-    /// This class represents a WANEmulator derived from Simulator. This class is capable of constraining speed, delaying the traffic, corrupting the traffic and more. 
+    /// This class represents a WANEmulator derived from Simulator. This class is capable of constraining speed, delaying the traffic, corrupting the traffic and more.<br />
+    /// Please do not try to route corrupted traffic - protocol parsing will fail. Instead, use the WAN emulator between two DirectInterfaceIO Handlers.
     /// </summary>
     public class WANEmulator : Simulator
     {

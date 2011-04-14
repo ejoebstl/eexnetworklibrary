@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Timers;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Routing
 {
@@ -24,8 +25,6 @@ namespace eExNetworkLibrary.Routing
         private int iNATTimer;
 
         private Timer tTTLTimer;
-
-        private IP.IPAddressAnalysis ipv4Analysis;
 
         /// <summary>
         /// This delegate represents the method which is used to handle NAT events
@@ -130,7 +129,6 @@ namespace eExNetworkLibrary.Routing
         {
             this.iRangeStartPort = 4000;
             this.iRangeEndPort = 8000;
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             lNATDatabase = new List<NATEntry>();
             lExternalRange = new List<NATAddressRange>();
             lExternalAddressPool = new List<IPAddress>();
@@ -168,9 +166,9 @@ namespace eExNetworkLibrary.Routing
         {
             lock (lExternalRange)
             {
-                lExternalAddressPool.AddRange(ipv4Analysis.GetIPRange(
-                    ipv4Analysis.GetClasslessNetworkAddress(toAdd.NetworkAddress, toAdd.Subnetmask),
-                    ipv4Analysis.GetClasslessBroadcastAddress(toAdd.NetworkAddress, toAdd.Subnetmask))
+                lExternalAddressPool.AddRange(IPAddressAnalysis.GetIPRange(
+                    IPAddressAnalysis.GetClasslessNetworkAddress(toAdd.NetworkAddress, toAdd.Subnetmask),
+                    IPAddressAnalysis.GetClasslessBroadcastAddress(toAdd.NetworkAddress, toAdd.Subnetmask))
                     );
                 lExternalRange.Add(toAdd);
             }
@@ -198,9 +196,9 @@ namespace eExNetworkLibrary.Routing
         {
             lock (lExternalRange)
             {
-                foreach (IPAddress ipa in ipv4Analysis.GetIPRange(
-                    ipv4Analysis.GetClasslessNetworkAddress(toRemove.NetworkAddress, toRemove.Subnetmask),
-                    ipv4Analysis.GetClasslessBroadcastAddress(toRemove.NetworkAddress, toRemove.Subnetmask))
+                foreach (IPAddress ipa in IPAddressAnalysis.GetIPRange(
+                    IPAddressAnalysis.GetClasslessNetworkAddress(toRemove.NetworkAddress, toRemove.Subnetmask),
+                    IPAddressAnalysis.GetClasslessBroadcastAddress(toRemove.NetworkAddress, toRemove.Subnetmask))
                     )
                 {
                     lExternalAddressPool.Remove(ipa);
@@ -493,7 +491,7 @@ namespace eExNetworkLibrary.Routing
             {
                 foreach (NATAddressRange ipa in lExternalRange)
                 {
-                    if (ipv4Analysis.GetClasslessNetworkAddress(ipa.NetworkAddress, ipa.Subnetmask).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaAddress, ipa.Subnetmask)))
+                    if (IPAddressAnalysis.GetClasslessNetworkAddress(ipa.NetworkAddress, ipa.Subnetmask).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaAddress, ipa.Subnetmask)))
                     {
                         return true;
                     }
@@ -508,7 +506,7 @@ namespace eExNetworkLibrary.Routing
             {
                 foreach (NATAddressRange ipa in lInternalRange)
                 {
-                    if (ipv4Analysis.GetClasslessNetworkAddress(ipa.NetworkAddress, ipa.Subnetmask).Equals(ipv4Analysis.GetClasslessNetworkAddress(ipaAddress, ipa.Subnetmask)))
+                    if (IPAddressAnalysis.GetClasslessNetworkAddress(ipa.NetworkAddress, ipa.Subnetmask).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaAddress, ipa.Subnetmask)))
                     {
                         return true;
                     }

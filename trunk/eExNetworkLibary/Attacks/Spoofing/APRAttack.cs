@@ -385,7 +385,7 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         }
 
         /// <summary>
-        /// Stops 
+        /// Stops thist traffic handler 
         /// </summary>
         public override void Stop()
         {
@@ -414,7 +414,7 @@ namespace eExNetworkLibrary.Attacks.Spoofing
         }
 
         /// <summary>
-        /// Pauses the attack until ResumeAttack() is called.
+        /// Pauses the attack until ResumeAttack() is called and restores the ARP tables of the victims.
         /// </summary>
         public void PauseAttack()
         {

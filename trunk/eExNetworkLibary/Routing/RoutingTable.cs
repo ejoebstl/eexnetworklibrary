@@ -13,7 +13,6 @@ namespace eExNetworkLibrary.Routing
     public class RoutingTable
     {
         private List<RoutingEntry> lAllRoutes;
-        private IPAddressAnalysis ipaAnalysis;
 
         /// <summary>
         /// This delegate is used to handle routing table changes
@@ -41,7 +40,6 @@ namespace eExNetworkLibrary.Routing
         public RoutingTable()
         {
             lAllRoutes = new List<RoutingEntry>();
-            ipaAnalysis = new IPAddressAnalysis();
         }
 
         /// <summary>
@@ -85,8 +83,8 @@ namespace eExNetworkLibrary.Routing
             {
                 foreach (RoutingEntry re in lAllRoutes)
                 {
-                    if (ipa.AddressFamily == re.Destination.AddressFamily && 
-                        ipaAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
+                    if (ipa.AddressFamily == re.Destination.AddressFamily &&
+                        IPAddressAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
                     {
                         if (iMask > iMaskFav)
                         {
@@ -140,7 +138,7 @@ namespace eExNetworkLibrary.Routing
                 foreach (RoutingEntry re in lAllRoutes)
                 {
                     if (ipa.AddressFamily == re.Destination.AddressFamily &&
-                        ipaAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
+                        IPAddressAnalysis.GetClasslessNetworkAddress(re.Destination, re.Subnetmask).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipa, re.Subnetmask)))
                     {
                         lRe.Add(re);
                     }

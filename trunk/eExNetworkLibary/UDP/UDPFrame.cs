@@ -19,7 +19,6 @@ namespace eExNetworkLibrary.UDP
         private int iSourcePort;
         private int iDestinationPort;
         private byte[] bChecksum;
-        private ChecksumCalculator clCalc;
 
         /// <summary>
         /// Creates a new instance of this class initialized with default values
@@ -29,7 +28,6 @@ namespace eExNetworkLibrary.UDP
             iSourcePort = 0;
             iDestinationPort = 0;
             bChecksum = new byte[2];
-            clCalc = new ChecksumCalculator();
         }
 
         /// <summary>
@@ -38,8 +36,6 @@ namespace eExNetworkLibrary.UDP
         /// <param name="bData">The data to parse</param>
         public UDPFrame(byte[] bData)
         {
-            clCalc = new ChecksumCalculator();
-
             iSourcePort = bData[0] * 256 + bData[1];
             iDestinationPort = bData[2] * 256 + bData[3];
             int iLen = bData[4] * 256 + bData[5];
@@ -84,7 +80,7 @@ namespace eExNetworkLibrary.UDP
 
             bPseudoHeader.CopyTo(bUDPFrame, 8 + bInnerData.Length);
 
-            return clCalc.CalculateChecksum(bUDPFrame);
+            return ChecksumCalculator.CalculateChecksum(bUDPFrame);
         }
 
         #region Props

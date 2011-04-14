@@ -75,7 +75,7 @@ namespace eExNetworkLibrary.DNS
         {
             dnsEnc = new DNSNameEncoder();
             int iStringLen = 0;
-            strQuestion = dnsEnc.DecodeDNSName(bData, iParserIndex, ref iStringLen).Substring(1);
+            strQuestion = DNSNameEncoder.DecodeDNSName(bData, iParserIndex, ref iStringLen).Substring(1);
             iParserIndex += iStringLen;
             qType = (DNSResourceType)(((bData[iParserIndex]) << 8) + bData[iParserIndex + 1]);
             qClass = (DNSResourceClass)(((bData[iParserIndex + 2]) << 8) + bData[iParserIndex + 3]);
@@ -102,7 +102,7 @@ namespace eExNetworkLibrary.DNS
             get
             {
                 byte[] bData = new byte[this.Length];
-                byte[] bName = dnsEnc.EncodeDNSName(strQuestion);
+                byte[] bName = DNSNameEncoder.EncodeDNSName(strQuestion);
                 bName.CopyTo(bData, 0);
                 int iIndex = bName.Length;
                 bData[iIndex] = (byte)(((int)qType >> 8) & 0xFF);
@@ -145,7 +145,7 @@ namespace eExNetworkLibrary.DNS
         {
             MemoryStream msStream = new MemoryStream();
 
-            byte[] bName = dnsEnc.CompressDNSName(strQuestion, dictCompression, iStartIndex);
+            byte[] bName = DNSNameEncoder.CompressDNSName(strQuestion, dictCompression, iStartIndex);
             msStream.Write(bName, 0, bName.Length);
             byte[] bData = new byte[4];
             bData[0] = (byte)(((int)qType >> 8) & 0xFF);

@@ -14,7 +14,6 @@ namespace eExNetworkLibrary.ICMP
         protected int icmpType;
         protected int icmpCode;
         byte[] bICMPChecksum;
-        ChecksumCalculator cCalc;
 
         /// <summary>
         /// Gets or sets the type of this ICMP frame
@@ -84,7 +83,7 @@ namespace eExNetworkLibrary.ICMP
             Array.Copy(bPseudoHeader, 0, bChecksumData, 0, bPseudoHeader.Length);
             Array.Copy(this.FrameBytes, 0, bChecksumData, bPseudoHeader.Length, this.Length);
 
-            return cCalc.CalculateChecksum(bChecksumData);
+            return ChecksumCalculator.CalculateChecksum(bChecksumData);
         }
 
 
@@ -94,8 +93,6 @@ namespace eExNetworkLibrary.ICMP
         /// <param name="bICMPData">The data to parse</param>
         public ICMPFrame(byte[] bICMPData)
         {
-            cCalc = new ChecksumCalculator();
-
             icmpType = (int)bICMPData[0];
             icmpCode = (int)bICMPData[1];
 
@@ -113,7 +110,6 @@ namespace eExNetworkLibrary.ICMP
         public ICMPFrame()
         {
             bICMPChecksum = new byte[2];
-            cCalc = new ChecksumCalculator();
         }
 
         /// <summary>

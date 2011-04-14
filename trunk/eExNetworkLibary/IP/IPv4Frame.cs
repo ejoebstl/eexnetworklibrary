@@ -28,7 +28,6 @@ namespace eExNetworkLibrary.IP
         private IPAddress ipaSource;
         private IPAddress ipaDestination;
         private IPv4Options ipoOptions;
-        private ChecksumCalculator clCalc;
         private int iHeaderLength;
 
 
@@ -38,8 +37,6 @@ namespace eExNetworkLibrary.IP
         /// <param name="bRaw">The data to parse</param>
         public IPv4Frame(byte[] bRaw)
         {
-            this.clCalc = new ChecksumCalculator();
-
             int iHeaderLength;
             int iTotalLength;
 
@@ -117,8 +114,6 @@ namespace eExNetworkLibrary.IP
             this.ipaSource = IPAddress.Any;
             this.ipaDestination = IPAddress.Any;
             this.ipoOptions = new IPv4Options();
-
-            this.clCalc = new ChecksumCalculator();
         }
 
         /// <summary>
@@ -280,7 +275,7 @@ namespace eExNetworkLibrary.IP
 
                 this.ipoOptions.Raw.CopyTo(bHeader, 20);
 
-                return clCalc.CalculateChecksum(bHeader);
+                return ChecksumCalculator.CalculateChecksum(bHeader);
             }
         }
 

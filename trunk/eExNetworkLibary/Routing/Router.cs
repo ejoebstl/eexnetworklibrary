@@ -20,7 +20,6 @@ namespace eExNetworkLibrary.Routing
         private List<TrafficAnalyzer> lRoutedTrafficAnalyzer;
         private RoutingTable rtRoutingtable;
         private int iRoutedPackets;
-        private IP.IPAddressAnalysis ipv4Analysis;
         private bool bExcludeMulticast;
 
         /// <summary>
@@ -91,7 +90,6 @@ namespace eExNetworkLibrary.Routing
             rtRoutingtable = new RoutingTable();
             iRoutedPackets = 0;
             bExcludeMulticast = true;
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             if (bInsertOSRoutesOnStrartup)
             {
                 RoutingEntry[] arEntries = SystemRouteQuery.GetOSRoutes();
@@ -194,7 +192,7 @@ namespace eExNetworkLibrary.Routing
         {
             for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
             {
-                RoutingEntry re = new RoutingEntry(ipi.IpAddresses[iC1], ipv4Analysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]), 0, ipi.Subnetmasks[iC1], RoutingEntryOwner.Interface);
+                RoutingEntry re = new RoutingEntry(ipi.IpAddresses[iC1], IPAddressAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]), 0, ipi.Subnetmasks[iC1], RoutingEntryOwner.Interface);
                 re.NextHopInterface = ipi;
                 this.rtRoutingtable.AddRoute(re);
             }
@@ -238,22 +236,7 @@ namespace eExNetworkLibrary.Routing
 
         private bool RoutingNeeded(Frame fInputFrame)
         {
-            IP.IPFrame fIpFrame = null;
-            TrafficDescriptionFrame fDescFrame = null;
-            Frame fFrame = fInputFrame;
-
-            while (fFrame != null) //Get the frames
-            {
-                if (FrameTypes.IsIP(fFrame))
-                {
-                    fIpFrame = (IP.IPFrame)fFrame;
-                }
-                if (fFrame.FrameType == FrameTypes.TrafficDescriptionFrame)
-                {
-                    fDescFrame = (TrafficDescriptionFrame)fFrame;
-                }
-                fFrame = fFrame.EncapsulatedFrame;
-            }
+            IP.IPFrame fIpFrame = GetIPFrame(fInputFrame);
 
             if(fIpFrame == null)
             {

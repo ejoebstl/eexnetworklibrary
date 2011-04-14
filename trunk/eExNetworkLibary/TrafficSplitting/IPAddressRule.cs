@@ -14,7 +14,6 @@ namespace eExNetworkLibrary.TrafficSplitting
         private Subnetmask smSourceWildcard;
         private IPAddress ipaDestination;
         private Subnetmask smDestinationWildcard;
-        private IP.IPAddressAnalysis ipv4Analysis;
 
         /// <summary>
         /// Gets or sets the source address for which matches occour
@@ -69,7 +68,6 @@ namespace eExNetworkLibrary.TrafficSplitting
             ipaSource = IPAddress.Any;
             smSourceWildcard = new Subnetmask();
             smDestinationWildcard = new Subnetmask();
-            ipv4Analysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
         }
 
         /// <summary>

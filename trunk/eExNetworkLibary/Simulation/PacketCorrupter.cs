@@ -29,7 +29,7 @@ namespace eExNetworkLibrary.Simulation
             {
                 if (value > iMaxErrorCount)
                 {
-                    throw new ArgumentException("Value must be less or equal  than maximal error count.");
+                    throw new ArgumentException("Value must be less or equal than maximal error count.");
                 }
                 iMinErrorCount = value;
                 InvokePropertyChanged();

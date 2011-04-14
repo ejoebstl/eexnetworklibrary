@@ -7,14 +7,14 @@ namespace eExNetworkLibrary.Utilities
     /// <summary>
     /// A simple checksum calculator, which can be used to calculate IP checksums and so on.
     /// </summary>
-    public class ChecksumCalculator
+    public static class ChecksumCalculator
     {
         /// <summary>
         /// Calculates a checksum from the given data
         /// </summary>
         /// <param name="bData">The data to calculate the checksum from</param>
         /// <returns>The resulting checksum</returns>
-        public byte[] CalculateChecksum(byte[] bData)
+        public static byte[] CalculateChecksum(byte[] bData)
         {
             if (bData.Length % 2 != 0)
             {
