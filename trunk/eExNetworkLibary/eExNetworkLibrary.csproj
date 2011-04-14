@@ -72,6 +72,7 @@
     <Compile Include="ICMP\V6\NeighborAdvertisment.cs" />
     <Compile Include="ICMP\V6\ICMPv6Type.cs" />
     <Compile Include="IP\IIPFrame.cs" />
+    <Compile Include="IP\IPFragmenter.cs" />
     <Compile Include="IP\V6\ExtensionHeader.cs" />
     <Compile Include="IP\V6\FragmentExtensionHeader.cs" />
     <Compile Include="IP\V6\IIPHeader.cs" />
@@ -85,13 +86,13 @@
     <Compile Include="ProtocolParsing\IProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\ProtocolParser.cs" />
     <Compile Include="ProtocolParsing\Providers\ARPProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\DHCPProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\DNSProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\EthernetProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\ICMPv4ProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\ICMPv6ProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\IPv4ProtocolProvider.cs" />
-    <Compile Include="ProtocolParsing\Providers\IPv6FragmentExtensionProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\IPv6ProtocolProvider.cs" />
-    <Compile Include="ProtocolParsing\Providers\IPv6RoutingExtensionProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\OSPFProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\TCPProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\TrafficDescriptionFrameProtocolProvider.cs" />

@@ -30,7 +30,13 @@ namespace eExNetworkLibrary.ICMP.V6
 
             Array.Copy(bData, 2, OptionData, 0, iOptionLength);
 
-            Encapsulate(bData, 2);
+            byte[] bPayload = new byte[bData.Length - (2 + iOptionLength)];
+            Array.Copy(bData, 2 + iOptionLength, bPayload, 0, bPayload.Length);
+
+            if (bPayload.Length > 0)
+            {
+                this.fEncapsulatedFrame = new NeighborDiscoveryOption(bPayload);
+            }
  
         }
 

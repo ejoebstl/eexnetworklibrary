@@ -93,11 +93,11 @@ namespace eExNetworkLibrary.Sockets
                 throw new ArgumentException("It is not possible to mix up addresses of different types.");
             }
 
-            if (ipaRemoteBinding.AddressFamily != AddressFamily.InterNetworkV6)
+            if (ipaRemoteBinding.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 iIPVersion = 6;
             }
-            else if (ipaRemoteBinding.AddressFamily != AddressFamily.InterNetwork)
+            else if (ipaRemoteBinding.AddressFamily == AddressFamily.InterNetwork)
             {
                 iIPVersion = 4;
             }
@@ -236,29 +236,11 @@ namespace eExNetworkLibrary.Sockets
                 ipv4Frame.Protocol = ProtocolBinding;
                 ipv4Frame.Identification = (uint)rRandom.Next(Int32.MaxValue);
 
-                if (fFrame.Length + (ipv4Frame.InternetHeaderLength * 4) > MaximumTransmissionUnit)
+                ipv4Frame.EncapsulatedFrame = fFrame;
+
+                foreach (IPFrame fFragment in IPFragmenter.FragmentV4(ipv4Frame, MaximumTransmissionUnit))
                 {
-                    byte[][] bChunks = CreateChunks(fFrame.FrameBytes, MaximumTransmissionUnit - (ipv4Frame.InternetHeaderLength * 4));
-
-                    int iDataCounter = 0;
-
-                    for (int iC1 = 0; iC1 < bChunks.Length; iC1++)
-                    {
-                        IPv4Frame ipv4Clone = (IPv4Frame)ipv4Frame.Clone();
-
-                        ipv4Clone.EncapsulatedFrame = new RawDataFrame(bChunks[iC1]);
-                        ipv4Clone.FragmentOffset = (ushort)((iDataCounter) / 2);
-                        ipv4Clone.PacketFlags.MoreFragments = iC1 != bChunks.Length - 1;
-
-                        InvokeFrameDecapsulated(ipv4Clone, bPush);
-
-                        iDataCounter += bChunks[iC1].Length;
-                    }
-                }
-                else
-                {
-                    ipv4Frame.EncapsulatedFrame = fFrame;
-                    InvokeFrameEncapsulated(ipv4Frame, bPush);
+                    InvokeFrameEncapsulated(fFragment, bPush);
                 }
             }
             else if (iIPVersion == 6)
@@ -270,62 +252,17 @@ namespace eExNetworkLibrary.Sockets
 
                 ipv6Frame.Protocol = ProtocolBinding;
 
-                if (fFrame.Length + ipv6Frame.Length > MaximumTransmissionUnit)
+                ipv6Frame.EncapsulatedFrame = fFrame;
+
+                foreach (IPFrame fFragment in IPFragmenter.FragmentV6(ipv6Frame, MaximumTransmissionUnit))
                 {
-                    byte[][] bChunks = CreateChunks(fFrame.FrameBytes, MaximumTransmissionUnit - ipv6Frame.Length);
-
-                    int iDataCounter = 0;
-                    uint iIdentification = (uint)rRandom.Next(Int32.MaxValue);
-
-                    for (int iC1 = 0; iC1 < bChunks.Length; iC1++)
-                    {
-                        IPv6Frame ipv6Clone = (IPv6Frame)ipv6Frame.Clone();
-                        FragmentExtensionHeader fragHeader = new FragmentExtensionHeader();
-
-                        fragHeader.EncapsulatedFrame = new RawDataFrame(bChunks[iC1]);
-                        ipv6Frame.EncapsulatedFrame = fragHeader;
-
-                        fragHeader.FragmentOffset = ((iDataCounter) / 2);
-                        fragHeader.MoreFragments = iC1 != bChunks.Length - 1;
-                        fragHeader.Identification = iIdentification;
-
-                        fragHeader.Protocol = ipv6Frame.Protocol;
-                        ipv6Frame.Protocol = IPProtocol.IPv6_Frag;
-
-                        InvokeFrameDecapsulated(ipv6Clone, bPush);
-
-                        iDataCounter += bChunks[iC1].Length;
-                    }
-                }
-                else
-                {
-                    ipv6Frame.EncapsulatedFrame = fFrame;
-                    InvokeFrameEncapsulated(ipv6Frame, bPush);
+                    InvokeFrameEncapsulated(fFragment, bPush);
                 }
             }
 
-            throw new ArgumentException("Only IPv4 addresses are supportet on the moment.");
+            throw new ArgumentException("Only IPv4 and IPv6 addresses are supportet on the moment.");
 
         }
-
-        private byte[][] CreateChunks(byte[] bBuffer, int iChunkSize)
-        {
-            List<byte[]> lChunks = new List<byte[]>();
-            iChunkSize -= iChunkSize % 8;
-            for (int iC1 = 0; iC1 < bBuffer.Length; iC1 += iChunkSize)
-            {
-                byte[] bChunk = new byte[Math.Min(iChunkSize, (bBuffer.Length - iC1))];
-
-                for (int iC2 = iC1; iC2 < iC1 + iChunkSize && iC2 < bBuffer.Length; iC1++)
-                {
-                    bChunk[iC2 - iC1] = bBuffer[iC2];
-                }
-
-                lChunks.Add(bChunk);
-            }
-            return lChunks.ToArray();
-        }
-
         /// <summary>
         /// Returns the BindingInformation of this socket as IPBindingInformation
         /// </summary>
