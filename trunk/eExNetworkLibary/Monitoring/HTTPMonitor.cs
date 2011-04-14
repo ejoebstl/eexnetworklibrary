@@ -12,7 +12,6 @@ namespace eExNetworkLibrary.Monitoring
     /// <summary>
     /// This traffic analyzer provides the capability to intercept and isolate HTTP traffic.
     /// </summary>
-    [Obsolete("This class is marked as an experimental preview and not fully functional at the moment", false)]
     public class HTTPMonitor : TCPStreamMonitor
     {
         Dictionary<TCPStreamMonitorStack, HTTPConversation> dictConversations;

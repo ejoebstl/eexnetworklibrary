@@ -98,7 +98,7 @@ namespace eExNetworkLibrary.DNS
         {
             dnsEnc = new DNSNameEncoder();
             int iStringLen = 0;
-            strName = dnsEnc.DecodeDNSName(bData, iParserIndex, ref iStringLen).Substring(1);
+            strName = DNSNameEncoder.DecodeDNSName(bData, iParserIndex, ref iStringLen).Substring(1);
             iParserIndex += iStringLen;
             dnsType = (DNSResourceType)(((bData[iParserIndex]) << 8) + bData[iParserIndex + 1]);
             dnsClass = (DNSResourceClass)(((bData[iParserIndex + 2]) << 8) + bData[iParserIndex + 3]);
@@ -118,7 +118,7 @@ namespace eExNetworkLibrary.DNS
             else
             {
                 int iDummy = 0;
-                bResourceData = ASCIIEncoding.ASCII.GetBytes(dnsEnc.DecodeDNSName(bData, iParserIndex, ref iDummy).Substring(1));
+                bResourceData = ASCIIEncoding.ASCII.GetBytes(DNSNameEncoder.DecodeDNSName(bData, iParserIndex, ref iDummy).Substring(1));
             }
 
             iParserIndex += iRDLen;
@@ -166,7 +166,7 @@ namespace eExNetworkLibrary.DNS
         public byte[] GetCompressedBytes(Dictionary<string, int> dictCompression, int iStartIndex)
         {
             MemoryStream msStream = new MemoryStream();
-            byte[] bName = dnsEnc.CompressDNSName(strName, dictCompression, iStartIndex);
+            byte[] bName = DNSNameEncoder.CompressDNSName(strName, dictCompression, iStartIndex);
             msStream.Write(bName, 0, bName.Length);
             byte[] bData = new byte[10];
             bData[0] = (byte)(((int)dnsType >> 8) & 0xFF);
@@ -195,7 +195,7 @@ namespace eExNetworkLibrary.DNS
             get
             {
                 byte[] bData = new byte[this.Length];
-                byte[] bName = dnsEnc.EncodeDNSName(strName);
+                byte[] bName = DNSNameEncoder.EncodeDNSName(strName);
                 bName.CopyTo(bData, 0);
                 int iIndex = bName.Length;
                 bData[iIndex] = (byte)(((int)dnsType >> 8) & 0xFF);

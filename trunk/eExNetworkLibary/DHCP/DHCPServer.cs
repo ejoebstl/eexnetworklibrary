@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using eExNetworkLibrary.Ethernet;
+using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.DHCP
 {
@@ -29,7 +30,6 @@ namespace eExNetworkLibrary.DHCP
         protected int iIPIDCounter;
         private List<int> lOpenServerTransactions;
         private int iLeaseDuration;
-        private IP.IPAddressAnalysis ipAnalysis;
         private bool bShuttingDown;
 
         /// <summary>
@@ -62,9 +62,9 @@ namespace eExNetworkLibrary.DHCP
             {
                 for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
                 {
-                    if (ipi.IpAddresses[iC1].AddressFamily == ipaStart.AddressFamily && ipi.IpAddresses[iC1].AddressFamily == ipaEnd.AddressFamily && 
-                        (ipAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipAnalysis.GetClasslessNetworkAddress(ipaStart, ipi.Subnetmasks[iC1])) ||
-                        ipAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipAnalysis.GetClasslessNetworkAddress(ipaEnd, ipi.Subnetmasks[iC1]))))
+                    if (ipi.IpAddresses[iC1].AddressFamily == ipaStart.AddressFamily && ipi.IpAddresses[iC1].AddressFamily == ipaEnd.AddressFamily &&
+                        (IPAddressAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaStart, ipi.Subnetmasks[iC1])) ||
+                        IPAddressAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaEnd, ipi.Subnetmasks[iC1]))))
                     {
                         this.CreatePool(ipaStart, ipaEnd, ipi, iC1);
                     }
@@ -97,18 +97,11 @@ namespace eExNetworkLibrary.DHCP
             {
                 throw new ArgumentException("Only IPv4 is supported at the moment");
             }
-            foreach (IPInterface ipi in lInterfaces)
+            foreach (IPInterface ipi in GetInterfacesForAddress(dhItem.Address))
             {
-                for (int iC1 = 0; iC1 < ipi.IpAddresses.Length && iC1 < ipi.Subnetmasks.Length; iC1++)
-                {
-                    if (ipi.IpAddresses[iC1].AddressFamily == dhItem.Address.AddressFamily 
-                        && ipAnalysis.GetClasslessNetworkAddress(ipi.IpAddresses[iC1], ipi.Subnetmasks[iC1]).Equals(ipAnalysis.GetClasslessNetworkAddress(dhItem.Address, ipi.Subnetmasks[iC1])))
-                    {
-                        DHCPPool dhPool = GetPoolForInterface(ipi);
-                        DHCPPoolItem dhPoolItem = new DHCPPoolItem(dhItem.Address, dhItem.Netmask, dhItem.Gateway, dhItem.DNSServer);
-                        AddPoolItem(dhPoolItem, dhPool, ipi);
-                    }
-                }
+                DHCPPool dhPool = GetPoolForInterface(ipi);
+                DHCPPoolItem dhPoolItem = new DHCPPoolItem(dhItem.Address, dhItem.Netmask, dhItem.Gateway, dhItem.DNSServer);
+                AddPoolItem(dhPoolItem, dhPool, ipi);
             }
         }
 
@@ -128,7 +121,7 @@ namespace eExNetworkLibrary.DHCP
 
             DHCPPool dhPool = GetPoolForInterface(ipi);
 
-            IPAddress[] ipRange = ipAnalysis.GetIPRange(ipaStart, ipaEnd);
+            IPAddress[] ipRange = IPAddressAnalysis.GetIPRange(ipaStart, ipaEnd);
 
             foreach (IPAddress ipa in ipRange)
             {
@@ -333,7 +326,6 @@ namespace eExNetworkLibrary.DHCP
         /// </summary>
         public DHCPServer()
         {
-            ipAnalysis = new eExNetworkLibrary.IP.IPAddressAnalysis();
             lOpenServerTransactions = new List<int>();
             iDHCPInPort = 68;
             iDHCPOutPort = 67;
@@ -405,25 +397,18 @@ namespace eExNetworkLibrary.DHCP
         /// <param name="fInputFrame">The frame to handle</param>
         protected override void HandleTraffic(Frame fInputFrame)
         {
-            Ethernet.EthernetFrame ethFrame = GetEthernetFrame(fInputFrame);
-            if (ethFrame == null)
-            {
-                return; //invalid.
-            }
             if (bShuttingDown)
             {
                 return; //Shutdown pending.
             }
             UDP.UDPFrame udpFrame = GetUDPFrame(fInputFrame);
             TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fInputFrame, FrameTypes.TrafficDescriptionFrame);    
-            IP.IPFrame ipv4Frame = GetIPv4Frame(fInputFrame);
+            IP.IPFrame ipFrame = GetIPFrame(fInputFrame);
+            DHCP.DHCPFrame dhcpFrame = (DHCP.DHCPFrame)GetFrameByType(fInputFrame, FrameTypes.DHCP);
 
-            if (udpFrame != null && ((udpFrame.DestinationPort == iDHCPInPort && udpFrame.SourcePort == iDHCPOutPort) || (udpFrame.DestinationPort == iDHCPOutPort && udpFrame.SourcePort == iDHCPInPort)))
+            if (dhcpFrame != null && ipFrame != null && udpFrame != null && tdf != null)
             {
-                DHCP.DHCPFrame dhcFrame = new DHCPFrame(udpFrame.EncapsulatedFrame.FrameBytes); // parse DHCP frame
-
-                HandleDHCPFrame(dhcFrame, ethFrame, udpFrame, ipv4Frame, tdf);
-
+                HandleDHCPFrame(dhcpFrame, udpFrame, ipFrame, tdf, fInputFrame);
             }
         }
 
@@ -431,11 +416,11 @@ namespace eExNetworkLibrary.DHCP
         /// Handles a DHCP frame and sends responses or leases addresses according to its contents
         /// </summary>
         /// <param name="dhcFrame">The DHCP frame to handle</param>
-        /// <param name="ethFrame">The according ethernet frame</param>
-        /// <param name="udpFrame">The according UDP frame</param>
-        /// <param name="ipv4Frame">The according IPv4 frame</param>
-        /// <param name="tdf">The according traffic description frame</param>
-        protected virtual void HandleDHCPFrame(DHCPFrame dhcFrame, eExNetworkLibrary.Ethernet.EthernetFrame ethFrame, eExNetworkLibrary.UDP.UDPFrame udpFrame, eExNetworkLibrary.IP.IPFrame ipv4Frame, TrafficDescriptionFrame tdf)
+        /// <param name="udpFrame">The UDP frame</param>
+        /// <param name="ipFrame">The IP frame</param>
+        /// <param name="tdf">The traffic description frame</param>
+        /// <param name="fInputFrame">The original root frame</param>
+        protected virtual void HandleDHCPFrame(DHCPFrame dhcFrame, eExNetworkLibrary.UDP.UDPFrame udpFrame, eExNetworkLibrary.IP.IPFrame ipFrame, TrafficDescriptionFrame tdf, Frame fInputFrame)
         {
             bool bIsRequest = false;
             bool bIsDiscover = false;

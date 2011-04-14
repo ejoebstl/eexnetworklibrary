@@ -30,7 +30,6 @@ namespace eExNetworkLibrary.Routing.OSPF
         private Timer tHello;
         private List<OSPFNeighbour> lNeighbours;
         private List<DirectAttachedNetwork> lNetworks;
-        private IPAddressAnalysis ipv4Analysis;
         private int iIPIDCounter;
         private byte bPriority;
         private uint iLSASeqCounter;
@@ -117,7 +116,6 @@ namespace eExNetworkLibrary.Routing.OSPF
             dictlLocalLSAs = new Dictionary<OSPFArea, List<LSAHeader>>();
             ipaAllOSPFDesignatedRouters = new IPAddress(new byte[] { 224, 0, 0, 6 });
             ipaAllOSPFRouters = new IPAddress(new byte[] { 224, 0, 0, 5 });
-            ipv4Analysis = new IPAddressAnalysis();
             lNeighbours = new List<OSPFNeighbour>();
             dictIDArea = new Dictionary<uint, OSPFArea>();
             lNetworks = new List<DirectAttachedNetwork>();
@@ -226,7 +224,7 @@ namespace eExNetworkLibrary.Routing.OSPF
                             rLSA.AddLinkItem(rLSALI);
                             rLSALI = new RouterLSA.LinkItem();
                             rLSALI.Type = RouterLSA.LinkType.Stub;
-                            rLSALI.LinkID = ConvertIntIP(ipv4Analysis.GetClasslessNetworkAddress(dan.InterfaceAddress, dan.SubnetMask));
+                            rLSALI.LinkID = ConvertIntIP(IPAddressAnalysis.GetClasslessNetworkAddress(dan.InterfaceAddress, dan.SubnetMask));
                             rLSALI.LinkData = dan.SubnetMask.IntNotation;
                             rLSALI.ZeroTOSMetric = 2;
                             rLSA.AddLinkItem(rLSALI);

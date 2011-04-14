@@ -17,7 +17,7 @@ namespace eExNetworkLibrary.DNS
         /// <param name="iIndex">The index at which the name to parse starts</param>
         /// <param name="iDataLen">A pointer to an integer where the data length is stored. This integer will be increased according to the number of bytes read</param>
         /// <returns>A decoded DNS name</returns>
-        public string DecodeDNSName(byte[] bData, int iIndex, ref int iDataLen)
+        public static string DecodeDNSName(byte[] bData, int iIndex, ref int iDataLen)
         {
             int iCount = (int)bData[iIndex];
             int iDummy = 0;
@@ -52,7 +52,7 @@ namespace eExNetworkLibrary.DNS
         /// </summary>
         /// <param name="strName">The string to encode</param>
         /// <returns>A DNS encoded string converted to bytes</returns>
-        public byte[] EncodeDNSName(string strName)
+        public static byte[] EncodeDNSName(string strName)
         {
             if (strName[0] != '.')
             {
@@ -86,7 +86,7 @@ namespace eExNetworkLibrary.DNS
         /// Dictionar&lt;string, int&gt; should be passed, which can be used in further calls of this method</param>
         /// <param name="iStartIndex">The index where this name is written into the corresponding DNS frame</param>
         /// <returns>The compressed DNS name converted to bytes</returns>
-        public byte[] CompressDNSName(string strName, Dictionary<string, int> dictCompressionIndices, int iStartIndex)
+        public static byte[] CompressDNSName(string strName, Dictionary<string, int> dictCompressionIndices, int iStartIndex)
         {
             if (strName.Length == 0 || strName[0] != '.')
             {
@@ -139,7 +139,7 @@ namespace eExNetworkLibrary.DNS
         /// Dictionar&lt;string, int&gt; should be passed, which can be used in further calls of this method</param>
         /// <param name="iDataStartIndex">The index where the names are written into the corresponding DNS frame</param>
         /// <returns>The compressed DNS names converted to bytes</returns>
-        public byte[] CompressDNSNames(string[] strNames, Dictionary<string, int> dictCompressionIndices, int iDataStartIndex)
+        public static byte[] CompressDNSNames(string[] strNames, Dictionary<string, int> dictCompressionIndices, int iDataStartIndex)
         {
             MemoryStream msMemoryStream = new MemoryStream();
             byte[] bData;

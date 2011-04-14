@@ -74,92 +74,80 @@ namespace eExNetworkLibrary.Monitoring
         /// <param name="fInputFrame">The frame to analyze</param>
         protected override void HandleTraffic(Frame fInputFrame)
         {
-            DNSFrame dFrame;
-            Frame fUDP = GetFrameByType(fInputFrame, FrameTypes.UDP);
-            Frame fIP = GetFrameByType(fInputFrame, FrameTypes.IPv4);
-            if (fUDP != null && fIP != null)
+            UDPFrame fUDP = GetUDPFrame(fInputFrame);
+            IPFrame ipFrame = GetIPFrame(fInputFrame);
+            DNSFrame dFrame = (DNSFrame)GetFrameByType(fInputFrame, FrameTypes.DNS);
+
+            if (fUDP != null && ipFrame != null && dFrame != null)
             {
-                UDPFrame uFrame = (UDPFrame)fUDP;
-                IPFrame ipFrame = (IPFrame)fIP;
-                if(uFrame.DestinationPort == iDNSPort || uFrame.SourcePort == iDNSPort)
+                bool bFound = false;
+                foreach (DNSItem di in lLog)
                 {
-                    if (uFrame.EncapsulatedFrame.FrameType == FrameTypes.DNS)
+                    foreach (DNSQuestion qs in dFrame.GetQuestions())
                     {
-                        dFrame = (DNSFrame)uFrame.EncapsulatedFrame;
-                    }
-                    else
-                    {
-                        dFrame = new DNS.DNSFrame(uFrame.EncapsulatedFrame.FrameBytes);
-                    }
-                    bool bFound = false;
-                    foreach (DNSItem di in lLog)
-                    {
-                        foreach (DNSQuestion qs in dFrame.GetQuestions())
+                        if ((di.QueryingHost.Equals(ipFrame.SourceAddress) || di.QueryingHost.Equals(ipFrame.DestinationAddress)) && di.TransactionID == dFrame.Identifier && di.QueryName == qs.Query && !di.TransactionComplete)
                         {
-                            if ((di.QueryingHost.Equals(ipFrame.SourceAddress) || di.QueryingHost.Equals(ipFrame.DestinationAddress)) && di.TransactionID == dFrame.Identifier && di.QueryName == qs.Query && !di.TransactionComplete)
-                            {
-                                bFound = true;
-                            }
+                            bFound = true;
                         }
                     }
-                     if(!bFound)
-                     {
-                        foreach (DNSQuestion qs in dFrame.GetQuestions())
-                        {
-                            DNSItem dsItem;
-                            if (dFrame.QRFlag)
-                            {
-                                dsItem = new DNSItem(qs.Query, ipFrame.DestinationAddress, ipFrame.SourceAddress, TimeSpan.Zero, dFrame.Identifier);
-                            }
-                            else
-                            {
-                                dsItem = new DNSItem(qs.Query, ipFrame.SourceAddress, ipFrame.DestinationAddress, TimeSpan.Zero, dFrame.Identifier);
-                            }
-                            AddLogItem(dsItem);
-                        }
-                     }
-                    if (dFrame.QRFlag)
+                }
+                if (!bFound)
+                {
+                    foreach (DNSQuestion qs in dFrame.GetQuestions())
                     {
-                        foreach (DNSItem dsItem in lLog)
+                        DNSItem dsItem;
+                        if (dFrame.QRFlag)
                         {
-                            if (dFrame.Identifier == dsItem.TransactionID && !dsItem.TransactionComplete)
+                            dsItem = new DNSItem(qs.Query, ipFrame.DestinationAddress, ipFrame.SourceAddress, TimeSpan.Zero, dFrame.Identifier);
+                        }
+                        else
+                        {
+                            dsItem = new DNSItem(qs.Query, ipFrame.SourceAddress, ipFrame.DestinationAddress, TimeSpan.Zero, dFrame.Identifier);
+                        }
+                        AddLogItem(dsItem);
+                    }
+                }
+                if (dFrame.QRFlag)
+                {
+                    foreach (DNSItem dsItem in lLog)
+                    {
+                        if (dFrame.Identifier == dsItem.TransactionID && !dsItem.TransactionComplete)
+                        {
+                            foreach (DNSResourceRecord rr in dFrame.GetAnswers())
                             {
-                                foreach (DNSResourceRecord rr in dFrame.GetAnswers())
+                                if (rr.Type == DNSResourceType.CNAME)
                                 {
-                                    if (rr.Type == DNSResourceType.CNAME)
+                                    if (rr.Name == dsItem.QueryName)
                                     {
-                                        if (rr.Name == dsItem.QueryName)
+                                        string strTMPName = ASCIIEncoding.ASCII.GetString(rr.ResourceData);
+                                        foreach (DNSResourceRecord rr2 in dFrame.GetAnswers())
                                         {
-                                            string strTMPName = ASCIIEncoding.ASCII.GetString(rr.ResourceData);
-                                            foreach (DNSResourceRecord rr2 in dFrame.GetAnswers())
+                                            if (rr2.Type == DNSResourceType.A && rr2.Name == strTMPName)
                                             {
-                                                if (rr2.Type == DNSResourceType.A && rr2.Name == strTMPName)
+                                                IPAddress ipa = new IPAddress(rr2.ResourceData);
+                                                if (!dsItem.ContainsAnswer(ipa))
                                                 {
-                                                    IPAddress ipa = new IPAddress(rr2.ResourceData);
-                                                    if (!dsItem.ContainsAnswer(ipa))
-                                                    {
-                                                        dsItem.AddAnswer(ipa);
-                                                    }
-                                                    dsItem.ChacheTime = new TimeSpan(0, 0, rr2.TTL);
-                                                    dsItem.TransactionComplete = true;
-                                                    dsItem.AnsweringServer = ipFrame.SourceAddress;
-                                                    InvokeUpdated(dsItem);
+                                                    dsItem.AddAnswer(ipa);
                                                 }
+                                                dsItem.ChacheTime = new TimeSpan(0, 0, rr2.TTL);
+                                                dsItem.TransactionComplete = true;
+                                                dsItem.AnsweringServer = ipFrame.SourceAddress;
+                                                InvokeUpdated(dsItem);
                                             }
                                         }
                                     }
-                                    if (rr.Type == DNSResourceType.A && rr.Name == dsItem.QueryName)
+                                }
+                                if (rr.Type == DNSResourceType.A && rr.Name == dsItem.QueryName)
+                                {
+                                    IPAddress ipa = new IPAddress(rr.ResourceData);
+                                    if (!dsItem.ContainsAnswer(ipa))
                                     {
-                                        IPAddress ipa = new IPAddress(rr.ResourceData);
-                                        if (!dsItem.ContainsAnswer(ipa))
-                                        {
-                                            dsItem.AddAnswer(ipa);
-                                        }
-                                        dsItem.ChacheTime = new TimeSpan(0, 0, rr.TTL);
-                                        dsItem.AnsweringServer = ipFrame.SourceAddress;
-                                        dsItem.TransactionComplete = true;
-                                        InvokeUpdated(dsItem);
+                                        dsItem.AddAnswer(ipa);
                                     }
+                                    dsItem.ChacheTime = new TimeSpan(0, 0, rr.TTL);
+                                    dsItem.AnsweringServer = ipFrame.SourceAddress;
+                                    dsItem.TransactionComplete = true;
+                                    InvokeUpdated(dsItem);
                                 }
                             }
                         }
@@ -167,6 +155,7 @@ namespace eExNetworkLibrary.Monitoring
                 }
             }
         }
+            
 
         private void AddLogItem(DNSItem dsItem)
         {

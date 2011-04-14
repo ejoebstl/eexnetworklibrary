@@ -31,7 +31,6 @@ namespace eExNetworkLibrary.TCP
         private byte[] bChecksum;
         private uint iUrgentPointer;
         private TCPOptions oOptions;
-        private ChecksumCalculator clCalc;
 
 
         /// <summary>
@@ -54,7 +53,6 @@ namespace eExNetworkLibrary.TCP
             iUrgentPointer = 0;
             oOptions = new TCPOptions();
             fEncapsulatedFrame = null;
-            clCalc = new ChecksumCalculator();
         }
 
         /// <summary>
@@ -104,7 +102,6 @@ namespace eExNetworkLibrary.TCP
             }
 
             this.fEncapsulatedFrame = new RawDataFrame(bEncapsulatedData);
-            clCalc = new ChecksumCalculator();
         }
 
         /// <summary>
@@ -160,7 +157,7 @@ namespace eExNetworkLibrary.TCP
             }
             bPseudoHeader.CopyTo(bTCPFrame, iC1);
 
-            return clCalc.CalculateChecksum(bTCPFrame);
+            return ChecksumCalculator.CalculateChecksum(bTCPFrame);
         }
 
         /// <summary>

@@ -6,13 +6,10 @@ using System.Net.Sockets;
 
 namespace eExNetworkLibrary.IP
 {
-    public class IPv4AddressAnalysis : IPAddressAnalysis
-    { /*Alias definition for compatibility reasons */ }
-
     /// <summary>
     /// This class provides diffrent methods for IPv4 and IPv6 address analysis and the calculating of network and broadcast addresses
     /// </summary>
-    public class IPAddressAnalysis
+    public static class IPAddressAnalysis
     {
         /// <summary>
         /// Returns the count of all IP addresses in the given address range.
@@ -20,7 +17,7 @@ namespace eExNetworkLibrary.IP
         /// <param name="ipaStart">The start IP address of the range</param>
         /// <param name="ipaEnd">The end IP address of the range</param>
         /// <returns>The count of all IP addresses between the given addresses</returns>
-        public ulong GetIpCount(IPAddress ipaStart, IPAddress ipaEnd)
+        public static ulong GetIpCount(IPAddress ipaStart, IPAddress ipaEnd)
         {
             CheckVersion(ipaStart, ipaEnd);
 
@@ -61,7 +58,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipaAddress1">The first address to check</param>
         /// <param name="ipaAddress2">The second address to check.</param>
-        private void CheckVersion(IPAddress ipaAddress1, IPAddress ipaAddress2)
+        private static void CheckVersion(IPAddress ipaAddress1, IPAddress ipaAddress2)
         {
             if ((ipaAddress1.AddressFamily != AddressFamily.InterNetwork
                 && ipaAddress1.AddressFamily != AddressFamily.InterNetworkV6)
@@ -77,7 +74,7 @@ namespace eExNetworkLibrary.IP
         /// <param name="ipaStart">The start IP address of the range</param>
         /// <param name="ipaEnd">The end IP address of the range</param>
         /// <returns>All IP addresses in the given address range</returns>
-        public IPAddress[] GetIPRange(IPAddress ipaStart, IPAddress ipaEnd)
+        public static IPAddress[] GetIPRange(IPAddress ipaStart, IPAddress ipaEnd)
         {
             CheckVersion(ipaStart, ipaEnd);
 
@@ -110,7 +107,7 @@ namespace eExNetworkLibrary.IP
         /// <returns>-1, if bA is smaller than bB<br />
         /// 0, if bA and bB are equal<br />
         /// 1, bB is smaller than bA</returns>
-        private int Compare(byte[] bA, byte[] bB)
+        public static int Compare(byte[] bA, byte[] bB)
         {
             if (bA.Length != bB.Length)
             {
@@ -133,11 +130,24 @@ namespace eExNetworkLibrary.IP
         }
 
         /// <summary>
+        /// Compares two IP addresses by their numeric value. 
+        /// </summary>
+        /// <param name="ipaA">The first IP addresses to compare.</param>
+        /// <param name="ipaB">The second IP addresses to compare.</param>
+        /// <returns>-1, if bA is smaller than bB<br />
+        /// 0, if bA and bB are equal<br />
+        /// 1, bB is smaller than bA</returns>
+        public static int Compare(IPAddress ipaA, IPAddress ipaB)
+        {
+            return Compare(ipaA.GetAddressBytes(), ipaB.GetAddressBytes());
+        }
+
+        /// <summary>
         /// Returns the classfull broadcast IPv4 address for the given IPv4 network
         /// </summary>
         /// <param name="ipa">The IPv4 network to get the broadcast address for</param>
         /// <returns>The classfull broadcast IPv4 address for the given IPv4 network</returns>
-        public IPAddress GetClassfullBroadcastAddress(IPAddress ipa)
+        public static IPAddress GetClassfullBroadcastAddress(IPAddress ipa)
         {
             if (ipa.AddressFamily != AddressFamily.InterNetwork)
             {
@@ -171,7 +181,7 @@ namespace eExNetworkLibrary.IP
         /// <param name="ipa">The IP network the get the network address for</param>
         /// <param name="sMask">The IP subnet mask to get the network address for</param>
         /// <returns>The classless network IP address for the given IP network and the given IP subnetmask</returns>
-        public IPAddress GetClasslessNetworkAddress(IPAddress ipa, Subnetmask sMask)
+        public static IPAddress GetClasslessNetworkAddress(IPAddress ipa, Subnetmask sMask)
         {
             if (ipa.AddressFamily != AddressFamily.InterNetwork && ipa.AddressFamily != AddressFamily.InterNetworkV6)
             {
@@ -202,7 +212,7 @@ namespace eExNetworkLibrary.IP
         /// <param name="ipa">The IPv4 network the get the broadcast address for</param>
         /// <param name="sMask">The IPv4 subnet mask to get the broadcast address for</param>
         /// <returns>The classless broadcast IPv4 address for the given IPv4 network and the given IPv4 subnetmask</returns>
-        public IPAddress GetClasslessBroadcastAddress(IPAddress ipa, Subnetmask sMask)
+        public static IPAddress GetClasslessBroadcastAddress(IPAddress ipa, Subnetmask sMask)
         {
             if (ipa.AddressFamily != AddressFamily.InterNetwork && ipa.AddressFamily != AddressFamily.InterNetworkV6)
             {
@@ -232,7 +242,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipa">The IPv4 network to get the network address for</param>
         /// <returns>The classfull network IPv4 address for the given IPv4 network</returns>
-        public IPAddress GetClassfullNetworkAddress(IPAddress ipa)
+        public static IPAddress GetClassfullNetworkAddress(IPAddress ipa)
         {
             if (ipa.AddressFamily != AddressFamily.InterNetwork)
             {
@@ -265,7 +275,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipaIn">The IPv4 address to determine the class for</param>
         /// <returns>The class of the given IPv4 address</returns>
-        public IPv4AddressClass GetClass(IPAddress ipaIn)
+        public static IPv4AddressClass GetClass(IPAddress ipaIn)
         {
             if (ipaIn.AddressFamily != AddressFamily.InterNetwork)
             {
@@ -302,7 +312,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipa">The network to get the classfull subnetmask for</param>
         /// <returns>The classfull subnet mask of a given IPv4 network</returns>
-        public Subnetmask GetClassfullSubnetMask(IPAddress ipa)
+        public static Subnetmask GetClassfullSubnetMask(IPAddress ipa)
         {
             if (ipa.AddressFamily != AddressFamily.InterNetwork)
             {
@@ -335,7 +345,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipaIn">The IPv4 address to get the privacy level for</param>
         /// <returns>THe privacy level of the given IPv4 address</returns>
-        public IPv4AddressPrivacyLevel GetPrivacyLevel(IPAddress ipaIn)
+        public static IPv4AddressPrivacyLevel GetPrivacyLevel(IPAddress ipaIn)
         {
             if (ipaIn.AddressFamily != AddressFamily.InterNetwork)
             {
@@ -364,7 +374,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipaAddress">The IPAddress to increase</param>
         /// <returns>The increased IPAddress</returns>
-        public IPAddress Increase(IPAddress ipaAddress)
+        public static IPAddress Increase(IPAddress ipaAddress)
         {
             return new IPAddress(Increase(ipaAddress.GetAddressBytes()));
         }
@@ -374,7 +384,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipaAddress">The IPAddress to increase</param>
         /// <returns>The decreased IPAddress</returns>
-        public IPAddress Decrease(IPAddress ipaAddress)
+        public static IPAddress Decrease(IPAddress ipaAddress)
         {
             return new IPAddress(Decrease(ipaAddress.GetAddressBytes()));
         }   
@@ -384,7 +394,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="bAddress">The IPAddress to increase as an array of unsigned bytes</param>
         /// <returns>The increased IPAddress as an array of unsigned bytes</returns>
-        public byte[] Increase(byte[] bAddress)
+        public static byte[] Increase(byte[] bAddress)
         {
             int iResult = 0;
 
@@ -410,7 +420,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="bAddress">The IPAddress to increase as an array of unsigned bytes</param>
         /// <returns>The decreased IPAddress as an array of unsigned bytes</returns>
-        public byte[] Decrease(byte[] bAddress)
+        public static byte[] Decrease(byte[] bAddress)
         {
             int iResult = 0;
 
@@ -437,7 +447,7 @@ namespace eExNetworkLibrary.IP
         /// </summary>
         /// <param name="ipaAddress">The IP address to convert</param>
         /// <returns>The solicited note multicast address.</returns>
-        public IPAddress GetSolicitedNodeMulticastAddress(IPAddress ipaAddress)
+        public static IPAddress GetSolicitedNodeMulticastAddress(IPAddress ipaAddress)
         {
             if (ipaAddress.AddressFamily != AddressFamily.InterNetworkV6)
             {

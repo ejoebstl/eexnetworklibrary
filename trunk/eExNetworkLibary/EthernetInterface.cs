@@ -28,7 +28,6 @@ namespace eExNetworkLibrary
         private bool bExcludeOwnTraffic;
         private bool bExcludeLocalHostTraffic;
         private object oInterfaceStartStopLock;
-        private IPAddressAnalysis ipaAnalysis;
         private AddressResolution ipAddressResolution;
 
         private MACAddress maMacAddress;
@@ -222,8 +221,6 @@ namespace eExNetworkLibrary
                 throw new ArgumentException("Cannot create an interface instance for an interface not properly recognised by WinPcap."); 
             }
 
-            ipaAnalysis = new IPAddressAnalysis();
-
             oInterfaceStartStopLock = new object();
             AddressResolutionMethod = AddressResolution.NDP;
             bExcludeOwnTraffic = true;
@@ -299,62 +296,48 @@ namespace eExNetworkLibrary
 
         private void HandleICMP(EthernetFrame fFrame)
         {
-            //TODO: Cleanup protocl parsing.
             IPFrame ipFrame = GetIPFrame(fFrame);
-            if (ipFrame != null && ipFrame.Protocol == IPProtocol.IPv6_ICMP)
+            NeighborSolicitation icmpNeighborSolicitation = (NeighborSolicitation)GetFrameByType(fFrame, NeighborSolicitation.DefaultFrameType);
+            if (ipFrame != null && icmpNeighborSolicitation != null)
             {
-                ICMPv6Frame icmpFrame = new ICMPv6Frame(ipFrame.EncapsulatedFrame.FrameBytes); 
-                if (icmpFrame.ICMPv6Type == ICMPv6Type.NeighborSolicitation && ipFrame.Version == 6)
+                if (this.ContainsAddress(icmpNeighborSolicitation.TargetAddress))
                 {
-                    NeighborSolicitation ndSolicitation = new NeighborSolicitation(icmpFrame.EncapsulatedFrame.FrameBytes);
-                    if (this.ContainsAddress(ndSolicitation.TargetAddress))
-                    {
-                        SendICMPNeighborAdvertisment(ipFrame.SourceAddress, ndSolicitation.TargetAddress);
-                    }
+                    SendICMPNeighborAdvertisment(ipFrame.SourceAddress, icmpNeighborSolicitation.TargetAddress);
                 }
             }
         }
 
         private void AnalyzeICMP(TrafficDescriptionFrame tdf)
         {
-            //TODO: Cleanup protocl parsing.
-            IPFrame ipFrame = GetIPFrame(tdf);
-            if (ipFrame != null && ipFrame.Protocol == IPProtocol.IPv6_ICMP)
+            IPFrame ipFrame = GetIPv6Frame(tdf);
+            NeighborAdvertisment icmpNeighborAdvertisment = (NeighborAdvertisment)GetFrameByType(tdf, NeighborAdvertisment.DefaultFrameType);
+            NeighborSolicitation icmpNeighborSolicitation = (NeighborSolicitation)GetFrameByType(tdf, NeighborSolicitation.DefaultFrameType);
+
+            if (ipFrame!= null && icmpNeighborAdvertisment != null && icmpNeighborAdvertisment.EncapsulatedFrame != null)
             {
-                ICMPv6Frame icmpFrame = new ICMPv6Frame(ipFrame.EncapsulatedFrame.FrameBytes);
-                if (icmpFrame.ICMPv6Type == ICMPv6Type.NeighborAdvertisement)
+                NeighborDiscoveryOption ndOption = new NeighborDiscoveryOption(icmpNeighborAdvertisment.EncapsulatedFrame.FrameBytes);
+                if (ndOption.OptionType == NeighborDiscoveryOptionType.TargetLinkLayerAddress)
                 {
-                    NeighborAdvertisment ndAdvertisment = new NeighborAdvertisment(icmpFrame.EncapsulatedFrame.FrameBytes);
-                    if (ndAdvertisment.EncapsulatedFrame != null)
+                    MACAddress macTarget = new MACAddress(ndOption.OptionData);
+                    if (!UsesSpoofedAddress(macTarget))
                     {
-                        NeighborDiscoveryOption ndOption = new NeighborDiscoveryOption(ndAdvertisment.EncapsulatedFrame.FrameBytes);
-                        if (ndOption.OptionType == NeighborDiscoveryOptionType.TargetLinkLayerAddress)
+                        if (!(arpHostTable.Contains(icmpNeighborAdvertisment.TargetAddress) && !icmpNeighborAdvertisment.OverrideFlag))
                         {
-                            MACAddress macTarget = new MACAddress(ndOption.OptionData);
-                            if (!UsesSpoofedAddress(macTarget))
-                            {
-                                if (!(arpHostTable.Contains(ndAdvertisment.TargetAddress) && !ndAdvertisment.OverrideFlag))
-                                {
-                                    UpdateAddressTable(macTarget, ndAdvertisment.TargetAddress);
-                                }
-                            }
+                            UpdateAddressTable(macTarget, icmpNeighborAdvertisment.TargetAddress);
                         }
                     }
                 }
-                else if (icmpFrame.ICMPv6Type == ICMPv6Type.NeighborSolicitation && ipFrame.Version == 6)
+
+            }
+            else if (ipFrame != null && icmpNeighborSolicitation != null && icmpNeighborSolicitation.EncapsulatedFrame != null)
+            {
+                NeighborDiscoveryOption ndOption = new NeighborDiscoveryOption(icmpNeighborSolicitation.EncapsulatedFrame.FrameBytes);
+                if (ndOption.OptionType == NeighborDiscoveryOptionType.SourceLinkLayerAddress)
                 {
-                    NeighborSolicitation ndSolicitation = new NeighborSolicitation(icmpFrame.EncapsulatedFrame.FrameBytes);
-                    if (ndSolicitation.EncapsulatedFrame != null)
+                    MACAddress macTarget = new MACAddress(ndOption.OptionData);
+                    if (!UsesSpoofedAddress(macTarget))
                     {
-                        NeighborDiscoveryOption ndOption = new NeighborDiscoveryOption(ndSolicitation.EncapsulatedFrame.FrameBytes);
-                        if (ndOption.OptionType == NeighborDiscoveryOptionType.SourceLinkLayerAddress)
-                        {
-                            MACAddress macTarget = new MACAddress(ndOption.OptionData);
-                            if (!UsesSpoofedAddress(macTarget))
-                            {
-                                UpdateAddressTable(macTarget, ipFrame.SourceAddress);
-                            }
-                        }
+                        UpdateAddressTable(macTarget, ipFrame.SourceAddress);
                     }
                 }
             }
@@ -585,24 +568,49 @@ namespace eExNetworkLibrary
         }
 
         /// <summary>
-        /// Pushes this frame to the output queue and updates the ethernet component of this frame according to the given destination address and interface properties.
+        /// Pushes this frame to the output queue and adds the ethernet component of this frame according to the given destination address and interface properties.<br />
+        /// If fFrame contains an Ethernet component, the Ethernet component is removed.
         /// </summary>
-        /// <param name="fFrame">The frame to send. This frame must contain an IPv4 frame.</param>
+        /// <param name="fFrame">The frame to send. This frame must contain an IPv4 or IPv6 frame.</param>
         /// <param name="ipaDestination">The next hop's IP address of the given frame</param>
         public override void Send(Frame fFrame, IPAddress ipaDestination)
         {
-            EthernetFrame ethFrame = this.GetEthernetFrame(fFrame);
             IPFrame ipFrame = GetIPFrame(fFrame);
 
             if (ipFrame == null)
             {
-                throw new InvalidOperationException("Cannot send an non-ip frame via the Send(Frame, IPAddress) method. In this case you have to implement data link handling by overriding this method and use the Send(fFrame) or Send(byte[]) method");
+                throw new ArgumentException("Cannot send a non IP frame, because the ether-type cannot be guessed. Please use the Send(Frame, IPAddress, EtherType) method instead.");
             }
 
-            if (ethFrame == null)
+            if (ipFrame.Version == 4)
             {
-                ethFrame = new EthernetFrame();
+                Send(fFrame, ipaDestination, EtherType.IPv4);
             }
+            else if (ipFrame.Version == 6)
+            {
+                Send(fFrame, ipaDestination, EtherType.IPv6);
+            }
+            else
+            {
+                throw new ArgumentException("The given IP frame has an invalid IP version specified.");
+            }
+        }
+
+        /// <summary>
+        /// Pushes this frame to the output queue and adds the ethernet component of this frame according to the given destination address and interface properties.<br />
+        /// If fFrame contains an Ethernet component, the Ethernet component is removed.
+        /// </summary>
+        /// <param name="fFrame">The frame to send.</param>
+        /// <param name="ipaDestination">The next hop's IP address of the given frame</param>
+        /// <param name="ethType">The ether type of fFrame</param>
+        public void Send(Frame fFrame, IPAddress ipaDestination, EtherType ethType)
+        {
+            EthernetFrame ethFrame = this.GetEthernetFrame(fFrame);
+            if (ethFrame != null)
+            {
+                fFrame = ethFrame.EncapsulatedFrame;
+            }
+            ethFrame = new EthernetFrame();
 
             if (ipaDestination.Equals(IPAddress.Broadcast))
             {
@@ -618,20 +626,13 @@ namespace eExNetworkLibrary
                 ethFrame.Destination = new MACAddress(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
             }
 
-            if (ipFrame.Version == 4)
-            {
-                ethFrame.EtherType = EtherType.IPv4;
-            }
-            else if (ipFrame.Version == 6)
-            {
-                ethFrame.EtherType = EtherType.IPv6;
-            }
+            ethFrame.EtherType = ethType;
+            ethFrame.EncapsulatedFrame = fFrame;
 
             if (!lmacSpoofAdresses.Contains(ethFrame.Source))
             {
                 ethFrame.Source = this.PrimaryMACAddress;
             }
-            ethFrame.EncapsulatedFrame = ipFrame;
 
             Send(ethFrame);
         }
@@ -788,7 +789,7 @@ namespace eExNetworkLibrary
 
             IPv6Frame ipFrame = new IPv6Frame();
             ipFrame.SourceAddress = ipaSource;
-            ipFrame.DestinationAddress = ipaAnalysis.GetSolicitedNodeMulticastAddress(ipaQuery);
+            ipFrame.DestinationAddress = IPAddressAnalysis.GetSolicitedNodeMulticastAddress(ipaQuery);
             ipFrame.NextHeader = IPProtocol.IPv6_ICMP;
 
             EthernetFrame ethFrame = new EthernetFrame();
@@ -847,7 +848,7 @@ namespace eExNetworkLibrary
             {
                 if (ipa.AddressFamily == ipaQuery.AddressFamily)
                 {
-                    if (ipaAnalysis.GetClasslessNetworkAddress(ipa, this.GetMaskForAddress(ipa)).Equals(ipaAnalysis.GetClasslessNetworkAddress(ipaQuery, this.GetMaskForAddress(ipa))))
+                    if (IPAddressAnalysis.GetClasslessNetworkAddress(ipa, this.GetMaskForAddress(ipa)).Equals(IPAddressAnalysis.GetClasslessNetworkAddress(ipaQuery, this.GetMaskForAddress(ipa))))
                     {
                         lAddresses.Add(ipa);
                     }

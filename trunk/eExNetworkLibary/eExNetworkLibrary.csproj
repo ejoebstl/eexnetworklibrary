@@ -45,7 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attacks\IAttack.cs" />
+    <Compile Include="Attacks\INetworkAttack.cs" />
     <Compile Include="Attacks\ISingleHostAttack.cs" />
+    <Compile Include="Attacks\Scanning\ScanTask.cs" />
     <Compile Include="Attacks\Spoofing\DHCPSpoofer.cs" />
     <Compile Include="Attacks\Modification\DNSOnTheFlySpoofer.cs" />
     <Compile Include="Attacks\Scanning\ARPNetScan.cs" />
@@ -56,6 +59,7 @@
     <Compile Include="CodeLab\DynamicFunctionHandler.cs" />
     <Compile Include="CodeLab\IDynamicHandler.cs" />
     <Compile Include="EthernetInterface.cs" />
+    <Compile Include="FrameTypes.cs" />
     <Compile Include="HTTP\HTTPHeaderCollection.cs" />
     <Compile Include="HTTP\HTTPMessage.cs" />
     <Compile Include="HTTP\HTTPConversationParser.cs" />
@@ -82,6 +86,7 @@
     <Compile Include="ProtocolParsing\Providers\ICMPv6ProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\IPv4ProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\IPv6ProtocolProvider.cs" />
+    <Compile Include="ProtocolParsing\Providers\OSPFProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\TCPProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\TrafficDescriptionFrameProtocolProvider.cs" />
     <Compile Include="ProtocolParsing\Providers\UDPProtocolProvider.cs" />
@@ -203,7 +208,6 @@
     <Compile Include="IP\IPv4Options.cs" />
     <Compile Include="TCP\TCPOptions.cs" />
     <Compile Include="UDP\UDPFrame.cs" />
-    <Compile Include="VirtualHostBase.cs" />
     <Compile Include="Utilities\WinPcapDotNet.cs" />
   </ItemGroup>
   <ItemGroup>

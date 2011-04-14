@@ -22,7 +22,6 @@ namespace eExNetworkLibrary.Routing.OSPF
         //2 byte checksum
         private OSPFAuthenticationType oAuthType;
         private byte[] bAuthentication;
-        private ChecksumCalculator cCalc;
         private byte[] bAttachedData;
 
         #region Props
@@ -97,7 +96,6 @@ namespace eExNetworkLibrary.Routing.OSPF
         /// </summary>
         public OSPFCommonHeader()
         {
-            cCalc = new ChecksumCalculator();
             bVersion = 2;
             tType = OSPFFrameType.Hello;
             iRouterID = 0;
@@ -115,7 +113,6 @@ namespace eExNetworkLibrary.Routing.OSPF
         /// <param name="bData">The data to parse</param>
         public OSPFCommonHeader(byte[] bData)
         {
-            cCalc = new ChecksumCalculator();
             bVersion = bData[0];
             tType = (OSPFFrameType)bData[1];
             int iLen = ((int)bData[2] << 8) + bData[3];
@@ -204,7 +201,7 @@ namespace eExNetworkLibrary.Routing.OSPF
                 }
 
                 //Calculate the checksum
-                byte[] bChecksum = cCalc.CalculateChecksum(bData);
+                byte[] bChecksum = ChecksumCalculator.CalculateChecksum(bData);
 
                 //Insert the checksum
                 bData[12] = bChecksum[0];

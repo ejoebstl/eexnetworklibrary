@@ -9,10 +9,14 @@ namespace eExNetworkLibrary.ProtocolParsing
         private Dictionary<string, IProtocolProvider> dictProtocolProviders;
         private Dictionary<string, Dictionary<string, IProtocolProvider>> dictPayloadLookupTree;
 
-        public ProtocolParser(IProtocolProvider[] arUserProviders)
+        public ProtocolParser(IProtocolProvider[] arUserProviders, bool bIncludeDefaultProviders)
         {
-            IProtocolProvider[] arDefaultProviders
-                = new IProtocolProvider[]{new Providers.ARPProtocolProvider(), 
+            IProtocolProvider[] arProviders;
+
+            if (bIncludeDefaultProviders)
+            {
+                IProtocolProvider[] arDefaultProviders
+                    = new IProtocolProvider[]{new Providers.ARPProtocolProvider(), 
                     new Providers.EthernetProtocolProvider(), 
                     new Providers.ICMPv4ProtocolProvider(),
                     new Providers.ICMPv6ProtocolProvider(),
@@ -20,18 +24,28 @@ namespace eExNetworkLibrary.ProtocolParsing
                     new Providers.IPv6ProtocolProvider(),
                     new Providers.TCPProtocolProvider(),
                     new Providers.TrafficDescriptionFrameProtocolProvider(),
-                    new Providers.UDPProtocolProvider()};
+                    new Providers.UDPProtocolProvider(),
+                    new Providers.OSPFProtocolProvider()};
 
-            IProtocolProvider[] arProviders = new IProtocolProvider[arUserProviders.Length + arDefaultProviders.Length];
+                arProviders = new IProtocolProvider[arUserProviders.Length + arDefaultProviders.Length];
 
-            arDefaultProviders.CopyTo(arProviders, 0);
-            arUserProviders.CopyTo(arProviders, arDefaultProviders.Length);
+                arDefaultProviders.CopyTo(arProviders, 0);
+                arUserProviders.CopyTo(arProviders, arDefaultProviders.Length);
+            }
+            else
+            {
+                arProviders = arUserProviders;
+            }
 
             dictProtocolProviders = new Dictionary<string, IProtocolProvider>();
             dictPayloadLookupTree = new Dictionary<string, Dictionary<string, IProtocolProvider>>();
 
             foreach (IProtocolProvider ipProtocol in arProviders)
             {
+                if(dictProtocolProviders.ContainsKey(ipProtocol.Protocol))
+                {
+                    throw new ArgumentException("The protocol " + ipProtocol.Protocol + " was already defined. Another provider for this protocol cannot be added.");
+                }
                 dictProtocolProviders.Add(ipProtocol.Protocol, ipProtocol);
                 foreach (string strKnownPayload in ipProtocol.KnownPayloads)
                 {
@@ -49,7 +63,7 @@ namespace eExNetworkLibrary.ProtocolParsing
         }
 
         public ProtocolParser()
-            : this(new IProtocolProvider[0])
+            : this(new IProtocolProvider[0], true)
         {
 
         }
