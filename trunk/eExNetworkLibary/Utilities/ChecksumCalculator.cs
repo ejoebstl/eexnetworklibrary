@@ -21,22 +21,19 @@ namespace eExNetworkLibrary.Utilities
                 throw new ArgumentException("Data to calculate checksum from must be a multiple of two.");
             }
 
-            UInt32 iChecksum = 0;
+            uint iChecksum = 0;
             int iIndex = 0;
 
             while (iIndex < bData.Length)
             {
                 iChecksum += (uint)BitConverter.ToUInt16(bData, iIndex);
                 iIndex += 2;
-
-                if (iChecksum > 0xffff)
-                {
-                    iChecksum = (iChecksum >> 16) + (iChecksum & 0xffff);
-                    iChecksum += (iChecksum >> 16);
-                }
             }
 
-            return BitConverter.GetBytes((UInt16)~iChecksum);
+            iChecksum = (iChecksum >> 16) + (iChecksum & 0xffff);
+            iChecksum += (iChecksum >> 16);
+
+            return BitConverter.GetBytes((ushort)(~iChecksum));
         }
     }
 }
