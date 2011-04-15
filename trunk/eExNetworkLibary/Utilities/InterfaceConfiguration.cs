@@ -24,6 +24,7 @@ namespace eExNetworkLibrary.Utilities
         private static string[] arEasyName;
         private static Dictionary<string, int> dictNameIndex;
         private static Dictionary<int, int> dictIntIndexStoreIndex;
+        private static int[] arMTU;
 
         private static bool bChacheLoaded;
 
@@ -45,6 +46,7 @@ namespace eExNetworkLibrary.Utilities
             List<NetworkInterfaceType> lNicType = new List<NetworkInterfaceType>();
             List<string> lEasyName = new List<string>();
             List<string> lDescription = new List<string>();
+            List<int> lMTU = new List<int>();
 
             dictNameIndex = new Dictionary<string, int>();
             dictIntIndexStoreIndex = new Dictionary<int,int>();
@@ -57,12 +59,28 @@ namespace eExNetworkLibrary.Utilities
                 List<Subnetmask> lsmMask = new List<Subnetmask>();
 
                 IPInterfaceProperties ipProps = nic.GetIPProperties();
-                IPv4InterfaceProperties ipv4Props = ipProps.GetIPv4Properties();
+                IPv4InterfaceProperties ipv4Props = null;
+                IPv6InterfaceProperties ipv6Props = null;
+
+                try { ipv4Props = ipProps.GetIPv4Properties(); }
+                catch { /*Black hole, since there is an exception if the protocol is not supported by the OS.*/ }
+
+                try { ipv6Props = ipProps.GetIPv6Properties(); }
+                catch { /*Black hole, since there is an exception if the protocol is not supported by the OS.*/ }
 
                 //Skip interface if not IP ready
-                if (ipProps != null && ipv4Props != null)
+                if (ipProps != null && (ipv4Props != null || ipv6Props != null))
                 {
-                    int iIndex = ipv4Props.Index;
+                    int iIndex;
+
+                    if (ipv4Props != null)
+                    {
+                        iIndex = ipv4Props.Index;
+                    }
+                    else
+                    {
+                        iIndex = ipv6Props.Index;
+                    }
 
                     dictIntIndexStoreIndex.Add(iIndex, iStoreIndex);
 
@@ -95,6 +113,14 @@ namespace eExNetworkLibrary.Utilities
                     lipaAddresses.Add(lipAddress.ToArray());
                     lLocalIPAddresses.AddRange(lipAddress);
                     lsmSubnetmask.Add(lsmMask.ToArray());
+                    if (ipv4Props != null)
+                    {
+                        lMTU.Add(ipv4Props.Mtu);
+                    }
+                    else
+                    {
+                        lMTU.Add(ipv6Props.Mtu);
+                    }
 
                     lipAddress.Clear();
 
@@ -147,6 +173,7 @@ namespace eExNetworkLibrary.Utilities
             arAdapterType = lNicType.ToArray();
             arDescription = lDescription.ToArray();
             arEasyName = lEasyName.ToArray();
+            arMTU = lMTU.ToArray();
         }
 
         /// <summary>
@@ -194,6 +221,18 @@ namespace eExNetworkLibrary.Utilities
 
             throw new NotImplementedException("The submitted interface name could not be found");
         }
+
+        /// <summary>
+        /// Gets the Maximum Transmission Unit for a specific interface
+        /// </summary>
+        /// <param name="strName">The interface name</param>
+        /// <returns>The Maximum Transmission Unit of the interface.</returns>
+        public static int GetMtuForInterface(string strName)
+        {
+            CheckChache();
+            return arMTU[GetStoreIndexForName(strName)];
+        }
+
 
         /// <summary>
         /// Gets the MACAddress for a specific interface

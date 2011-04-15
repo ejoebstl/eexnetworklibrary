@@ -32,7 +32,6 @@ namespace eExNetworkLibrary
         private AddressResolution ipAddressResolution;
 
         private MACAddress maMacAddress;
-        private const int MTU = 1474;
 
 
         private bool bAutoAnswerARPRequests;
@@ -48,6 +47,15 @@ namespace eExNetworkLibrary
         public HostTable ARPTable
         {
             get { return arpHostTable; }
+        }
+
+        /// <summary>
+        /// Gets the MTU, as queried from the operating system.
+        /// </summary>
+        public int MTU
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -237,8 +245,10 @@ namespace eExNetworkLibrary
             areWorkToDo = new AutoResetEvent(false);
             this.wpcInterface = wpcInterface;
             wpcDevice = new WinPcapDotNet();
+
             this.maMacAddress = InterfaceConfiguration.GetMacAddressForInterface(wpcInterface.Name);
             this.aType = InterfaceConfiguration.GetAdapterTypeForInterface(wpcInterface.Name);
+            this.MTU = InterfaceConfiguration.GetMtuForInterface(wpcInterface.Name) - 18; //Reserve 18 bytes for our ethernet-header
 
             IPAddress[] arip = InterfaceConfiguration.GetIPAddressesForInterface(wpcInterface.Name);
             Subnetmask[] smMask = InterfaceConfiguration.GetIPSubnetsForInterface(wpcInterface.Name);
