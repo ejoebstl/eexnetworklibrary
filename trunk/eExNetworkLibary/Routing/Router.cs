@@ -159,26 +159,6 @@ namespace eExNetworkLibrary.Routing
             }
             else if (RoutingNeeded(fInputFrame))
             {
-                //Debug
-                ICMP.V6.ICMPv6Frame icmpFrame = (ICMP.V6.ICMPv6Frame)GetFrameByType(fInputFrame, ICMP.V6.ICMPv6Frame.DefaultFrameType);
-                if (icmpFrame.ICMPv6Type == eExNetworkLibrary.ICMP.V6.ICMPv6Type.EchoRequest)
-                {
-                    byte[] bData = new byte[3000];
-                    bData[0] = 1;
-                    bData[1] = 2;
-                    bData[2] = 3;
-                    bData[3] = 4;
-                    bData[4] = 5;
-                    bData[5] = 6;
-                    bData[1432] = 2;
-                    bData[1433] = 3;
-                    bData[2864] = 4;
-                    bData[2865] = 5;
-                    bData[2999] = 6;
-                    icmpFrame.EncapsulatedFrame = new RawDataFrame(bData);
-                    icmpFrame.Checksum = icmpFrame.CalculateChecksum(GetIPv6Frame(fInputFrame).GetPseudoHeader());
-                }
-
                 RouteFrame(fInputFrame);
             }
         }
