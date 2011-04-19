@@ -132,7 +132,7 @@ namespace eExNetworkLibrary.Utilities
                     }
                     catch
                     {
-                        //Interface is not ehternet - we have no MAC
+                        //Interface is not ethernet - we have no MAC
                         lmcMacAddress.Add(MACAddress.Empty);
                     }
 

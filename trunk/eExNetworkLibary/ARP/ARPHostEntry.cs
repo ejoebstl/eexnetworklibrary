@@ -12,16 +12,43 @@ namespace eExNetworkLibrary.ARP
     {
         private MACAddress macAddress;
         private IPAddress ipAddress;
+        private bool bIsStatic;
+        private DateTime dtValidUtil;
 
         /// <summary>
         /// Creates a new instance of this class
         /// </summary>
         /// <param name="macAddress">The IP address</param>
         /// <param name="ipAddress">The MAC address associated with the IP address</param>
-        public ARPHostEntry(MACAddress macAddress, IPAddress ipAddress)
+        public ARPHostEntry(MACAddress macAddress, IPAddress ipAddress) : this(macAddress, ipAddress, false)
+        {
+
+        }
+        /// <summary>
+        /// Creates a new instance of this class
+        /// </summary>
+        /// <param name="macAddress">The IP address</param>
+        /// <param name="ipAddress">The MAC address associated with the IP address</param>
+        /// <param name="bStatic">A bool indicating whether this address entry is static</param>
+        public ARPHostEntry(MACAddress macAddress, IPAddress ipAddress, bool bStatic)
+            : this(macAddress, ipAddress, bStatic, bStatic ? new DateTime(0) : DateTime.Now.AddMinutes(1))
+        {
+
+        }
+
+
+        /// <summary>
+        /// Creates a new instance of this class
+        /// </summary>
+        /// <param name="macAddress">The IP address</param>
+        /// <param name="ipAddress">The MAC address associated with the IP address</param>
+        /// <param name="bStatic">A bool indicating whether this address entry is static</param>
+        public ARPHostEntry(MACAddress macAddress, IPAddress ipAddress, bool bStatic, DateTime dtValidUtil)
         {
             this.macAddress = macAddress;
             this.ipAddress = ipAddress;
+            this.bIsStatic = bStatic;
+            this.dtValidUtil = dtValidUtil;
         }
 
         /// <summary>
@@ -38,6 +65,22 @@ namespace eExNetworkLibrary.ARP
         public IPAddress IP
         {
             get { return ipAddress; }
+        }
+
+        /// <summary>
+        /// Gets a DateTime object which indicates how long this ARP entry is valid. 
+        /// </summary>
+        public DateTime ValidUtil
+        {
+            get { return dtValidUtil; }
+        }
+
+        /// <summary>
+        /// Gets a bool indicating whether this entry is static
+        /// </summary>
+        public bool IsStatic
+        {
+            get { return bIsStatic; }
         }
     }
 }
