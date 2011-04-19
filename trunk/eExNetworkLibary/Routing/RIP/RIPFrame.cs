@@ -59,7 +59,7 @@ namespace eExNetworkLibrary.Routing.RIP
         }
 
         /// <summary>
-        /// Gets or sets the version of this RIP frame
+        /// Gets or sets the version of this RIP frame, 1 for RIPv1 and 2 for RIPv2
         /// </summary>
         public uint Version
         {

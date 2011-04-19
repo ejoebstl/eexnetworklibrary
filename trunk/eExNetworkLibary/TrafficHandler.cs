@@ -266,7 +266,7 @@ namespace eExNetworkLibrary
         /// Pushes a frame in this handler input-queue. 
         /// </summary>
         /// <param name="fInputFrame">The frame to handle</param>
-        public void PushTraffic(Frame fInputFrame)
+        public virtual void PushTraffic(Frame fInputFrame)
         {
             if (!bSouldRun)
             {

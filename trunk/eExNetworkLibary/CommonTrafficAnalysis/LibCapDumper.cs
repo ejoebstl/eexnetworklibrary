@@ -257,6 +257,20 @@ namespace eExNetworkLibrary.CommonTrafficAnalysis
             byte[] bData;
             if (bReadyToLog || bIsLiveLogging)
             {
+                if (FrameTypes.IsIP(fInputFrame)) //IP hack
+                {
+                    Ethernet.EthernetFrame ethFrame = new Ethernet.EthernetFrame();
+                    if(((IP.IPFrame)fInputFrame).Version == 4)
+                    {
+                        ethFrame.EtherType = EtherType.IPv4;
+                    }
+                    else if (((IP.IPFrame)fInputFrame).Version == 6)
+                    {
+                        ethFrame.EtherType = EtherType.IPv6;
+                    }
+                    ethFrame.EncapsulatedFrame = fInputFrame;
+                    fInputFrame = ethFrame;
+                }
                 bData = fInputFrame.FrameBytes;
                 if (bReadyToLog)
                 {

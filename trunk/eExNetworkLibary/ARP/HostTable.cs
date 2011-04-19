@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
+using System.Timers;
 
 namespace eExNetworkLibrary.ARP
 {
@@ -13,6 +14,7 @@ namespace eExNetworkLibrary.ARP
     {
         private Dictionary<IPAddress, ARPHostEntry> dIPHostTable;
         private Dictionary<MACAddress, ARPHostEntry> dMACHostTable;
+        private Timer tTimer;
 
         /// <summary>
         /// This delegate represents the method used to handle ARP host table event args
@@ -34,42 +36,101 @@ namespace eExNetworkLibrary.ARP
         /// <summary>
         /// Creates a new instance of this class
         /// </summary>
-        public HostTable()
+        public HostTable() : this(true)
         {
-            dIPHostTable = new Dictionary<IPAddress, ARPHostEntry>();
-            dMACHostTable = new Dictionary<MACAddress, ARPHostEntry>();
+
         }
 
         /// <summary>
-        /// Adds a host entry to this host table
+        /// Creates a new instance of this class
+        /// <param name="bTimeout">True, if ARP entries should be auto removed when they become invalid, otherwise false.</param>
         /// </summary>
-        /// <param name="arphEntry"></param>
+        public HostTable(bool bTimeout)
+        {
+            dIPHostTable = new Dictionary<IPAddress, ARPHostEntry>();
+            dMACHostTable = new Dictionary<MACAddress, ARPHostEntry>();
+            if (bTimeout)
+            {
+                tTimer = new Timer(1000);
+                tTimer.Elapsed += new ElapsedEventHandler(tTimer_Elapsed);
+                tTimer.Start();
+            }
+        }
+
+        ~HostTable()
+        {
+            if (tTimer != null)
+            {
+                tTimer.Stop();
+                tTimer.Dispose();
+            }
+        }
+
+        void tTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            lock (dMACHostTable)
+            {
+                lock (dIPHostTable)
+                {
+                    DateTime dtNow = DateTime.Now;
+                    foreach (ARPHostEntry arpEntry in this.GetKnownHosts())
+                    {
+                        if (arpEntry.IsStatic == false && arpEntry.ValidUtil < dtNow)
+                        {
+                            dIPHostTable.Remove(arpEntry.IP);
+                            InvokeExternalAsync(EntryRemoved, new HostTableEventArgs(arpEntry));
+                            dMACHostTable.Remove(arpEntry.MAC);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a host entry to this host table. This will not overwrite static entries.
+        /// </summary>
+        /// <param name="arphEntry">The host entry to add.</param>
         public void AddHost(ARPHostEntry arphEntry)
         {
+            bool bAdded = false;
+
             lock (dMACHostTable)
             {
                 if (dMACHostTable.ContainsKey(arphEntry.MAC))
                 {
-                    InvokeExternalAsync(EntryRemoved, new HostTableEventArgs(dMACHostTable[arphEntry.MAC]));
-                    dMACHostTable[arphEntry.MAC] = arphEntry;
+                    if (!dMACHostTable[arphEntry.MAC].IsStatic)
+                    {
+                        InvokeExternalAsync(EntryRemoved, new HostTableEventArgs(dMACHostTable[arphEntry.MAC]));
+                        dMACHostTable[arphEntry.MAC] = arphEntry;
+                        bAdded = true;
+                    }
                 }
                 else
                 {
                     dMACHostTable.Add(arphEntry.MAC, arphEntry);
+                    bAdded = true;
                 }
             }
             lock (dIPHostTable)
             {
                 if (dIPHostTable.ContainsKey(arphEntry.IP))
                 {
-                    dIPHostTable[arphEntry.IP] = arphEntry;
+                    if (!dIPHostTable[arphEntry.IP].IsStatic)
+                    {
+                        dIPHostTable[arphEntry.IP] = arphEntry;
+                        bAdded = true;
+                    }
                 }
                 else
                 {
                     dIPHostTable.Add(arphEntry.IP, arphEntry);
+                    bAdded = true;
                 }
             }
-            InvokeExternalAsync(EntryAdded, new HostTableEventArgs(arphEntry));
+            if (bAdded)
+            {
+                InvokeExternalAsync(EntryAdded, new HostTableEventArgs(arphEntry));
+            }
         }
 
         /// <summary>

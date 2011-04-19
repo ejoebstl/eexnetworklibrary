@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Timers;
 using eExNetworkLibrary.IP;
+using eExNetworkLibrary.Utilities;
 
 namespace eExNetworkLibrary.Routing
 {
@@ -25,6 +26,71 @@ namespace eExNetworkLibrary.Routing
         private int iNATTimer;
 
         private Timer tTTLTimer;
+
+        /// <summary>
+        /// This output handler will only outputs frames translated to their internal addresses. 
+        /// It is thought to be connected to other traffic handlers and modifiers which rely on consistend addressing.
+        /// </summary>
+        public TrafficHandler InternalOutputHandler
+        {
+            get { return base.OutputHandler; }
+            set { base.OutputHandler = value; }
+        }
+
+        public TrafficHandler InternalInputHandler
+        {
+            get;
+            protected set;
+        }
+
+        protected void NotifyNextInternal(Frame fFrame)
+        {
+            NotifyNext(fFrame);
+        }
+
+        public void PushInternalTraffic(Frame fFrame)
+        {
+            PushTraffic(fFrame);
+        }
+
+        public override void PushTraffic(Frame fInputFrame)
+        {
+            NATDescriptionFrame ndFrame = new NATDescriptionFrame(NATDescriptionFrame.NATFrameSource.Internal);
+            ndFrame.EncapsulatedFrame = fInputFrame;
+            base.PushTraffic(ndFrame);
+        }
+
+        /// <summary>
+        /// This output handler will only outputs frames translated to their external addresses. 
+        /// It is thought to be connected directly to the Router or DirectInterfaceIO
+        /// </summary>
+        public TrafficHandler ExternalOutputHandler
+        {
+            get;
+            set;
+        }
+
+        public TrafficHandler ExternalInputHandler
+        {
+            get;
+            protected set;
+        }
+
+        protected void NotifyNextExternal(Frame fFrame)
+        {
+            if (ExternalOutputHandler != null)
+            {
+                ExternalOutputHandler.PushTraffic(fFrame);
+                InvokeFrameForwarded();
+            }
+        }
+
+        public void PushExternalTraffic(Frame fFrame)
+        {
+            NATDescriptionFrame ndFrame = new NATDescriptionFrame(NATDescriptionFrame.NATFrameSource.External);
+            ndFrame.EncapsulatedFrame = fFrame;
+            base.PushTraffic(ndFrame);
+        }
 
         /// <summary>
         /// This delegate represents the method which is used to handle NAT events
@@ -134,6 +200,9 @@ namespace eExNetworkLibrary.Routing
             lExternalAddressPool = new List<IPAddress>();
             lInternalRange = new List<NATAddressRange>();
             iNATTimer = 60;
+
+            InternalInputHandler = this;
+            ExternalInputHandler = new NATExternalInputHandler(this);
 
             tTTLTimer = new Timer(1000);
             tTTLTimer.AutoReset = true;
@@ -260,9 +329,19 @@ namespace eExNetworkLibrary.Routing
             int iSourcePort = 0;
             int iDestinationPort = 0;
 
+            if (fInputFrame.FrameType != NATDescriptionFrame.DefaultFrameType)
+            {
+                throw new Exception("A frame without a NATDescription was received by the NAT handler. This must not happen and indicates a serious internal error.");
+            }
+
+            NATDescriptionFrame ndDescription = (NATDescriptionFrame)fInputFrame;
+
+            fInputFrame = ndDescription.EncapsulatedFrame;
+
             IP.IPFrame ipFrame = GetIPv4Frame(fInputFrame);
             TCP.TCPFrame tcpFrame = GetTCPFrame(fInputFrame);
             UDP.UDPFrame udpFrame = null;
+
             if (tcpFrame != null)
             {
                 iSourcePort = tcpFrame.SourcePort;
@@ -280,75 +359,88 @@ namespace eExNetworkLibrary.Routing
 
             if (ipFrame != null)
             {
-                //In to out
-                if (IsInternalRange(ipFrame.SourceAddress))
+                if (ndDescription.Source == NATDescriptionFrame.NATFrameSource.Internal)
                 {
-                    NATEntry neEntry = GetTranslationEntry(ipFrame.SourceAddress, ipFrame.DestinationAddress, iSourcePort, iDestinationPort, ipFrame.Protocol);
-                    if (neEntry == null)
+                    //In to out
+                    if (IsInternalRange(ipFrame.SourceAddress))
                     {
-                        neEntry = CreateTranslationEntry(ipFrame.SourceAddress, ipFrame.DestinationAddress, iSourcePort, iDestinationPort, ipFrame.Protocol);
+                        HandleFromInternal(fInputFrame, iSourcePort, iDestinationPort, ipFrame, tcpFrame, udpFrame);
                     }
-
-                    ipFrame.SourceAddress = neEntry.TranslatedSourceAddress;
-                    if (tcpFrame != null)
+                    else
                     {
-                        tcpFrame.SourcePort = neEntry.TranslatedSourcePort;
-                        tcpFrame.Checksum = tcpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
-
-                        CheckForTCPFinish(tcpFrame, neEntry);
-                         
-                    }
-                    else if (udpFrame != null)
-                    {
-                        udpFrame.SourcePort = neEntry.TranslatedSourcePort;
-                        udpFrame.Checksum = new byte[2];
-                    }
-
-                    NotifyNext(fInputFrame);
-                }
-                else if (IsExternalRange(ipFrame.DestinationAddress)) //Out to in
-                {
-                      NATEntry neEntry = GetReTranslationEntry(ipFrame.DestinationAddress, ipFrame.SourceAddress, iDestinationPort, iSourcePort, ipFrame.Protocol);
-                      if (neEntry != null)
-                      {
-                          ipFrame.DestinationAddress = neEntry.OriginalSourceAddress;
-                          if (tcpFrame != null)
-                          {
-                              tcpFrame.DestinationPort = neEntry.OriginalSourcePort;
-                              tcpFrame.Checksum = tcpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
-
-                              CheckForTCPFinish(tcpFrame, neEntry);
-                          }
-                          else if (udpFrame != null)
-                          {
-                              udpFrame.DestinationPort = neEntry.OriginalSourcePort;
-                              udpFrame.Checksum = new byte[2];
-                          }
-
-                          NotifyNext(fInputFrame);
-                      }
-                      else
-                      {
-                          PushDroppedFrame(fInputFrame);
-                          if (bThrowOnNonNATFrame)
-                          {
-                              throw new Exception("The external frame was discarded because there was no corresponding translation entry in the database. (Source: " + ipFrame.SourceAddress + "/" + iSourcePort + ", Destination: " + ipFrame.DestinationAddress + "/" + iDestinationPort + ", Protocol: " + ipFrame.Protocol.ToString());
-                          }
-                      }
-                }
-                else if (bDropNonNATFrames)
-                {
-                    PushDroppedFrame(fInputFrame);
-                    if (bThrowOnNonNATFrame)
-                    {
-                        throw new Exception("The frame's source address was neither known in the external ranges nor in the internal ranges. (Source: " + ipFrame.SourceAddress + "/" + iSourcePort + ", Destination: " + ipFrame.DestinationAddress + "/" + iDestinationPort + ", Protocol: " + ipFrame.Protocol.ToString());
+                        NotifyNextExternal(fInputFrame);
                     }
                 }
-                else
+                else if (ndDescription.Source == NATDescriptionFrame.NATFrameSource.External)
                 {
-                    NotifyNext(fInputFrame);
+                    //Out to in
+                    if (IsExternalRange(ipFrame.DestinationAddress))
+                    {
+                        HandleFromExternal(fInputFrame, iSourcePort, iDestinationPort, ipFrame, tcpFrame, udpFrame);
+                    }
+                    else
+                    {
+                        NotifyNextInternal(fInputFrame);
+                    }
                 }
             }
+        }
+
+        private void HandleFromExternal(Frame fInputFrame, int iSourcePort, int iDestinationPort, IP.IPFrame ipFrame, TCP.TCPFrame tcpFrame, UDP.UDPFrame udpFrame)
+        {
+            NATEntry neEntry = GetReTranslationEntry(ipFrame.DestinationAddress, ipFrame.SourceAddress, iDestinationPort, iSourcePort, ipFrame.Protocol);
+            if (neEntry != null)
+            {
+                ipFrame.DestinationAddress = neEntry.OriginalSourceAddress;
+                if (tcpFrame != null)
+                {
+                    tcpFrame.DestinationPort = neEntry.OriginalSourcePort;
+                    tcpFrame.Checksum = tcpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
+
+                    CheckForTCPFinish(tcpFrame, neEntry);
+                }
+                else if (udpFrame != null)
+                {
+                    udpFrame.DestinationPort = neEntry.OriginalSourcePort;
+                    udpFrame.Checksum = udpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
+                }
+
+                NotifyNextInternal(ipFrame);
+            }
+            else
+            {
+                PushDroppedFrame(fInputFrame);
+                if (bThrowOnNonNATFrame)
+                {
+                    throw new Exception("The external frame was discarded because there was no corresponding translation entry in the database. (Source: " + ipFrame.SourceAddress + "/" + iSourcePort + ", Destination: " + ipFrame.DestinationAddress + "/" + iDestinationPort + ", Protocol: " + ipFrame.Protocol.ToString());
+                }
+            }
+        }
+
+        private void HandleFromInternal(Frame fInputFrame, int iSourcePort, int iDestinationPort, IP.IPFrame ipFrame, TCP.TCPFrame tcpFrame, UDP.UDPFrame udpFrame)
+        {
+            NATEntry neEntry = GetTranslationEntry(ipFrame.SourceAddress, ipFrame.DestinationAddress, iSourcePort, iDestinationPort, ipFrame.Protocol);
+            if (neEntry == null)
+            {
+                neEntry = CreateTranslationEntry(ipFrame.SourceAddress, ipFrame.DestinationAddress, iSourcePort, iDestinationPort, ipFrame.Protocol);
+            }
+
+            ipFrame.SourceAddress = neEntry.TranslatedSourceAddress;
+            if (tcpFrame != null)
+            {
+                tcpFrame.SourcePort = neEntry.TranslatedSourcePort;
+                tcpFrame.Checksum = tcpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
+
+                CheckForTCPFinish(tcpFrame, neEntry);
+
+            }
+            else if (udpFrame != null)
+            {
+                udpFrame.SourcePort = neEntry.TranslatedSourcePort;
+                udpFrame.Checksum = udpFrame.CalculateChecksum(ipFrame.GetPseudoHeader());
+            }
+
+            NotifyNextExternal(ipFrame);
         }
 
         private void CheckForTCPFinish(TCP.TCPFrame tcpFrame, NATEntry neEntry)
@@ -394,6 +486,7 @@ namespace eExNetworkLibrary.Routing
         public override void Start()
         {
             base.Start();
+            ExternalInputHandler.Start();
             tTTLTimer.Start();
         }
 
@@ -403,6 +496,7 @@ namespace eExNetworkLibrary.Routing
         public override void Stop()
         {
             tTTLTimer.Stop();
+            ExternalInputHandler.Stop();
             base.Stop();
         }
 
@@ -513,6 +607,29 @@ namespace eExNetworkLibrary.Routing
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Helper class for defining two input ports.
+        /// </summary>
+        class NATExternalInputHandler : TrafficHandler
+        {
+            NetworkAddressTranslationHandler natHandler;
+
+            public NATExternalInputHandler(NetworkAddressTranslationHandler natHandler)
+            {
+                this.natHandler = natHandler;
+            }
+
+            public override void Cleanup()
+            {
+                //Do nothing
+            }
+
+            protected override void HandleTraffic(Frame fInputFrame)
+            {
+                this.natHandler.PushExternalTraffic(fInputFrame);
+            }
         }
     }
 
@@ -730,6 +847,51 @@ namespace eExNetworkLibrary.Routing
         public NATEventArgs(NATEntry neEntry)
         {
             this.neEntry = neEntry;
+        }
+    }
+
+    /// <summary>
+    /// A nat description frame, which is prepended internally to NAT frames. This frame is removed as soon as frames are transmitted to other handlers.
+    /// </summary>
+    public class NATDescriptionFrame : Frame
+    {
+        public static string DefaultFrameType { get { return "NATDescription"; } }
+
+        public NATDescriptionFrame(NATFrameSource source)
+        {
+            this.Source = source;
+        }
+
+        public override string FrameType
+        {
+            get { return NATDescriptionFrame.DefaultFrameType; }
+        }
+
+        public override byte[] FrameBytes
+        {
+            get { return new byte[0]; }
+        }
+
+        public override int Length
+        {
+            get { return 0; }
+        }
+
+        public override Frame Clone()
+        {
+            return fEncapsulatedFrame.Clone();
+        }
+
+        public NATFrameSource Source
+        {
+            get;
+            private set;
+        }
+
+        public enum NATFrameSource
+        {
+            Internal = 0,
+            External = 1
         }
     }
 }

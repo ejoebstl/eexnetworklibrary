@@ -102,7 +102,14 @@ namespace eExNetworkLibrary
             }
             set
             {
-                wpcDevice.Filter = wpcDevice.CompileFilter(value, true, Subnetmasks.Length > 0 ? Subnetmasks[0] : new Subnetmask());
+                if (value == "" || value == null)
+                {
+                    wpcDevice.Filter = null;
+                }
+                else
+                {
+                    wpcDevice.Filter = wpcDevice.CompileFilter(value, true, Subnetmasks.Length > 0 ? Subnetmasks[0] : new Subnetmask());
+                }
             }
         }
 
@@ -387,6 +394,15 @@ namespace eExNetworkLibrary
         public bool UsesSpoofedAddress(MACAddress macAddress)
         {
             return lmacSpoofAdresses.Contains(macAddress);
+        }
+
+        /// <summary>
+        /// Returns all addresses which are currently known as spoofed by this interface.
+        /// </summary>
+        /// <returns>All addresses known as spoofed.</returns>
+        public MACAddress[] GetSpoofedAddresses()
+        {
+            return lmacSpoofAdresses.ToArray();
         }
 
         /// <summary>
