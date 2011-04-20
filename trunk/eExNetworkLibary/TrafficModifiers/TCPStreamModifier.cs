@@ -48,20 +48,20 @@ namespace eExNetworkLibrary.TrafficModifiers
         {
             if (!bIsShuttingDown)
             {
-                IP.IPFrame ipv4Frame = GetIPv4Frame(fInputFrame);
+                IP.IPFrame ipFrame = GetIPv4Frame(fInputFrame);
                 TCP.TCPFrame tcpFrame = GetTCPFrame(fInputFrame);
 
-                if (ipv4Frame == null || tcpFrame == null)
+                if (ipFrame == null || tcpFrame == null)
                 {
                     return fInputFrame;
                 }
 
-                if (IsLocal(ipv4Frame))
+                if (IsLocal(ipFrame))
                 {
                     return fInputFrame;
                 }
 
-                if (!ShouldIntercept(ipv4Frame.SourceAddress, ipv4Frame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort))
+                if (!ShouldIntercept(ipFrame.SourceAddress, ipFrame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort))
                 {
                     return fInputFrame;
                 }
@@ -88,9 +88,9 @@ namespace eExNetworkLibrary.TrafficModifiers
                         TCPIPStack sBob;
                         NetworkStreamModifier[] arMods;
 
-                        sAlice = new TCPIPStack(ipv4Frame.SourceAddress, ipv4Frame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort);
+                        sAlice = new TCPIPStack(ipFrame.DestinationAddress, ipFrame.SourceAddress, tcpFrame.DestinationPort, tcpFrame.SourcePort);
                         sAlice.ProtocolParser = this.ProtocolParser;
-                        sBob = new TCPIPStack(ipv4Frame.DestinationAddress, ipv4Frame.SourceAddress, tcpFrame.DestinationPort, tcpFrame.SourcePort);
+                        sBob = new TCPIPStack(ipFrame.SourceAddress, ipFrame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort);
                         sBob.ProtocolParser = this.ProtocolParser;
                         sAlice.FrameEncapsulated += new FrameProcessedEventHandler(Stack_FrameEncapsulated);
                         sBob.FrameEncapsulated += new FrameProcessedEventHandler(Stack_FrameEncapsulated);
@@ -149,81 +149,6 @@ namespace eExNetworkLibrary.TrafficModifiers
             HandleOperatorException(sender, args);
         }
 
-        //void sModifier_BobLoopClosed(object sender, EventArgs e)
-        //{
-        //    TCPStreamModifierStack tsmsStack = GetStackForOperator((NetworkStreamModifier)sender);
-        //    if (tsmsStack == null)
-        //    {
-        //        throw new InvalidOperationException("TCP stream modifier caught an event of a stream modifier which was not created by it. This should never happen.");
-        //    }
-
-        //    for (int iC1 = 0; iC1 < tsmsStack.Modifiers.Length; iC1++)
-        //    {
-        //        if (tsmsStack.Modifiers[iC1] == sender)
-        //        {
-        //            if (iC1 - 1 < 0)
-        //            {
-        //                if (tsmsStack.StackAlice.TCPSocket.TCPState != TCPSocketState.Closed && tsmsStack.StackAlice.TCPSocket.TCPState != TCPSocketState.TimeWait)
-        //                {
-        //                    tsmsStack.StackAlice.Close();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if (tsmsStack.Modifiers[iC1 - 1].IsRunning)
-        //                {
-        //                    NetworkStreamModifier nsModifier = tsmsStack.Modifiers[iC1 - 1];
-        //                    nsModifier.Stop();
-        //                }
-        //            }
-
-        //            tsmsStack.Modifiers[iC1].BobLoopClosed -= new EventHandler(sModifier_BobLoopClosed);
-        //            tsmsStack.Modifiers[iC1].BobLoopError -= new ExceptionEventHandler(sModifier_BobLoopError);
-
-        //            RemoveIfClosed(tsmsStack);
-
-        //            break;
-        //        }
-        //    }
-        //}
-
-        //void sModifier_AliceLoopClosed(object sender, EventArgs e)
-        //{
-        //    TCPStreamModifierStack tsmsStack = GetStackForOperator((NetworkStreamModifier)sender);
-        //    if (tsmsStack == null)
-        //    {
-        //        throw new InvalidOperationException("TCP stream modifier caught an event of a stream modifier which was not created by it. This should never happen.");
-        //    }
-
-        //    for (int iC1 = 0; iC1 < tsmsStack.Modifiers.Length; iC1++)
-        //    {
-        //        if (tsmsStack.Modifiers[iC1] == sender)
-        //        {
-        //            if (iC1 + 1 >= tsmsStack.Modifiers.Length)
-        //            {
-        //                if (tsmsStack.StackBob.TCPSocket.TCPState != TCPSocketState.Closed && tsmsStack.StackBob.TCPSocket.TCPState != TCPSocketState.TimeWait)
-        //                {
-        //                    tsmsStack.StackBob.Close();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if (tsmsStack.Modifiers[iC1 + 1].IsRunning)
-        //                {
-        //                    NetworkStreamModifier nsModifier = tsmsStack.Modifiers[iC1 + 1];
-        //                    nsModifier.Stop();
-        //                }
-        //            }
-        //            tsmsStack.Modifiers[iC1].AliceLoopClosed -= new EventHandler(sModifier_AliceLoopClosed);
-        //            tsmsStack.Modifiers[iC1].AliceLoopError -= new ExceptionEventHandler(sModifier_AliceLoopError);
-
-        //            RemoveIfClosed(tsmsStack);
-
-        //            break;
-        //        }
-        //    }
-        //}
-
         private bool IsLocal(eExNetworkLibrary.IP.IPFrame ipv4Frame)
         {
             return lLocalAddresses.Contains(ipv4Frame.SourceAddress) || lLocalAddresses.Contains(ipv4Frame.DestinationAddress);
@@ -246,26 +171,6 @@ namespace eExNetworkLibrary.TrafficModifiers
                     ShutdownStack(tsmsStack);
 
                     RemoveIfClosed(tsmsStack);
-                }
-                else if (sAlice.TCPState != TCPSocketState.Closed && sAlice.TCPState != TCPSocketState.TimeWait)
-                {
-                    //for (int iC1 = 0; iC1 < tsmsStack.Modifiers.Length; iC1++)
-                    //{
-                    //    tsmsStack.Modifiers[iC1].Stop();
-                    //    tsmsStack.Modifiers[iC1].AliceLoopError -= new ExceptionEventHandler(sModifier_AliceLoopError);
-                    //    tsmsStack.Modifiers[iC1].BobLoopError -= new ExceptionEventHandler(sModifier_BobLoopError);
-                    //}
-                    //tsmsStack.StackAlice.CloseAsync();
-                }
-                else if (sBob.TCPState != TCPSocketState.Closed && sBob.TCPState != TCPSocketState.TimeWait)
-                {
-                    //for (int iC1 = tsmsStack.Modifiers.Length - 1; iC1 >= 0; iC1--)
-                    //{
-                    //    tsmsStack.Modifiers[iC1].Stop();
-                    //    tsmsStack.Modifiers[iC1].AliceLoopError -= new ExceptionEventHandler(sModifier_AliceLoopError);
-                    //    tsmsStack.Modifiers[iC1].BobLoopError -= new ExceptionEventHandler(sModifier_BobLoopError);
-                    //}
-                    //tsmsStack.StackBob.CloseAsync();
                 }
             }
         }
@@ -336,18 +241,65 @@ namespace eExNetworkLibrary.TrafficModifiers
         {
             bIsShuttingDown = true;
 
-
-            foreach (TCPStreamModifierStack tsmsStack in lStacks)
-            {
-                ShutdownStack(tsmsStack);
-            }
             lock (lStacks)
             {
+                foreach (TCPStreamModifierStack tsmsStack in lStacks)
+                {
+                    BeginShutdownStack(tsmsStack);
+                }
+                foreach (TCPStreamModifierStack tsmsStack in lStacks)
+                {
+                    EndShutdownStack(tsmsStack);
+                }
                 lStacks.Clear();
             }
         }
 
+        public override void Stop()
+        {
+            lock (lStacks)
+            {
+                foreach (TCPStreamModifierStack tsmsStack in lStacks)
+                {
+                    ShutdownStackQuick(tsmsStack);
+                }
+                lStacks.Clear();
+            }
+            base.Stop();
+        }
+
+        private void ShutdownStackQuick(TCPStreamModifierStack tsmsStack)
+        {
+            tsmsStack.StackAlice.TCPSocket.StateChange -= new EventHandler<TCPSocketEventArgs>(TCPSocket_StateChange);
+            tsmsStack.StackBob.TCPSocket.StateChange -= new EventHandler<TCPSocketEventArgs>(TCPSocket_StateChange);
+            tsmsStack.StackAlice.FrameEncapsulated -= new FrameProcessedEventHandler(Stack_FrameEncapsulated);
+            tsmsStack.StackBob.FrameEncapsulated -= new FrameProcessedEventHandler(Stack_FrameEncapsulated);
+
+            foreach (NetworkStreamModifier sModifier in tsmsStack.Modifiers)
+            {
+                if (sModifier.IsRunning)
+                {
+
+                    sModifier.AliceLoopError -= new ExceptionEventHandler(sModifier_AliceLoopError);
+                    sModifier.BobLoopError -= new ExceptionEventHandler(sModifier_BobLoopError);
+                    sModifier.StopAsync();
+                }
+            }
+        }
+
         private void ShutdownStack(TCPStreamModifierStack tsmsStack)
+        {
+            BeginShutdownStack(tsmsStack);
+            EndShutdownStack(tsmsStack);
+        }
+
+        private void EndShutdownStack(TCPStreamModifierStack tsmsStack)
+        {
+            tsmsStack.StackAlice.EndClose();
+            tsmsStack.StackBob.EndClose();
+        }
+
+        private void BeginShutdownStack(TCPStreamModifierStack tsmsStack)
         {
             tsmsStack.StackAlice.TCPSocket.StateChange -= new EventHandler<TCPSocketEventArgs>(TCPSocket_StateChange);
             tsmsStack.StackBob.TCPSocket.StateChange -= new EventHandler<TCPSocketEventArgs>(TCPSocket_StateChange);
@@ -356,23 +308,22 @@ namespace eExNetworkLibrary.TrafficModifiers
 
             if (tsmsStack.StackAlice.TCPSocket.TCPState != TCPSocketState.Closed && tsmsStack.StackAlice.TCPSocket.TCPState != TCPSocketState.TimeWait)
             {
-                tsmsStack.StackAlice.Close();
+                tsmsStack.StackAlice.BeginClose();
             }
 
             if (tsmsStack.StackBob.TCPSocket.TCPState != TCPSocketState.Closed && tsmsStack.StackBob.TCPSocket.TCPState != TCPSocketState.TimeWait)
             {
-                tsmsStack.StackBob.Close();
+                tsmsStack.StackBob.BeginClose();
             }
 
             foreach (NetworkStreamModifier sModifier in tsmsStack.Modifiers)
             {
                 if (sModifier.IsRunning)
                 {
-                    //sModifier.AliceLoopClosed -= new EventHandler(sModifier_AliceLoopClosed);
-                    //sModifier.BobLoopClosed -= new EventHandler(sModifier_BobLoopClosed);
+
                     sModifier.AliceLoopError -= new ExceptionEventHandler(sModifier_AliceLoopError);
                     sModifier.BobLoopError -= new ExceptionEventHandler(sModifier_BobLoopError);
-                    sModifier.Stop();
+                    sModifier.StopAsync();
                 }
             }
         }

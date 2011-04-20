@@ -67,18 +67,18 @@ namespace eExNetworkLibrary.UDP
 
             byte[] bUDPFrame = new byte[8 + bInnerData.Length + (bInnerData.Length % 2 == 0 ? 0 : 1) + bPseudoHeader.Length];
 
-            bUDPFrame[0] = (byte)((iSourcePort >> 8) & 0xFF);
-            bUDPFrame[1] = (byte)((iSourcePort) & 0xFF);
-            bUDPFrame[2] = (byte)((iDestinationPort >> 8) & 0xFF);
-            bUDPFrame[3] = (byte)((iDestinationPort) & 0xFF);
-            bUDPFrame[4] = (byte)((iLength >> 8) & 0xFF);
-            bUDPFrame[5] = (byte)((iLength) & 0xFF);
-            bUDPFrame[6] = 0;
-            bUDPFrame[7] = 0;
+            bPseudoHeader.CopyTo(bUDPFrame, 0);
 
-            bInnerData.CopyTo(bUDPFrame, 8);
+            bUDPFrame[bPseudoHeader.Length + 0] = (byte)((iSourcePort >> 8) & 0xFF);
+            bUDPFrame[bPseudoHeader.Length + 1] = (byte)((iSourcePort) & 0xFF);
+            bUDPFrame[bPseudoHeader.Length + 2] = (byte)((iDestinationPort >> 8) & 0xFF);
+            bUDPFrame[bPseudoHeader.Length + 3] = (byte)((iDestinationPort) & 0xFF);
+            bUDPFrame[bPseudoHeader.Length + 4] = (byte)((iLength >> 8) & 0xFF);
+            bUDPFrame[bPseudoHeader.Length + 5] = (byte)((iLength) & 0xFF);
+            bUDPFrame[bPseudoHeader.Length + 6] = 0;
+            bUDPFrame[bPseudoHeader.Length + 7] = 0;
 
-            bPseudoHeader.CopyTo(bUDPFrame, 8 + bInnerData.Length);
+            bInnerData.CopyTo(bUDPFrame, bPseudoHeader.Length + 8);
 
             return ChecksumCalculator.CalculateChecksum(bUDPFrame);
         }

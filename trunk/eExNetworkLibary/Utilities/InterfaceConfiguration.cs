@@ -126,16 +126,15 @@ namespace eExNetworkLibrary.Utilities
 
                     lsmMask.Clear();
 
-                    try
+                    byte[] bAddressBytes = nic.GetPhysicalAddress().GetAddressBytes();
+                    if (bAddressBytes.Length == 6)
                     {
-                        lmcMacAddress.Add(new MACAddress(nic.GetPhysicalAddress().GetAddressBytes()));
+                        lmcMacAddress.Add(new MACAddress(bAddressBytes));
                     }
-                    catch
+                    else
                     {
-                        //Interface is not ethernet - we have no MAC
                         lmcMacAddress.Add(MACAddress.Empty);
                     }
-
 
                     //Get Standardgateways
                     GatewayIPAddressInformationCollection arGateways = ipProps.GatewayAddresses;

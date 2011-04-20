@@ -148,7 +148,7 @@ namespace eExNetworkLibrary.Sockets
             }
         }
 
-        public void CloseAsync()
+        public void BeginClose()
         {
             lock (oCloseLock)
             {
@@ -158,8 +158,13 @@ namespace eExNetworkLibrary.Sockets
                 }
                 bClosing = true;
                 tcpSocket.StateChange += new EventHandler<TCPSocketEventArgs>(tcpSocket_StateChange);
-                tcpSocket.CloseAsync();
+                tcpSocket.BeginClose();
             }
+        }
+
+        public void EndClose()
+        {
+            tcpSocket.EndClose();
         }
 
         void tcpSocket_StateChange(object sender, TCPSocketEventArgs e)

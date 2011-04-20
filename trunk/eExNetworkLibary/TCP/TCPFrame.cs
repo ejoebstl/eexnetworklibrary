@@ -118,44 +118,51 @@ namespace eExNetworkLibrary.TCP
 
             byte[] bInnerData = this.fEncapsulatedFrame != null ? this.fEncapsulatedFrame.FrameBytes : new byte[0];
 
-            byte[] bTCPFrame = new byte[20 + oOptions.OptionLength + bInnerData.Length + (bInnerData.Length % 2 == 0 ? 0 : 1) + bPseudoHeader.Length];
-
-            bTCPFrame[0] = (byte)((iSourcePort >> 8) & 0xFF);
-            bTCPFrame[1] = (byte)((iSourcePort) & 0xFF);
-            bTCPFrame[2] = (byte)((iDestinationPort >> 8) & 0xFF);
-            bTCPFrame[3] = (byte)((iDestinationPort) & 0xFF);
-            bTCPFrame[4] = (byte)((iSequenceNumber >> 24) & 0xFF);
-            bTCPFrame[5] = (byte)((iSequenceNumber >> 16) & 0xFF);
-            bTCPFrame[6] = (byte)((iSequenceNumber >> 8) & 0xFF);
-            bTCPFrame[7] = (byte)((iSequenceNumber) & 0xFF);
-            bTCPFrame[8] = (byte)((iAcknowledgmentNumber >> 24) & 0xFF);
-            bTCPFrame[9] = (byte)((iAcknowledgmentNumber >> 16) & 0xFF);
-            bTCPFrame[10] = (byte)((iAcknowledgmentNumber >> 8) & 0xFF);
-            bTCPFrame[11] = (byte)((iAcknowledgmentNumber) & 0xFF);
-            bTCPFrame[12] = (byte)((((20 + oOptions.OptionLength) / 4) << 4) & 0xF0);
-            bTCPFrame[13] |= (byte)(bUrgent ? 0x20 : 0x00);
-            bTCPFrame[13] |= (byte)(bAcknowledgement ? 0x10 : 0x00);
-            bTCPFrame[13] |= (byte)(bPush ? 0x8 : 0x00);
-            bTCPFrame[13] |= (byte)(bReset ? 0x4 : 0x00);
-            bTCPFrame[13] |= (byte)(bSynchronize ? 0x2 : 0x00);
-            bTCPFrame[13] |= (byte)(bFinish ? 0x1 : 0x00);
-            bTCPFrame[14] = (byte)((iWindow >> 8) & 0xFF);
-            bTCPFrame[15] = (byte)((iWindow) & 0xFF);
-            bTCPFrame[16] = 0;
-            bTCPFrame[17] = 0;
-            bTCPFrame[18] = (byte)((iUrgentPointer >> 8) & 0xFF);
-            bTCPFrame[19] = (byte)((iUrgentPointer) & 0xFF);
-
-            oOptions.Raw.CopyTo(bTCPFrame, 20);
-
-            int iC1 = 20 + oOptions.OptionLength;
-            bInnerData.CopyTo(bTCPFrame, iC1);
-            iC1 += bInnerData.Length;
-            if (iC1 % 2 != 0)
+            int iTotalLen = bPseudoHeader.Length + Length;
+            if(iTotalLen % 2 != 0)
             {
-                iC1++;
+                iTotalLen += 1;
             }
-            bPseudoHeader.CopyTo(bTCPFrame, iC1);
+
+            byte[] bTCPFrame = new byte[iTotalLen];
+
+            int iDataOffset = 20 + oOptions.OptionLength;
+            if (iDataOffset % 4 != 0)
+            {
+                iDataOffset += 4 - (iDataOffset % 4);
+            }
+
+            bPseudoHeader.CopyTo(bTCPFrame, 0);
+
+            bTCPFrame[bPseudoHeader.Length + 0] = (byte)((iSourcePort >> 8) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 1] = (byte)((iSourcePort) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 2] = (byte)((iDestinationPort >> 8) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 3] = (byte)((iDestinationPort) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 4] = (byte)((iSequenceNumber >> 24) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 5] = (byte)((iSequenceNumber >> 16) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 6] = (byte)((iSequenceNumber >> 8) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 7] = (byte)((iSequenceNumber) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 8] = (byte)((iAcknowledgmentNumber >> 24) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 9] = (byte)((iAcknowledgmentNumber >> 16) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 10] = (byte)((iAcknowledgmentNumber >> 8) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 11] = (byte)((iAcknowledgmentNumber) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 12] = (byte)((((iDataOffset) / 4) << 4) & 0xF0);
+            bTCPFrame[bPseudoHeader.Length + 13] |= (byte)(bUrgent ? 0x20 : 0x00);
+            bTCPFrame[bPseudoHeader.Length + 13] |= (byte)(bAcknowledgement ? 0x10 : 0x00);
+            bTCPFrame[bPseudoHeader.Length + 13] |= (byte)(bPush ? 0x8 : 0x00);
+            bTCPFrame[bPseudoHeader.Length + 13] |= (byte)(bReset ? 0x4 : 0x00);
+            bTCPFrame[bPseudoHeader.Length + 13] |= (byte)(bSynchronize ? 0x2 : 0x00);
+            bTCPFrame[bPseudoHeader.Length + 13] |= (byte)(bFinish ? 0x1 : 0x00);
+            bTCPFrame[bPseudoHeader.Length + 14] = (byte)((iWindow >> 8) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 15] = (byte)((iWindow) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 16] = 0;
+            bTCPFrame[bPseudoHeader.Length + 17] = 0;
+            bTCPFrame[bPseudoHeader.Length + 18] = (byte)((iUrgentPointer >> 8) & 0xFF);
+            bTCPFrame[bPseudoHeader.Length + 19] = (byte)((iUrgentPointer) & 0xFF);
+
+            oOptions.Raw.CopyTo(bTCPFrame, bPseudoHeader.Length + 20);
+
+            bInnerData.CopyTo(bTCPFrame, bPseudoHeader.Length + iDataOffset);
 
             return ChecksumCalculator.CalculateChecksum(bTCPFrame);
         }
@@ -322,6 +329,12 @@ namespace eExNetworkLibrary.TCP
             {
                 byte[] bRaw = new byte[this.Length];
 
+                int iDataOffset = 20 + oOptions.OptionLength;
+                if (iDataOffset % 4 != 0)
+                {
+                    iDataOffset += 4 - (iDataOffset % 4);
+                }
+
                 bRaw[0] = (byte)((iSourcePort >> 8) & 0xFF);
                 bRaw[1] = (byte)((iSourcePort) & 0xFF);
                 bRaw[2] = (byte)((iDestinationPort >> 8) & 0xFF);
@@ -334,7 +347,7 @@ namespace eExNetworkLibrary.TCP
                 bRaw[9] = (byte)((iAcknowledgmentNumber >> 16) & 0xFF);
                 bRaw[10] = (byte)((iAcknowledgmentNumber >> 8) & 0xFF);
                 bRaw[11] = (byte)((iAcknowledgmentNumber) & 0xFF);
-                bRaw[12] = (byte)((((20 + oOptions.OptionLength) / 4) << 4) & 0xF0);
+                bRaw[12] = (byte)((((iDataOffset) / 4) << 4) & 0xF0);
                 bRaw[13] |= (byte)(bUrgent ? 0x20 : 0x00);
                 bRaw[13] |= (byte)(bAcknowledgement ? 0x10 : 0x00);
                 bRaw[13] |= (byte)(bPush ? 0x8 : 0x00);
@@ -352,7 +365,7 @@ namespace eExNetworkLibrary.TCP
 
                 if (fEncapsulatedFrame != null)
                 {
-                    fEncapsulatedFrame.FrameBytes.CopyTo(bRaw, 20 + oOptions.OptionLength);
+                    fEncapsulatedFrame.FrameBytes.CopyTo(bRaw, iDataOffset);
                 }
 
                 return bRaw;
@@ -364,7 +377,16 @@ namespace eExNetworkLibrary.TCP
         /// </summary>
         public override int Length
         {
-            get { return 20 + oOptions.OptionLength + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
+            get
+            {
+                int iLen = 20 + oOptions.OptionLength;
+                if (iLen % 4 != 0)
+                {
+                    iLen += 4 - (iLen % 4);
+                }
+                iLen += (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0);
+                return iLen;
+            }
         }
 
         #endregion

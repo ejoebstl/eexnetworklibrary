@@ -25,15 +25,15 @@ namespace eExNetworkLibrary.Monitoring
         {
             if (!bIsShuttingDown)
             {
-                IP.IPv4Frame ipv4Frame = GetIPv4Frame(fInputFrame);
+                IP.IPFrame ipFrame = GetIPFrame(fInputFrame);
                 TCP.TCPFrame tcpFrame = GetTCPFrame(fInputFrame); 
                 
-                if (ipv4Frame == null || tcpFrame == null)
+                if (ipFrame == null || tcpFrame == null)
                 {
                     return;
                 }
                 
-                if (!ShouldIntercept(ipv4Frame.SourceAddress, ipv4Frame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort))
+                if (!ShouldIntercept(ipFrame.SourceAddress, ipFrame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort))
                 {
                     return;
                 }
@@ -60,9 +60,9 @@ namespace eExNetworkLibrary.Monitoring
                         TCPIPListenerStack sBob;
                         NetworkStreamMonitor[] arMonitors;
 
-                        sBob = new TCPIPListenerStack(ipv4Frame.DestinationAddress, ipv4Frame.SourceAddress, tcpFrame.DestinationPort, tcpFrame.SourcePort);
+                        sBob = new TCPIPListenerStack(ipFrame.DestinationAddress, ipFrame.SourceAddress, tcpFrame.DestinationPort, tcpFrame.SourcePort);
                         sBob.ProtocolParser = this.ProtocolParser;
-                        sAlice = new TCPIPListenerStack(ipv4Frame.SourceAddress, ipv4Frame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort);
+                        sAlice = new TCPIPListenerStack(ipFrame.SourceAddress, ipFrame.DestinationAddress, tcpFrame.SourcePort, tcpFrame.DestinationPort);
                         sAlice.ProtocolParser = this.ProtocolParser;
 
                         sAlice.TCPSocket.StateChange += new EventHandler<TCPListenerSocketEventArgs>(TCPSocket_StateChange);
@@ -80,7 +80,7 @@ namespace eExNetworkLibrary.Monitoring
                         }
 
                         tsmsStack.StackBob.Listen();
-                        tsmsStack.StackBob.PushUp(fInputFrame, false);
+                        tsmsStack.StackBob.PushUp(ipFrame, false);
 
                         tsmsStack.StackAlice.Connect();
 
@@ -174,7 +174,11 @@ namespace eExNetworkLibrary.Monitoring
         public override void Cleanup()
         {
             bIsShuttingDown = true;
+        }
 
+        public override void Stop()
+        {
+            bIsShuttingDown = true;
 
             foreach (TCPStreamMonitorStack tsmsStack in lStacks)
             {
@@ -184,6 +188,8 @@ namespace eExNetworkLibrary.Monitoring
             {
                 lStacks.Clear();
             }
+
+            base.Stop();
         }
 
         private void ShutdownStack(TCPStreamMonitorStack tsmsStack)
@@ -206,6 +212,9 @@ namespace eExNetworkLibrary.Monitoring
             {
                 if (nsMonitor.IsRunning)
                 {
+                    nsMonitor.LoopError -= new ExceptionEventHandler(nsMonitor_LoopError);
+                    nsMonitor.LoopClosed -= new EventHandler(nsMonitor_LoopClosed);
+
                     nsMonitor.StopAsync();
                 }
             }
