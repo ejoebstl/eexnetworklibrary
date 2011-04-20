@@ -68,7 +68,7 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification
                 InvokeExternalAsync(AliceLoopError, new ExceptionEventArgs(ex, DateTime.Now));
             }
             bAliceStopped = true;
-            bIsRunning = bBobStopped && bAliceStopped;
+            bIsRunning = bBobStopped || bAliceStopped;
             InvokeExternalAsync(AliceLoopClosed);
         }
 
@@ -84,7 +84,7 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification
                 InvokeExternalAsync(BobLoopError, new ExceptionEventArgs(ex, DateTime.Now));
             }
             bBobStopped = true;
-            bIsRunning = bBobStopped && bAliceStopped;
+            bIsRunning = bBobStopped || bAliceStopped;
             InvokeExternalAsync(BobLoopClosed);
         }
 
@@ -109,9 +109,16 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification
                 nsStreamBob.Close();
                 tWorkerThreadAlice.Join();
                 tWorkerThreadBob.Join();
-                nsStreamAlice = null;
-                nsStreamBob = null;
-                bIsRunning = false;
+            }
+        }
+
+        public void StopAsync()
+        {
+            if (bSouldRun)
+            {
+                bSouldRun = false;
+                nsStreamAlice.Close();
+                nsStreamBob.Close();
             }
         }
 

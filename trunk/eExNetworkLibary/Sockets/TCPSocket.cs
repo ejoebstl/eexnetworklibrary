@@ -129,7 +129,7 @@ namespace eExNetworkLibrary.Sockets
             r = new Random();
             lastTcpState = TCPSocketState.Closed;
             tcpState = TCPSocketState.Closed;
-            MaximumSegmentSize = 1450;
+            MaximumSegmentSize = 1400;
             tcpFrameStore = new List<TCPFrame>();
             tcpRetransmissionQueue = new TCPRetransmissionQueue(Transmit, HandleTransmissionFailure);
         }
@@ -201,7 +201,7 @@ namespace eExNetworkLibrary.Sockets
             tcb.SND_WL2 = 0;
             tcb.ISS = (uint)r.Next();
             tcb.RCV_NXT = 0;
-            tcb.RCV_WND = 1300;
+            tcb.RCV_WND = 13000;
             tcb.RCV_UP = 0;
             tcb.IRS = 0;
         }
@@ -221,12 +221,19 @@ namespace eExNetworkLibrary.Sockets
 
         public override void Close()
         {
-            CloseAsync();
-
-            areClosed.WaitOne();
+            BeginClose(); 
+            EndClose();
         }
 
-        public void CloseAsync()
+        public void EndClose()
+        {
+            if (tcpState != TCPSocketState.TimeWait && tcpState != TCPSocketState.Closed)
+            {
+                areClosed.WaitOne();
+            }
+        }
+
+        public void BeginClose()
         {
             if (tcpState != TCPSocketState.TimeWait && tcpState != TCPSocketState.Closed)
             {
@@ -1077,7 +1084,7 @@ namespace eExNetworkLibrary.Sockets
                     case TCPSocketState.Established:
 
                         rbSendBuffer.Write(bData, 0, bData.Length);
-                        if (bPush || rbSendBuffer.Length >= tcb.SND_WND)
+                        if (bPush || rbSendBuffer.Count >= tcb.SND_WND)
                         {
                             Flush();
                         }

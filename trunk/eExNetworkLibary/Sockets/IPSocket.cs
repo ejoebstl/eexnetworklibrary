@@ -259,8 +259,10 @@ namespace eExNetworkLibrary.Sockets
                     InvokeFrameEncapsulated(fFragment, bPush);
                 }
             }
-
-            throw new ArgumentException("Only IPv4 and IPv6 addresses are supportet on the moment.");
+            else
+            {
+                throw new ArgumentException("Only IPv4 and IPv6 addresses are supportet on the moment.");
+            }
 
         }
         /// <summary>

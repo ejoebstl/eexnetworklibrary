@@ -55,7 +55,8 @@ namespace eExNetworkLibrary.Sockets
         /// <param name="bPseudoHeader">The layer 3 pseudeo header to calculate the checksum with</param>
         public TCPListenerSocket(int iSourcePort, int iDestinationPort, IPseudoHeaderSource pseudoHaaderSource)
         {
-            oTCBLock = new object(); RemoteBinding = iSourcePort;
+            oTCBLock = new object(); 
+            RemoteBinding = iSourcePort;
             LocalBinding = iDestinationPort;
             this.pseudoHeaderSource = pseudoHaaderSource;
             TCPState = TCPSocketState.Closed;
@@ -110,7 +111,7 @@ namespace eExNetworkLibrary.Sockets
             {
                 if (bMyChecksum[iC1] != bReceivedChecksum[iC1])
                 {
-                    //If the checksum is diffrent, return.
+                    //If the checksum is different, return.
                     return true;
                 }
             }
@@ -210,7 +211,7 @@ namespace eExNetworkLibrary.Sockets
                 {
                     tcb.RCV_NXT += (uint)tcpFrameStore[0].EncapsulatedFrame.Length;
                     InvokeFrameDecapsulated(tcpFrameStore[0].EncapsulatedFrame, tcpFrame.PushFlagSet || tcpFrame.FinishFlagSet);
-                    System.Diagnostics.Debug.WriteLine(tcpFrameStore[0].EncapsulatedFrame.Length + "bytes of data pushed.");
+                    System.Diagnostics.Debug.WriteLine(tcpFrameStore[0].EncapsulatedFrame.Length + "bytes of data pushed. (From " + this.RemoteBinding + " to "+  this.LocalBinding + " at socket " + this.ChildSocket.BindingInformation.ToString());
                     tcpFrameStore.RemoveAt(0);
                 }
                 else

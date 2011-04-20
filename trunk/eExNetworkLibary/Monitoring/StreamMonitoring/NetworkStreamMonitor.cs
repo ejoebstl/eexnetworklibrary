@@ -49,8 +49,8 @@ namespace eExNetworkLibrary.Monitoring.StreamMonitoring
             {
                 InvokeExternal(LoopError, new ExceptionEventArgs(ex, DateTime.Now));
             }
-            InvokeExternal(LoopClosed);
             bIsRunning = false;
+            InvokeExternal(LoopClosed);
         }
 
 
@@ -77,7 +77,6 @@ namespace eExNetworkLibrary.Monitoring.StreamMonitoring
                 bSouldRun = false;
                 nsInput.Close();
                 tWorker.Join();
-                nsInput = null;
             }
         }
 
@@ -85,6 +84,7 @@ namespace eExNetworkLibrary.Monitoring.StreamMonitoring
         {
             if (bSouldRun)
             {
+                bSouldRun = false;
                 nsInput.Close();
             }
         }

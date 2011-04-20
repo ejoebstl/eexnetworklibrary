@@ -96,7 +96,7 @@ namespace eExNetworkLibrary.IP
                 this.ipoOptions = new IPv4Options();
             }
 
-            Encapsulate(bRaw, iHeaderLength);
+            Encapsulate(bRaw, iHeaderLength, iTotalLength - iHeaderLength);
         }
 
         /// <summary>

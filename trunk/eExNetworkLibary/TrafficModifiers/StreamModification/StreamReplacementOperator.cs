@@ -48,12 +48,12 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification
             MemoryStream msBuffer = new MemoryStream();
 
             int iData;
-            while (this.bIsRunning)
+            while (bSouldRun)
             {
                 iData = sIn.ReadByte();
                 if (iData != -1)
                 {
-                    if(ReplacementRule != null && ReplacementRule.DataToFind.Length != 0 && iData == ReplacementRule.DataToFind[iHitCounter] && (EnableBuffering || !sIn.IsPush))
+                    if (ReplacementRule != null && ReplacementRule.DataToFind.Length != 0 && iData == ReplacementRule.DataToFind[iHitCounter] && (EnableBuffering || !sIn.IsPush))
                     {
                         msBuffer.WriteByte((byte)iData);
                         iHitCounter++;
@@ -74,12 +74,16 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification
                             msBuffer.Position = 0;
                             iHitCounter = 0;
                         }
-                        sOut.WriteByte((byte)iData); 
+                        sOut.WriteByte((byte)iData);
                         if (sIn.IsPush)
                         {
                             sOut.Flush(); //Flush. Ok?
                         }
                     }
+                }
+                else
+                {
+                    break;
                 }
             }
         }
