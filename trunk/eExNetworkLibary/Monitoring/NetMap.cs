@@ -11,7 +11,7 @@ namespace eExNetworkLibrary.Monitoring
     /// <summary>
     /// This class provides capability of building network graphs by analyzing traffic
     /// </summary>
-    public class NetMap : CommonTrafficAnalysis.TrafficAnalyzer
+    public class NetMap : Monitoring.TrafficAnalyzer
     {
         private List<Host> lHosts;
         private List<Host> lDataLinkDistributors;

@@ -144,15 +144,6 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification
         {
             Dispose();
         }
-
-        #region Debug
-
-        public long AliceOutputBytes { get; protected set; }
-        public long AliceInputBytes { get; protected set; }
-        public long BobOutputBytes { get; protected set; }
-        public long BobInputBytes { get; protected set; }
-
-        #endregion
     }
 
     public class NetworkStreamModifierException : Exception

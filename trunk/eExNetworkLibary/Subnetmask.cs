@@ -21,7 +21,6 @@ namespace eExNetworkLibrary
             get { return bSubnetMask; }
             set
             {
-                Check(value);
                 bSubnetMask = value;
             }
         }
@@ -71,7 +70,6 @@ namespace eExNetworkLibrary
         /// <param name="bMaskBytes">The value to assign to the subnetmask. This value will be copied.</param>
         public Subnetmask(byte[] bMaskBytes)
         {
-            Check(bMaskBytes);
             if (bMaskBytes.Length != 4 && bMaskBytes.Length != 16) throw new ArgumentException("Only IPv4 or IPv6 subnet masks with four or sixteen bytes length are supported");
             bSubnetMask = new byte[bMaskBytes.Length];
             bMaskBytes.CopyTo(bSubnetMask, 0);

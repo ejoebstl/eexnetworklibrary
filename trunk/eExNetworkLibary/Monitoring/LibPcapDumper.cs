@@ -4,7 +4,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace eExNetworkLibrary.CommonTrafficAnalysis
+namespace eExNetworkLibrary.Monitoring
 {
     /// <summary>
     /// This class is capable of dumping frames in the LibCap dumping format which can be read by wireshark and other protocol analyzers.
@@ -13,7 +13,7 @@ namespace eExNetworkLibrary.CommonTrafficAnalysis
     /// This feature requires wireshark to be installed on the executing host.
     /// </remarks>
     /// </summary>
-    public class LibCapDumper : TrafficAnalyzer
+    public class LibPcapDumper : TrafficAnalyzer
     {
         Stream sFilestream;
         BinaryWriter bw;
@@ -87,7 +87,7 @@ namespace eExNetworkLibrary.CommonTrafficAnalysis
         /// <summary>
         /// Creates a new instance of this class
         /// </summary>
-        public LibCapDumper()
+        public LibPcapDumper()
         {
             strFileName = "";
         }

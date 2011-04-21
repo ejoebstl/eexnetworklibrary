@@ -7,7 +7,7 @@ using System.Timers;
 using eExNetworkLibrary.Utilities;
 using eExNetworkLibrary.Ethernet;
 using eExNetworkLibrary.ARP;
-using eExNetworkLibrary.CommonTrafficAnalysis;
+using eExNetworkLibrary.Monitoring;
 
 namespace eExNetworkLibrary.Attacks.Spoofing
 {

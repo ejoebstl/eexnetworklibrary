@@ -111,8 +111,13 @@
     <Compile Include="Sockets\TCPSocket.cs" />
     <Compile Include="Sockets\UDPSocket.cs" />
     <Compile Include="TrafficModifiers\HTTPStreamModifier.cs" />
-    <Compile Include="TrafficModifiers\StreamModification\HTTPStreamOperator.cs" />
-    <Compile Include="TrafficModifiers\StreamModification\HTTPStreamReplacementOperator.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\Actions\ImageAction.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\Actions\ImageFlipper.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\Conditions\HeaderCondition.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\HTTPStreamModifierAction.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\HTTPStreamModifierCondition.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\HTTPStreamOperator.cs" />
+    <Compile Include="TrafficModifiers\StreamModification\HTTP\HTTPStreamModifierOperator.cs" />
     <Compile Include="TrafficModifiers\TextStreamModifier.cs" />
     <Compile Include="TrafficModifiers\StreamModification\NetworkStreamModifier.cs" />
     <Compile Include="TrafficModifiers\StreamModification\StreamReplacementOperator.cs" />
@@ -177,7 +182,7 @@
     <Compile Include="Simulation\DelayJitter.cs" />
     <Compile Include="Simulation\WANEmulator.cs" />
     <Compile Include="TLVItem.cs" />
-    <Compile Include="CommonTrafficAnalysis\LibCapDumper.cs" />
+    <Compile Include="Monitoring\LibPcapDumper.cs" />
     <Compile Include="DirectInterfaceIOHandler.cs" />
     <Compile Include="TrafficModifiers\TCPStreamModifier.cs" />
     <Compile Include="TrafficSplitting\TrafficSplitter.cs" />
@@ -185,7 +190,7 @@
     <Compile Include="Utilities\RingBuffer.cs" />
     <Compile Include="Utilities\SystemRouteQuery.cs" />
     <Compile Include="Threading\WorkItem.cs" />
-    <Compile Include="CommonTrafficAnalysis\TrafficAnalyzer.cs" />
+    <Compile Include="Monitoring\TrafficAnalyzer.cs" />
     <Compile Include="TrafficDescriptionFrame.cs" />
     <Compile Include="TrafficHandler.cs" />
     <Compile Include="TrafficModifiers\TrafficModifier.cs" />
