@@ -152,7 +152,7 @@ namespace eExNetworkLibrary.TrafficSplitting
             {
                 foreach (TrafficSplitterRule tsr in tsrRules)
                 {
-                    if (tsr.IsMatch(ethFrame, ipv4Frame, udpFrame, tcpFrame))
+                    if (tsr.IsMatch(fInputFrame, ethFrame, ipv4Frame, udpFrame, tcpFrame))
                     {
                         if (tsr.Action == TrafficSplitterActions.SendToA)
                         {

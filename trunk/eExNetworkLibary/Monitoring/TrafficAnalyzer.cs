@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace eExNetworkLibrary.CommonTrafficAnalysis
+namespace eExNetworkLibrary.Monitoring
 {
     /// <summary>
     /// This class represents the superclass of all traffic analyzers.

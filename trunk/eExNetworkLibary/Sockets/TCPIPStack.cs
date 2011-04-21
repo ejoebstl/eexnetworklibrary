@@ -182,7 +182,7 @@ namespace eExNetworkLibrary.Sockets
             }
         }
 
-        internal void ConnectAsync()
+        public void ConnectAsync()
         {
             tcpSocket.ConnectAsync();
         }

@@ -6,7 +6,7 @@ using System.ComponentModel;
 using eExNetworkLibrary.Threading;
 using System.Net;
 using eExNetworkLibrary.Utilities;
-using eExNetworkLibrary.CommonTrafficAnalysis;
+using eExNetworkLibrary.Monitoring;
 using eExNetworkLibrary.IP;
 using eExNetworkLibrary.Ethernet;
 
