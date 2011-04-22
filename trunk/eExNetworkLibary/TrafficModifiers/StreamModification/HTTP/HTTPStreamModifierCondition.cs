@@ -71,6 +71,8 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification.HTTP
         /// <param name="httpMessage">The HTTP message to match</param>
         public virtual bool IsMatch(HTTPMessage httpMessage)
         {
+            bool bResult = false;
+
             lock (lChildRules)
             {
                 if (lChildRules.Count == 0)
@@ -81,12 +83,12 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification.HTTP
                 {
                     if (htCondition.IsMatch(httpMessage))
                     {
-                        return true;
+                        bResult = true;
                     }
                 }
             }
 
-            return false;
+            return bResult;
         }
 
         /// <summary>

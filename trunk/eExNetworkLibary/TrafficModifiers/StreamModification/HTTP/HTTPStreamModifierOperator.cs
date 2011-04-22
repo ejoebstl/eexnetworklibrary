@@ -44,10 +44,9 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification.HTTP
                 }
             }
 
-            string strContentType = httpMessage.Headers["Content-Type"][0].Value.ToLower();
             string strContentEncoding = null;
 
-            if (httpMessage.Headers.Contains("Content-Type") && httpMessage.Headers.Contains("Content-Length"))
+            if (httpMessage.Headers.Contains("Content-Length"))
             {
                 if (httpMessage.Headers.Contains("Content-Encoding"))
                 {
@@ -95,8 +94,18 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification.HTTP
                 }
             }
 
-            httpMessage.Headers["Content-Length"][0].Value = bPayload.Length.ToString();
-            httpMessage.Payload = bPayload;
+            if (bPayload.Length != 0)
+            {
+                if (httpMessage.Headers.Contains("Content-Length"))
+                {
+                    httpMessage.Headers["Content-Length"][0].Value = bPayload.Length.ToString();
+                }
+                else
+                {
+                    httpMessage.Headers.Add(new HTTPHeader("Content-Length", bPayload.Length.ToString()));
+                }
+                httpMessage.Payload = bPayload;
+            }
 
             return httpMessage;
         }
