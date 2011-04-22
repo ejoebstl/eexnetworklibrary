@@ -11,6 +11,9 @@ namespace eExNetworkLibrary.TrafficModifiers
     {
         List<HTTPStreamModifierAction> lActions;
 
+        public event EventHandler<HTTPStreamModifierActionEventArgs> ActionAdded;
+        public event EventHandler<HTTPStreamModifierActionEventArgs> ActionRemoved;
+
         /// <summary>
         /// Gets or sets the HTTP port to use.
         /// </summary>
@@ -24,9 +27,10 @@ namespace eExNetworkLibrary.TrafficModifiers
         /// Adds an action to this modifier.
         /// </summary>
         /// <param name="aAction"></param>
-        public void AddActions(HTTPStreamModifierAction aAction)
+        public void AddAction(HTTPStreamModifierAction aAction)
         {
             lActions.Add(aAction);
+            InvokeExternalAsync(ActionAdded, new HTTPStreamModifierActionEventArgs(aAction));
         }
 
         /// <summary>
@@ -36,6 +40,7 @@ namespace eExNetworkLibrary.TrafficModifiers
         public void RemoveAction(HTTPStreamModifierAction aAction)
         {
             lActions.Remove(aAction);
+            InvokeExternalAsync(ActionRemoved, new HTTPStreamModifierActionEventArgs(aAction));
         }
 
         /// <summary>
@@ -70,6 +75,7 @@ namespace eExNetworkLibrary.TrafficModifiers
         public HTTPStreamModifier()
         {
             HTTPPort = 80;
+            lActions = new List<HTTPStreamModifierAction>();
         }
 
         protected HTTPStreamModifierAction[] GetClonedActions()
@@ -93,6 +99,16 @@ namespace eExNetworkLibrary.TrafficModifiers
         protected override bool ShouldIntercept(IPAddress ipaSource, IPAddress ipaDestination, int iSourcePort, int iDestinationPort)
         {
             return iSourcePort == HTTPPort || iDestinationPort == HTTPPort;
+        }
+    }
+
+    public class HTTPStreamModifierActionEventArgs : EventArgs
+    {
+        public HTTPStreamModifierAction Action { get; private set; }
+
+        public HTTPStreamModifierActionEventArgs(HTTPStreamModifierAction htAction)
+        {
+            Action = htAction;
         }
     }
 }

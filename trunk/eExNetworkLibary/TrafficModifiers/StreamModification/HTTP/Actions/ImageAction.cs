@@ -26,7 +26,8 @@ namespace eExNetworkLibrary.TrafficModifiers.StreamModification.HTTP.Actions
                 bResult = httpMessage.Headers["Content-Type"][0].Value.ToLower().Contains("image");
             }
 
-            return bResult && base.IsMatch(httpMessage);
+            bool bBaseResult = base.IsMatch(httpMessage);
+            return bResult && bBaseResult;
         }
 
         public override HTTPMessage ApplyAction(HTTPMessage httpMessage)
