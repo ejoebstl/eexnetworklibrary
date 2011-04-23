@@ -11,7 +11,13 @@ using System.Net.NetworkInformation;
 namespace eExNetworkLibrary
 {
     /// <summary>
-    /// This class represents an physical IP interface of a computer.
+    /// The IPInterface class provides an abstract base for interface 
+    /// implementations like the Ethernet interface. 
+    /// Interfaces are not supposed to use the OutputHandler, 
+    /// instead they provide a PacketCaptured event. 
+    /// When this event is invoked, each event handler receives a 
+    /// separate copy of the captured frame. This means, multiple handlers of the type DirectInterfaceIO
+    /// can be attached to an IPInterface. 
     /// </summary>
     public abstract class IPInterface : TrafficHandler
     {

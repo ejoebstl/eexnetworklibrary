@@ -10,7 +10,9 @@ using eExNetworkLibrary.IP;
 namespace eExNetworkLibrary
 {
     /// <summary>
-    /// This class represents a traffic handler which is capable of receiving and forwarding traffic directly from an interface and to other traffic handlers.
+    /// This class represents a traffic handler which is capable of
+    /// receiving and forwarding traffic directly from an interface and to other 
+    /// traffic handlers.
     /// </summary>
     public class DirectInterfaceIOHandler : TrafficHandler
     {

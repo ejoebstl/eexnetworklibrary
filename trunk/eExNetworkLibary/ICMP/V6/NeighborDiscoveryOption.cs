@@ -4,19 +4,32 @@ using System.Text;
 
 namespace eExNetworkLibrary.ICMP.V6
 {
+    /// <summary>
+    /// Provides a NeighborDiscoveryOption Frame for ICMPv6 ND
+    /// </summary>
     public class NeighborDiscoveryOption : Frame
     {
         public NeighborDiscoveryOptionType OptionType { get; set; }
         public byte[] OptionData { get; set; }
 
+        /// <summary>
+        /// Returns ICMPv6NeighborDiscoveryOption
+        /// </summary>
         public static string DefaultFrameType { get { return "ICMPv6NeighborDiscoveryOption"; } }
 
+        /// <summary>
+        /// Creates a new, empty instance of this class.
+        /// </summary>
         public NeighborDiscoveryOption()
         {
             OptionType = NeighborDiscoveryOptionType.TargetLinkLayerAddress;
             OptionData = new byte[0];
         }
 
+        /// <summary>
+        /// Creates a new instance of this class from the given bytes.
+        /// </summary>
+        /// <param name="bData">The bytes to create the data from.</param>
         public NeighborDiscoveryOption(byte[] bData)
         {
             int iOptionType = bData[0];
@@ -40,11 +53,17 @@ namespace eExNetworkLibrary.ICMP.V6
  
         }
 
+        /// <summary>
+        /// Returns ICMPv6NeighborDiscoveryOption
+        /// </summary>
         public override string FrameType
         {
             get { return NeighborDiscoveryOption.DefaultFrameType; }
         }
 
+        /// <summary>
+        /// Returns this neighbor discovery option and its encapsulated frame, converted to raw bytes.
+        /// </summary>
         public override byte[] FrameBytes
         {
             get 
@@ -65,11 +84,18 @@ namespace eExNetworkLibrary.ICMP.V6
             }
         }
 
+        /// <summary>
+        /// Gets the length of this neighbor discovery option and the encapsulated frame.
+        /// </summary>
         public override int Length
         {
             get { return 2 + OptionData.Length + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
         }
 
+        /// <summary>
+        /// Returns a copy of this frame.
+        /// </summary>
+        /// <returns></returns>
         public override Frame Clone()
         {
             throw new NotImplementedException();

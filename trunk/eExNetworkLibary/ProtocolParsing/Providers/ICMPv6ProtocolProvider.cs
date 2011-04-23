@@ -27,9 +27,21 @@ namespace eExNetworkLibrary.ProtocolParsing.Providers
             if (fFrame.FrameType == this.Protocol)
             {
                 return fFrame;
+            } 
+            
+            ICMPv6Frame icmpFrame = new ICMPv6Frame(fFrame.FrameBytes);
+
+            switch (icmpFrame.ICMPv6Type)
+            {
+                case ICMPv6Type.NeighborAdvertisement:
+                    icmpFrame.EncapsulatedFrame = new NeighborAdvertisment(icmpFrame.EncapsulatedFrame.FrameBytes);
+                    break;
+                case ICMPv6Type.NeighborSolicitation:
+                    icmpFrame.EncapsulatedFrame = new NeighborSolicitation(icmpFrame.EncapsulatedFrame.FrameBytes);
+                    break;
             }
 
-            return new ICMPv6Frame(fFrame.FrameBytes);
+            return icmpFrame;
         }
 
         public string PayloadType(Frame fFrame)

@@ -5,16 +5,30 @@ using System.Net;
 
 namespace eExNetworkLibrary.IP.V6
 {
+    /// <summary>
+    /// This class represents an IPv6 routing extension header.
+    /// </summary>
     public class RoutingExtensionHeader : ExtensionHeader
     {
+        /// <summary>
+        /// Returns FrameTypes.IPv6Route
+        /// </summary>
         public static string DefaultFrameType { get { return FrameTypes.IPv6Route; } }
 
         private List<IPAddress> lAddresses;
 
+        /// <summary>
+        /// Gets or sets the value of the RoutingType field
+        /// </summary>
         public byte RoutingType { get; set; }
+        /// <summary>
+        /// Gets or sets the value of the SegmentsLeft field
+        /// </summary>
         public byte SegmentsLeft { get; set; }
 
-
+        /// <summary>
+        /// Creates a new, empty instance of this class
+        /// </summary>
         public RoutingExtensionHeader() 
             : base(new byte[1])
         {
@@ -23,6 +37,10 @@ namespace eExNetworkLibrary.IP.V6
             lAddresses = new List<IPAddress>();
         }
 
+        /// <summary>
+        /// Creates a new instance of this class from the given bytes.
+        /// </summary>
+        /// <param name="bData">The byte data to parse.</param>
         public RoutingExtensionHeader(byte[] bData) 
             : base(bData)
         {
@@ -39,7 +57,7 @@ namespace eExNetworkLibrary.IP.V6
             byte[] bAddressData = new byte[16];
             lAddresses = new List<IPAddress>();
 
-            //Counting in 16 bin hops
+            //Counting in 16 bit hops
             for (int iC1 = 0; iC1 < iLen; iC1 = iC1 + 2)
             {
                 Array.Copy(bData, 8 + (8 * iC1), bAddressData, 0, 16);
@@ -49,6 +67,10 @@ namespace eExNetworkLibrary.IP.V6
             Encapsulate(bData, Length);
         }
 
+        /// <summary>
+        /// Adds an address to this routing extension header.
+        /// </summary>
+        /// <param name="ipaAddress">The address to add.</param>
         public void AddAddress(IPAddress ipaAddress)
         {
             if (ipaAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
@@ -63,6 +85,9 @@ namespace eExNetworkLibrary.IP.V6
             lAddresses.Add(ipaAddress);
         }
 
+        /// <summary>
+        /// Gets the count of addresses, currently contained by this routing extension header.
+        /// </summary>
         public int AddressCount { get { return lAddresses.Count; } }
 
         public void RemoveAddress(IPAddress ipa)
@@ -70,21 +95,36 @@ namespace eExNetworkLibrary.IP.V6
             lAddresses.Remove(ipa);
         }
 
+        /// <summary>
+        /// Gets a bool indicating whether a specific address is contained in this routing extension header.
+        /// </summary>
+        /// <param name="ipa">The address to check for.</param>
+        /// <returns>A bool indicating whether a specific address is contained in this routing extension header.</returns>
         public bool ContainsAddress(IPAddress ipa)
         {
             return lAddresses.Contains(ipa);
         }
 
+        /// <summary>
+        /// Gets all addresses contained in this routing extension header.
+        /// </summary>
+        /// <returns>All addresses contained in this routing extension header.</returns>
         public IPAddress[] GetAddresses()
         {
             return lAddresses.ToArray();
         }
 
+        /// <summary>
+        /// Returns FrameTypes.IPv6Route
+        /// </summary>
         public override string FrameType
         {
             get { return DefaultFrameType; }
         }
 
+        /// <summary>
+        /// Returns this frame and it's encapsulated data, converted to raw bytes
+        /// </summary>
         public override byte[] FrameBytes
         {
             get
@@ -111,12 +151,18 @@ namespace eExNetworkLibrary.IP.V6
             }
         }
 
+        /// <summary>
+        /// Gets the length of this frame and the encapsulated frame.
+        /// </summary>
         public override int Length
         {
             get { return 8 + (lAddresses.Count * 16) + (fEncapsulatedFrame != null ? fEncapsulatedFrame.Length : 0); }
         }
 
-
+        /// <summary>
+        /// Returns a copy of this frame.
+        /// </summary>
+        /// <returns>A copy of this frame</returns>
         public override Frame Clone()
         {
             return new RoutingExtensionHeader(this.FrameBytes);

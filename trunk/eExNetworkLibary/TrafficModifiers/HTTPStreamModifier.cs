@@ -7,6 +7,7 @@ using eExNetworkLibrary.TrafficModifiers.StreamModification.HTTP;
 
 namespace eExNetworkLibrary.TrafficModifiers
 {
+    [Obsolete("This class is marked as an experimental preview and not fully functional at the moment.", false)]
     public class HTTPStreamModifier : TCPStreamModifier
     {
         List<HTTPStreamModifierAction> lActions;

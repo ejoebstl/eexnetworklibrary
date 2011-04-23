@@ -6,26 +6,51 @@ using eExNetworkLibrary.Sockets;
 
 namespace eExNetworkLibrary.Monitoring.StreamMonitoring
 {
+    /// <summary>
+    /// This class provides a base for network stream monitoring.<br /> 
+    /// If you implement your own base class, you have to also implement a class which inherits
+    /// eExNetworkLibrary.Monitoring.TCPStreamMonitor and to submit your base class in the 
+    /// CreateAndLinkStreamMonitors(NetworkStream nsAlice, NetworkStream nsBob) method.
+    /// </summary>
     public abstract class NetworkStreamMonitor : RunningObject
     {
         Thread tWorker;
         NetworkStream nsInput;
 
+        /// <summary>
+        /// This event is fired when a loop terminates due to an error.
+        /// </summary>
         public event eExNetworkLibrary.TrafficHandler.ExceptionEventHandler LoopError;
+        /// <summary>
+        /// This event is fired when a loop terminates.
+        /// </summary>
         public event EventHandler LoopClosed;
 
+        /// <summary>
+        /// Gets the input stream of this stream monitor.
+        /// </summary>
         protected NetworkStream InputStream
         {
             get { return nsInput; }
         }
 
+        /// <summary>
+        /// When overriden by a derived class, must return a description of the stream monitor. 
+        /// </summary>
         public abstract string Description { get; }
 
-        public NetworkStreamMonitor(NetworkStream nsInput)
+        /// <summary>
+        /// Initializes this class.
+        /// </summary>
+        /// <param name="nsInput">The input stream of this monitor.</param>
+        protected NetworkStreamMonitor(NetworkStream nsInput)
         {
             this.nsInput = nsInput;
         }
 
+        /// <summary>
+        /// Starts the monitor's working thread.
+        /// </summary>
         public override void Start()
         {
             CheckDisposed();
@@ -60,16 +85,25 @@ namespace eExNetworkLibrary.Monitoring.StreamMonitoring
         /// </summary>
         protected abstract void Run();
 
+        /// <summary>
+        /// Throws an InvalidOperationException.
+        /// </summary>
         public override void Pause()
         {
             throw new InvalidOperationException("Pausing a stream monitor is not supported.");
         }
 
+        /// <summary>
+        /// Calls Stop();
+        /// </summary>
         public override void Dispose()
         {
             Stop();
         }
 
+        /// <summary>
+        /// Closes the input stream and terminates the worker thread.
+        /// </summary>
         public override void Stop()
         {
             if (bSouldRun)
@@ -80,6 +114,9 @@ namespace eExNetworkLibrary.Monitoring.StreamMonitoring
             }
         }
 
+        /// <summary>
+        /// Closes the input stream and terminates the worker thread asynchronously. 
+        /// </summary>
         public void StopAsync()
         {
             if (bSouldRun)
@@ -89,6 +126,9 @@ namespace eExNetworkLibrary.Monitoring.StreamMonitoring
             }
         }
 
+        /// <summary>
+        /// Closes the input stream and terminates the worker thread.
+        /// </summary>
         ~NetworkStreamMonitor()
         {
             Dispose();
