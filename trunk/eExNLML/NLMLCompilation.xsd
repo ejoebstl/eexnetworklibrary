@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NLMLCompilation"
+    targetNamespace="NLMLCompilation.xsd"
+    elementFormDefault="qualified"
+    xmlns="NLMLCompilation.xsd"
+    xmlns:nlml="NLMLCompilation.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <!--NetLab File Definition-->
+  <xs:element name="nlmlCompilation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:interface" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:handler" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:link" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:config" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Configuration Property Element Definition-->
+  <xs:element name="configurationProperty">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:configurationProperty"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Custom Property Element Definition-->
+  <xs:element name="customProperty">
+    <xs:complexType mixed="true">
+      <xs:attribute name="name" type="xs:string" use="required" />
+      <xs:attribute name="type" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Interface Element Definition-->
+  <xs:element name="interface">
+    <xs:complexType>
+      <xs:attribute name="systemName" type="xs:string" use="required" />
+      <xs:attribute name="systemGUID" type="xs:string" use="required" />
+      <xs:attribute name="name" type="xs:string" use="required" />
+      <xs:attribute name="key" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Handler Element Definition-->
+  <xs:element name="handler">
+    <xs:complexType>
+      <xs:attribute name="name" type="xs:string" use="required" />
+      <xs:attribute name="key" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Link Element Definition-->
+  <xs:element name="link">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="2" maxOccurs="2" ref="nlml:port" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Port Element Definition-->
+  <xs:element name="port">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="handlerName" type="xs:string" use="required" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <!--Configuratoin Element Definition-->
+  <xs:element name="config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:configurationProperty" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:customProperty" />
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+</xs:schema>

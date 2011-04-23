@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NLMLPluginDescription"
+    targetNamespace="NLMLPluginDescription.xsd"
+    elementFormDefault="qualified"
+    xmlns="NLMLPluginDescription.xsd"
+    xmlns:nlml="NLMLPluginDescription.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <!--Plugin List Element Definition-->
+  <xs:element name="pluginList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="nlml:error" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:plugin" />
+      </xs:sequence>
+      <xs:attribute name="listName" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Error Element Definition-->
+  <xs:element name="error">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="message" type="xs:string"/>
+      </xs:sequence>
+      <xs:attribute name="error" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Plugin Element Definition-->
+  <xs:element name="plugin">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="name" type="xs:string"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="description" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="author" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="weblink" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="version" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="type" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="file" type="xs:string"/>
+      </xs:sequence>
+      <xs:attribute name="key" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
+  <!--Request Element Definition-->
+  <xs:element name="request">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="requestedPlugIn" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
