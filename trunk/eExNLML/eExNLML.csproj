@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{23C2E6AE-F145-4A91-843C-710C6CF838A9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>eExNLML</RootNamespace>
+    <AssemblyName>eExNLML</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\eExNLML.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\eExNLML.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DefaultControllers\APRAttackController.cs" />
+    <Compile Include="DefaultControllers\ARPScannerController.cs" />
+    <Compile Include="DefaultControllers\CodeLabController.cs" />
+    <Compile Include="DefaultControllers\ConditionalTrafficSplitterController.cs" />
+    <Compile Include="DefaultControllers\HTTPStreamModifierController.cs" />
+    <Compile Include="DefaultControllers\TextStreamModifierController.cs" />
+    <Compile Include="DefaultControllers\DHCPServerController.cs" />
+    <Compile Include="DefaultControllers\DHCPSpooferController.cs" />
+    <Compile Include="DefaultControllers\DirectInterfaceIOController.cs" />
+    <Compile Include="DefaultControllers\DNSOTFSpooferController.cs" />
+    <Compile Include="DefaultControllers\DNSQueryLoggerController.cs" />
+    <Compile Include="DefaultControllers\HTTPMonitorController.cs" />
+    <Compile Include="DefaultControllers\EthernetInterfaceController.cs" />
+    <Compile Include="DefaultControllers\NATHandlerController.cs" />
+    <Compile Include="DefaultControllers\NetMapController.cs" />
+    <Compile Include="DefaultControllers\RIPRouterController.cs" />
+    <Compile Include="DefaultControllers\RouterController.cs" />
+    <Compile Include="DefaultControllers\SpeedMeterController.cs" />
+    <Compile Include="DefaultControllers\TrafficDumperController.cs" />
+    <Compile Include="DefaultControllers\TrafficSplitterController.cs" />
+    <Compile Include="DefaultControllers\WANEmulatorController.cs" />
+    <Compile Include="DefaultDefinitions\APRAttackControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\ARPScannerControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\CodeLabControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\ConditionalTrafficSplitterControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\HTTPStreamModifierControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\TextStreamModifierControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\DHCPServerControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\DHCPSpooferControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\DirectInterfaceIOControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\DNSOTFSpooferControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\DNSQueryLoggerControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\HTTPMonitorControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\EthernetInterfaceControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\NATHandlerControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\NetMapControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\RIPRouterControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\RouterControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\SpeedMeterControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\TrafficDumperControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\TrafficSplitterControlDefinition.cs" />
+    <Compile Include="DefaultDefinitions\WANEmulatorControlDefinition.cs" />
+    <Compile Include="Extensibility\ExtensionLoader.cs" />
+    <Compile Include="Extensibility\HTTPModifierActionDefinition.cs" />
+    <Compile Include="Extensibility\IHandlerController.cs" />
+    <Compile Include="Extensibility\IInterfaceFactory.cs" />
+    <Compile Include="Extensibility\HandlerController.cs" />
+    <Compile Include="Extensibility\HandlerDefinition.cs" />
+    <Compile Include="Extensibility\IHandlerDefinition.cs" />
+    <Compile Include="Extensibility\IInterfaceDefinition.cs" />
+    <Compile Include="Extensibility\IPlugin.cs" />
+    <Compile Include="Extensibility\IProtocolDefinition.cs" />
+    <Compile Include="Extensibility\PluginLoader.cs" />
+    <Compile Include="Extensibility\HTTPModifierConditionDefinition.cs" />
+    <Compile Include="Extensibility\ProtocolDefinition.cs" />
+    <Compile Include="SubPlugInDefinitions\ImageFlipperDefinition.cs" />
+    <Compile Include="SubPlugInDefinitions\RegexHeaderConditionDefinition.cs" />
+    <Compile Include="IO\ConfigurationParser.cs" />
+    <Compile Include="IO\HandlerConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\ARPSpooferConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\ConditionalTrafficSplitterConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\HTTPModifierConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\TextStreamModifierConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\DHCPServerConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\DHCPSpooferConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\DNSOnTheFlySpooferConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\DumperConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\InterfaceConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\NATHandlerConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\RIPRouterConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\RouterConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationLoaders\WANEmulatorConfigurationLoader.cs" />
+    <Compile Include="IO\HandlerConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\ARPSpooferConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\ConditionalSplitterConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\HTTPModifierConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\TextStreamModifierConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\DHCPServerConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\DHCPSpooferConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\DNSOnTheFlySpooferConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\DumperConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\InterfaceConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\NATHandlerConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\RIPRouterConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\RouterConfigurationWriter.cs" />
+    <Compile Include="IO\HandlerConfigurationWriters\WANEmulatorConfigurationWriter.cs" />
+    <Compile Include="Extensibility\ISubPlugInDefinition.cs" />
+    <Compile Include="IO\NameValueItem.cs" />
+    <Compile Include="Link.cs" />
+    <Compile Include="NetworkCompilation.cs" />
+    <Compile Include="IEnvironment.cs" />
+    <Compile Include="Extensibility\NetworkLibraryInterfaceExtensionFactory.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\PlugInDescription.cs" />
+    <Compile Include="Repository\PlugInFile.cs" />
+    <Compile Include="Repository\PlugInRepository.cs" />
+    <Compile Include="SubPlugInDefinitions\IPAddressRuleDefinition.cs" />
+    <Compile Include="SubPlugInDefinitions\PortRuleDefinition.cs" />
+    <Compile Include="Task.cs" />
+    <Compile Include="TrafficHandlerPort.cs" />
+    <Compile Include="Extensibility\TrafficSplitterRuleDefinition.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\eExNetworkLibary\eExNetworkLibrary.csproj">
+      <Project>{3693D7A0-6012-4C81-B561-286E058499AF}</Project>
+      <Name>eExNetworkLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NLMLCompilation.xsd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Repository\NLMLPluginDescription.xsd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
