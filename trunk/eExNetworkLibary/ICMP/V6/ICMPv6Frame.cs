@@ -31,22 +31,11 @@ namespace eExNetworkLibrary.ICMP.V6
         public ICMPv6Frame(byte[] bData)
             : base(bData)
         {
-            byte[] bPayloadData = new byte[bData.Length - 4];
-            Array.Copy(bData, 4, bPayloadData, 0, bPayloadData.Length);
+            Encapsulate(bData, 4);
 
             //Auto parse ICMP payload
 
-            switch (ICMPv6Type)
-            {
-                case ICMPv6Type.NeighborAdvertisement:
-                    fEncapsulatedFrame = new NeighborAdvertisment(bPayloadData);
-                    break;
-                case ICMPv6Type.NeighborSolicitation:
-                    fEncapsulatedFrame = new NeighborSolicitation(bPayloadData);
-                    break;
-                default: fEncapsulatedFrame = new RawDataFrame(bPayloadData);
-                    break;
-            }
+         
         }
         public ICMPv6Frame() : base() { }
 

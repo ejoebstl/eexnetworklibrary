@@ -27,11 +27,25 @@ namespace eExNetworkLibrary
         private List<TrafficAnalyzer> lDroppedTrafficAnalyzer;
         private Queue<TrafficHandlerWorkItem> qwiWorkItems;
         private AutoResetEvent areWorkToDo;
+        private ProtocolParser pParser;
 
         /// <summary>
-        /// Gets or sets the protocol parser of this traffic handler. By changing it, it is possible to change the way the traffic handler parses protocols.
+        /// Gets or sets the protocol parser of this traffic handler. By changing the protocol parser, it is possible to change the way the traffic handler parses protocols.
+        /// If no protocol provider is set manually manually, a default provider is created on the first call to ProtocolParser_get.
         /// </summary>
-        public virtual ProtocolParser ProtocolParser { get; set; }
+        public ProtocolParser ProtocolParser
+        {
+            get
+            {
+                if (pParser == null)
+                {
+                    pParser = new ProtocolParser();
+                }
+                return pParser;
+            }
+            set { pParser = value; }
+
+        }
 
         /// <summary>
         /// This traffic handlers default output handler. All forwarded frames will be pushed to this handlers queue. 
