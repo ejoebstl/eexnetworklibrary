@@ -1,6 +1,7 @@
 ﻿// This source file is part of the eEx Network Library
 //
 // Author: 	    Emanuel Jöbstl <emi@eex-dev.net>
+// Editors:     Michael Eisendle <kiubiq@gulli.com>
 // Weblink: 	http://network.eex-dev.net
 //		        http://eex.codeplex.com
 //
