@@ -35,6 +35,15 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>eExNetworkLibrary.xml</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NL Mono|AnyCPU' ">
+    <OutputPath>bin\NL Mono\</OutputPath>
+    <DefineConstants>TRACE;LIBPCAP</DefineConstants>
+    <DocumentationFile>eExNetworkLibrary.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />

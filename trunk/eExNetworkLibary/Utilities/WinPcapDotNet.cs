@@ -1,4 +1,14 @@
-﻿using System;
+﻿// This source file is part of the eEx Network Library
+//
+// Author: 	    Emanuel Jöbstl <emi@eex-dev.net>
+// Weblink: 	http://network.eex-dev.net
+//		        http://eex.codeplex.com
+//
+// Licensed under the GNU Library General Public License (LGPL) 
+//
+// (c) eex-dev 2007-2011
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -10,31 +20,37 @@ namespace eExNetworkLibrary.Utilities
 {
     /// <summary>
     /// This class is a managed wrapper for WinPcap, the famous packet capture library for windows.
-    /// For information about WinPcap see http://www.winpcap.org
+    /// For information about WinPcap see http://www.winpcap.org.
     /// </summary>
     public class WinPcapDotNet
     {
-        [DllImport("wpcap.dll")]
+        #if LIBPCAP
+                private const string Lib = "libpcap.so";
+        #else
+                private const string Lib = "winpcap.dll";
+        #endif
+
+        [DllImport(Lib)]
         private static extern int pcap_findalldevs(ref IntPtr piDevices, string strErrorBuffer);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern int pcap_setbuff(IntPtr iptrBuffer, int iSize);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern int pcap_next_ex(IntPtr iptrBuffer, ref IntPtr iptrHeader, ref IntPtr iptrPacket);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern IntPtr pcap_open(string source, int iSnaplen, PcapOpenflags flags, int iReadTimeOut, IntPtr pcapAuth, string strErrorBuffer);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern void pcap_close(IntPtr iptrBuffer);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern void pcap_freealldevs(IntPtr piDevices);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern int pcap_loop(IntPtr ptrDevice, int iReadTimeout, PacketHandler phCallback, string strErrorBuffer);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern int pcap_sendpacket(IntPtr ptrDevice, byte[] bPacket, int iPacketSize);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern int pcap_compile(IntPtr ptrDevice, ref WinPcapFilter.WinPcapFilterStruct wpfsFilter, string strString, int iOptimize, uint uiNetmask);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern string pcap_geterr(IntPtr ptrDevice);
-        [DllImport("wpcap.dll")]
+        [DllImport(Lib)]
         private static extern int pcap_setfilter(IntPtr ptrDevice, ref WinPcapFilter.WinPcapFilterStruct wpfFilter);
 
 
