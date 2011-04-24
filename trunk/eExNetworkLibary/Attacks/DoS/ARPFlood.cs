@@ -7,7 +7,6 @@ using System.Timers;
 using eExNetworkLibrary.Utilities;
 using eExNetworkLibrary.Ethernet;
 using eExNetworkLibrary.ARP;
-using eExNetworkLibrary.CommonTrafficAnalysis;
 
 namespace eExNetworkLibrary.Attacks.DoS
 {
