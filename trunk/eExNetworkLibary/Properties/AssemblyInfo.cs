@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("eExNetworkLibary v2")]
-[assembly: AssemblyDescription("eEx Network Libary Version 2 Programmed by Emanuel Jöbstl 2007-2010")]
+[assembly: AssemblyTitle("eExNetworkLibary v3 (Beta)")]
+[assembly: AssemblyDescription("eEx Network Libary Version 3 Programmed by Emanuel Jöbstl 2007-2010")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("eEx")]
-[assembly: AssemblyProduct("eExNetworkLibary Version 2")]
-[assembly: AssemblyCopyright("Copyright © eEx 2009")]
+[assembly: AssemblyProduct("eExNetworkLibary Version 3")]
+[assembly: AssemblyCopyright("Copyright © eEx 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.9.9.1")]
-[assembly: AssemblyFileVersion("1.9.9.1")]
+[assembly: AssemblyVersion("2.9.0.1")]
+[assembly: AssemblyFileVersion("2.9.0.1")]

@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attacks\DoS\ARPFlood.cs" />
     <Compile Include="Attacks\IAttack.cs" />
     <Compile Include="Attacks\INetworkAttack.cs" />
     <Compile Include="Attacks\ISingleHostAttack.cs" />
