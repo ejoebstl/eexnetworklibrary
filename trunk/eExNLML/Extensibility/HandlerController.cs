@@ -518,6 +518,7 @@ namespace eExNLML.Extensibility
         /// <param name="param">A param associated with the controller to create</param>
         /// <returns>The traffic handler which is defined in this plug-in</returns>
         protected abstract TrafficHandler Create(object param);
+
         /// <summary>
         /// Must create a configuration loader for the given traffic handler, which loads the configuration or null to do not support loading. 
         /// This method is called once on plugin creation.
@@ -526,6 +527,7 @@ namespace eExNLML.Extensibility
         /// <param name="param">A param associated with the controller to create</param>
         /// <returns>The configuration loader for the given traffic handler or null, if no configuration loader should be used</returns>
         protected abstract HandlerConfigurationLoader CreateConfigurationLoader(TrafficHandler h, object param);
+
         /// <summary>
         /// Must create a configuration writer for the given traffic handler, which writes the configuration or null to do not support saving. 
         /// This method is called once on plugin creation.

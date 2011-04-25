@@ -152,7 +152,7 @@
     <None Include="NLMLCompilation.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Repository\NLMLPluginDescription.xsd">
+    <None Include="NLMLPluginDescription.xsd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
