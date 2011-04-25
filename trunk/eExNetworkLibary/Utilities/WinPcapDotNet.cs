@@ -27,7 +27,7 @@ namespace eExNetworkLibrary.Utilities
         #if LIBPCAP
                 private const string Lib = "libpcap.so";
         #else
-                private const string Lib = "winpcap.dll";
+                private const string Lib = "wpcap.dll";
         #endif
 
         [DllImport(Lib)]
