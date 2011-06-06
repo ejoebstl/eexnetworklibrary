@@ -27,7 +27,7 @@ namespace eExNetworkLibrary.Attacks
         void PauseAttack();
 
         /// <summary>
-        /// Resumes the attack which was suspended ba a previous call to PauseAttack().
+        /// Resumes the attack which was suspended by a previous call to PauseAttack().
         /// </summary>
         void ResumeAttack();
     }
