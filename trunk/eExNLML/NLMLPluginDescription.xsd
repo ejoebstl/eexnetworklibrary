@@ -10,10 +10,10 @@
   <xs:element name="pluginList">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="1" ref="nlml:error" />
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:plugin" />
       </xs:sequence>
       <xs:attribute name="listName" type="xs:string" use="required" />
+      <xs:attribute name="version" type="xs:int" use="required" />
     </xs:complexType>
   </xs:element>
   
@@ -24,6 +24,7 @@
         <xs:element minOccurs="0" maxOccurs="unbounded" name="message" type="xs:string"/>
       </xs:sequence>
       <xs:attribute name="error" type="xs:string" use="required" />
+      <xs:attribute name="version" type="xs:int" use="required" />
     </xs:complexType>
   </xs:element>
   
@@ -37,7 +38,12 @@
         <xs:element minOccurs="0" maxOccurs="1" name="weblink" type="xs:string" />
         <xs:element minOccurs="0" maxOccurs="1" name="version" type="xs:string" />
         <xs:element minOccurs="0" maxOccurs="1" name="type" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="largeIcon" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="smallIcon" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="rating" type="xs:integer" />
+        <xs:element minOccurs="0" maxOccurs="1" name="downloads" type="xs:integer" />
         <xs:element minOccurs="0" maxOccurs="unbounded" name="file" type="xs:string"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="nlml:dependency"/>
       </xs:sequence>
       <xs:attribute name="key" type="xs:string" use="required" />
     </xs:complexType>
@@ -49,6 +55,20 @@
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="unbounded" name="requestedPlugIn" type="xs:string"/>
       </xs:sequence>
+      <xs:attribute name="version" type="xs:int" use="required" />
     </xs:complexType>
   </xs:element>
+
+  <!--Dependency Element Definition-->
+  <xs:element name="dependency">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" name="resourceName" type="xs:string"/>
+        <xs:element minOccurs="1" maxOccurs="1" name="dllName" type="xs:string"/>
+        <xs:element minOccurs="1" maxOccurs="1" name="resourceLink" type="xs:string"/>
+      </xs:sequence>
+      <xs:attribute name="type" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  
 </xs:schema>

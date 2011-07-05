@@ -16,13 +16,15 @@ namespace eExNLML.Repository
 {
     public class PlugInFile
     {
-        public PlugInFile(string strFileName, string strFileContents)
+        public PlugInFile(string strFileName, byte[] bFileContents, string strMimeType)
         {
             this.FileName = strFileName;
-            this.FileContents = strFileContents;
+            this.FileContents = bFileContents;
+            this.MimeType = strMimeType;
         }
 
         public string FileName { get; protected set; }
-        public string FileContents { get; protected set; }
+        public byte[] FileContents { get; protected set; }
+        public string MimeType { get; protected set; }
     }
 }
