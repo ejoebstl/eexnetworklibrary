@@ -15,7 +15,8 @@ using System.Text;
 namespace eExNetworkLibrary
 {
     /// <summary>
-    /// This class represents a simple Type-Lentgh-Value item which can be used by various protocols
+    /// This class represents a simple Type-Lentgh-Value item which can be used by various protocols.
+    /// The length of the type and the length-field is one byte.
     /// </summary>
     public class TLVItem : Frame
     {

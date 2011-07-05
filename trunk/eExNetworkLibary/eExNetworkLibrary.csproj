@@ -81,6 +81,7 @@
     <Compile Include="ICMP\V6\NeighborSolicitationMessage.cs" />
     <Compile Include="ICMP\V6\NeighborAdvertisment.cs" />
     <Compile Include="ICMP\V6\ICMPv6Type.cs" />
+    <Compile Include="Threading\InvocationHelper.cs" />
     <Compile Include="IP\IIPFrame.cs" />
     <Compile Include="IP\IPFragmenter.cs" />
     <Compile Include="IP\V6\ExtensionHeader.cs" />

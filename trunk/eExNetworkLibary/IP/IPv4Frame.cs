@@ -216,6 +216,7 @@ namespace eExNetworkLibrary.IP
         public IPv4Options Options
         {
             get { return ipoOptions; }
+            set { ipoOptions = value; }
         }
 
         /// <summary>
@@ -326,7 +327,7 @@ namespace eExNetworkLibrary.IP
         }
 
         /// <summary>
-        /// Gets or sets the total packet length in bytes
+        /// Gets the total packet length in bytes
         /// </summary>
         public int TotalPacketLength
         {
@@ -367,7 +368,7 @@ namespace eExNetworkLibrary.IP
         }
 
         /// <summary>
-        /// Gets or sets the length of this frame and its encapsulated frame in bytes
+        /// Gets the length of this frame and its encapsulated frame in bytes
         /// </summary>
         public override int Length
         {
