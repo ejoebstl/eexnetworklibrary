@@ -95,6 +95,7 @@
     <Compile Include="Extensibility\PluginLoader.cs" />
     <Compile Include="Extensibility\HTTPModifierConditionDefinition.cs" />
     <Compile Include="Extensibility\ProtocolDefinition.cs" />
+    <Compile Include="Repository\PlugInDependency.cs" />
     <Compile Include="SubPlugInDefinitions\ImageFlipperDefinition.cs" />
     <Compile Include="SubPlugInDefinitions\RegexHeaderConditionDefinition.cs" />
     <Compile Include="IO\ConfigurationParser.cs" />

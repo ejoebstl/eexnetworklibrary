@@ -28,11 +28,13 @@ namespace eExNLML.Repository
         const string XMLError = "error";
         const string XMLPlugIn = "plugin";
         const string XMLRequest = "request";
+        const string XMLProtocolVersion = "protocolVersion";
+        const int LocalVersion = 0;
 
         public PlugInRepository(Uri uriRepository)
             : this(uriRepository, null)
         {
-
+        
         }
 
         public PlugInRepository(Uri uriRepository, ICredentials credAuthentication)
@@ -65,8 +67,6 @@ namespace eExNLML.Repository
             try
             {
                 WritePlugInRequest(strPlugInKeys, sStream);
-
-                webRequest.ContentLength = sStream.Length;
             }
             finally
             {
@@ -129,7 +129,7 @@ namespace eExNLML.Repository
                 {
                     string strContentDispositionHeader = webResponse.GetResponseHeader("Content-Disposition");
                     string strFileName = "";
-                    string strContent = ""; 
+                    byte[] bContent; 
 
                     if (webResponse.StatusCode != HttpStatusCode.OK)
                     {
@@ -147,14 +147,14 @@ namespace eExNLML.Repository
 
                     Stream sContent = webResponse.GetResponseStream();
 
-                    StreamReader sReader = new StreamReader(sContent, Encoding.GetEncoding(webResponse.ContentEncoding));
+                    BinaryReader sReader = new BinaryReader(sContent);
 
-                    strContent = sReader.ReadToEnd();
+                    bContent = sReader.ReadBytes((int)sContent.Length);
 
                     sReader.Close();
                     sContent.Close();
 
-                    plFile.Add(new PlugInFile(strFileName, strContent));
+                    plFile.Add(new PlugInFile(strFileName, bContent, webRequest.MediaType));
                 }
                 finally
                 {
@@ -172,9 +172,14 @@ namespace eExNLML.Repository
             string XMLAuthor = "author";
             string XMLWebLink = "weblink";
             string XMLVersion = "version";
+            string XMLSmallIcon = "smallIcon";
+            string XMLLargeIcon = "largeIcon";
+            string XMLRating = "rating";
+            string XMLDownloads = "downloads";
             string XMLType = "type";
             string XMLFile = "file";
             string XMLKey = "key";
+            string XMLDependency = "dependency";
 
             string strName = "";
             string strKey = "";
@@ -183,8 +188,19 @@ namespace eExNLML.Repository
             string strWebLink = "";
             string strVersion = "";
             string strType = "";
+            string strSmallIcon = "";
+            string strLargeIcon = "";
+
+            string strResourceName = "";
+            string strDllName = "";
+            string strResourceLink = "";
+            DependencyType tType;
+
+            int iRating = 0;
+            int iDownloads = 0;
 
             List<string> lFiles = new List<string>();
+            List<PlugInDependency> lDependencies = new List<PlugInDependency>();
             List<PlugInDescription> lPlugInDescriptions = new List<PlugInDescription>();
 
             XmlReaderSettings xmlSettings = new XmlReaderSettings();
@@ -199,13 +215,16 @@ namespace eExNLML.Repository
             sSchema.Close();
 
             xmlSettings.Schemas.Add(xmlSchema);
-            xmlSettings.ValidationType = ValidationType.Schema;
+
+            //StreamReader strReader = new StreamReader(sStream);
+            //string strOut = strReader.ReadToEnd();
 
             XmlReader xmlReader = XmlReader.Create(sStream, xmlSettings);
 
+
             try
             {
-                while (!xmlReader.EOF)
+                while (xmlReader.Read())
                 {
                     if (xmlReader.NodeType == XmlNodeType.Element)
                     {
@@ -217,51 +236,135 @@ namespace eExNLML.Repository
                             strWebLink = "";
                             strVersion = "";
                             strType = "";
+                            strSmallIcon = "";
+                            strLargeIcon = "";
+                            iRating = 0;
 
                             strKey = xmlReader.GetAttribute(XMLKey);
 
                             lFiles.Clear();
+                            lDependencies.Clear();
                         }
                         if (xmlReader.Name == XMLName)
+                        {
+                            xmlReader.Read();
                             strName = xmlReader.Value;
-
+                        }
                         if (xmlReader.Name == XMLDescription)
+                        {
+                            xmlReader.Read();
                             strDescription = xmlReader.Value;
-
+                        }
                         if (xmlReader.Name == XMLAuthor)
+                        {
+                            xmlReader.Read();
                             strAuthor = xmlReader.Value;
-
+                        }
                         if (xmlReader.Name == XMLWebLink)
+                        {
+                            xmlReader.Read();
                             strWebLink = xmlReader.Value;
-
+                        }
                         if (xmlReader.Name == XMLVersion)
+                        {
+                            xmlReader.Read();
                             strVersion = xmlReader.Value;
-
+                        }
                         if (xmlReader.Name == XMLType)
+                        {
+                            xmlReader.Read();
                             strType = xmlReader.Value;
-
+                        }
                         if (xmlReader.Name == XMLFile)
+                        {
+                            xmlReader.Read();
                             lFiles.Add(xmlReader.Value);
-
+                        }
+                        if (xmlReader.Name == XMLRating)
+                        {
+                            xmlReader.Read();
+                            iRating = Int32.Parse(xmlReader.Value);
+                        }
+                        if (xmlReader.Name == XMLDownloads)
+                        {
+                            xmlReader.Read();
+                            iDownloads = Int32.Parse(xmlReader.Value);
+                        }
+                        if (xmlReader.Name == XMLSmallIcon)
+                        {
+                            xmlReader.Read();
+                            strSmallIcon = xmlReader.Value;
+                        }
+                        if (xmlReader.Name == XMLLargeIcon)
+                        {
+                            xmlReader.Read();
+                            strLargeIcon = xmlReader.Value;
+                        }
                         if (xmlReader.Name == XMLError)
                         {
                             string strError = xmlReader.GetAttribute("error");
+                            xmlReader.Read();
+                            xmlReader.Read();
                             string strMessage = xmlReader.Value;
 
-                            throw new Exception("The NLML repository server responed with an error. " + strError + ": " + strMessage);
+                            throw new Exception("The NLML repository server responed with error " + strError + ": " + strMessage);
+                        }
+                        if (xmlReader.Name == XMLDependency)
+                        {
+                            if (xmlReader["type"] == "e")
+                            {
+                                tType = DependencyType.Extension;
+                            }
+                            else
+                            {
+                                tType = DependencyType.Library;
+                            }
+
+                            xmlReader.Read(); xmlReader.Read();
+
+                            strResourceName = xmlReader.Value;
+
+                            xmlReader.Read(); xmlReader.Read(); xmlReader.Read();
+
+                            strDllName = xmlReader.Value;
+
+                            xmlReader.Read(); xmlReader.Read(); xmlReader.Read();
+
+                            strResourceLink = xmlReader.Value;
+
+
+                            lDependencies.Add(new PlugInDependency(strResourceName, strDllName, strResourceLink, tType));
+                        }
+
+                        if (xmlReader.Name == XMLPluginList)
+                        {
+                            int iRemoteVersion = Int32.Parse(xmlReader.GetAttribute(XMLProtocolVersion));
+                            if (iRemoteVersion != LocalVersion)
+                            {
+                                throw new InvalidOperationException("The protocol version indicated in the server response (" + iRemoteVersion.ToString()
+                                    + ") is incompatible with the local version (" + LocalVersion.ToString() + ").");
+                            }
                         }
                     }
                     if (xmlReader.NodeType == XmlNodeType.EndElement)
                     {
-                        lPlugInDescriptions.Add(
-                            new PlugInDescription(strAuthor, 
-                                strDescription, 
-                                strName, 
-                                strKey, 
-                                strType, 
-                                strWebLink, 
-                                strVersion, 
-                                lFiles.ToArray()));
+                        if (xmlReader.Name == XMLPlugIn)
+                        {
+                            lPlugInDescriptions.Add(
+                                new PlugInDescription(strAuthor,
+                                    strDescription,
+                                    strName,
+                                    strKey,
+                                    strType,
+                                    strWebLink,
+                                    strVersion,
+                                    iRating, 
+                                    iDownloads,
+                                    lFiles.ToArray(), 
+                                    strLargeIcon,
+                                    strSmallIcon,
+                                    lDependencies.ToArray()));
+                        }
                     }
                 }
             }
@@ -282,6 +385,7 @@ namespace eExNLML.Repository
         {
             string XMLRequestedPlugIn = "requestedPlugIn";
 
+
             XmlWriterSettings xmlSettings = new XmlWriterSettings();
             xmlSettings.CloseOutput = false;
             xmlSettings.Indent = true;
@@ -296,6 +400,7 @@ namespace eExNLML.Repository
                 wWriter.WriteComment(XMLComment);
 
                 wWriter.WriteStartElement(XMLRequest);
+                wWriter.WriteAttributeString(XMLProtocolVersion, LocalVersion.ToString());
                 foreach (string strPlugInToRequest in strPlugInsToRequest)
                 {
                     wWriter.WriteStartElement(XMLRequestedPlugIn);
