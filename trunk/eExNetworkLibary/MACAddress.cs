@@ -111,6 +111,44 @@ namespace eExNetworkLibrary
                    bAddressBytes[3].ToString("x02") + ":" +
                    bAddressBytes[4].ToString("x02") + ":" +
                    bAddressBytes[5].ToString("x02");
+        } 
+        /// <summary>
+        /// Converts this MACAddress into a string
+        /// </summary>
+        /// <param name="strFormat">A string specifying the format</param>
+        /// <returns>A string representing the current MACAddress</returns>
+        /// <remarks>Use ":" for the format XX:XX:XX:XX:XX, "." for the format XXXX.XXXX.XXXX and "-" for the format XX-XX-XX-XX-XX-XX where X is a hexadecimal digit</remarks>
+        public string ToString(string strFormat)
+        {
+            if (strFormat == ":")
+            {
+                return bAddressBytes[0].ToString("x02") + ":" +
+                       bAddressBytes[1].ToString("x02") + ":" +
+                       bAddressBytes[2].ToString("x02") + ":" +
+                       bAddressBytes[3].ToString("x02") + ":" +
+                       bAddressBytes[4].ToString("x02") + ":" +
+                       bAddressBytes[5].ToString("x02");
+            }
+            else if (strFormat == ".")
+            {
+                return bAddressBytes[0].ToString("x02") +
+                       bAddressBytes[1].ToString("x02") + "." +
+                       bAddressBytes[2].ToString("x02") +
+                       bAddressBytes[3].ToString("x02") + "." +
+                       bAddressBytes[4].ToString("x02") +
+                       bAddressBytes[5].ToString("x02");
+            }
+            else if (strFormat == "-")
+            {
+                return bAddressBytes[0].ToString("x02") + "-" +
+                       bAddressBytes[1].ToString("x02") + "-" +
+                       bAddressBytes[2].ToString("x02") + "-" +
+                       bAddressBytes[3].ToString("x02") + "-" +
+                       bAddressBytes[4].ToString("x02") + "-" +
+                       bAddressBytes[5].ToString("x02");
+            }
+
+            throw new FormatException("Invaild format. Format has to be \":\", \".\" or \"-\"");
         }
 
         /// <summary>
@@ -121,18 +159,51 @@ namespace eExNetworkLibrary
         public static MACAddress Parse(string strIn)
         {
             MACAddress macReturn = new MACAddress();
-            string[] strDigits = strIn.Split(':');
-
-            if (strDigits.Length != 6)
+            if (strIn.Contains(":"))
             {
-                throw new Exception("Invalid MAC address. Digits must be seperated by ':'.");
-            }
+                string[] strDigits = strIn.Split(':');
 
-            for (int iC1 = 0; iC1 < strDigits.Length; iC1++)
+                if (strDigits.Length != 6)
+                {
+                    throw new Exception("Invalid MAC address. Digits must be in the format XX:XX:XX:XX:XX:XX, XX-XX-XX-XX-XX-XX or XXXX.XXXX.XXXX where X is a hexadecimal digit.");
+                }
+
+                for (int iC1 = 0; iC1 < strDigits.Length; iC1++)
+                {
+                    macReturn.AddressBytes[iC1] = Convert.ToByte(strDigits[iC1], 16);
+                }
+            }
+            else if (strIn.Contains("-"))
             {
-                macReturn.AddressBytes[iC1] = Convert.ToByte(strDigits[iC1], 16);
-            }
+                string[] strDigits = strIn.Split('-');
 
+                if (strDigits.Length != 6)
+                {
+                    throw new Exception("Invalid MAC address. Digits must be in the format XX:XX:XX:XX:XX:XX, XX-XX-XX-XX-XX-XX or XXXX.XXXX.XXXX where X is a hexadecimal digit.");
+                }
+
+                for (int iC1 = 0; iC1 < strDigits.Length; iC1++)
+                {
+                    macReturn.AddressBytes[iC1] = Convert.ToByte(strDigits[iC1], 16);
+                }
+            }
+            else
+            {
+                string[] strDigits = strIn.Split('.');
+
+                if (strDigits.Length != 3)
+                {
+                    throw new Exception("Invalid MAC address. Digits must be in the format XX:XX:XX:XX:XX:XX, XX-XX-XX-XX-XX-XX or XXXX.XXXX.XXXX where X is a hexadecimal digit.");
+                }
+
+                for (int iC1 = 0; iC1 < strDigits.Length; iC1++)
+                {
+                    byte[] bData = BitConverter.GetBytes(Convert.ToInt16(strDigits[iC1], 16));
+
+                    macReturn.AddressBytes[iC1 * 2] = bData[0];
+                    macReturn.AddressBytes[iC1 * 2 + 1] = bData[1];
+                }
+            }
             return macReturn;
         }
 

@@ -79,70 +79,46 @@ namespace eExNetworkLibrary
         /// <summary>
         /// Invokes a delegate on any external object with the given params and waits for the invoke's completion.
         /// This method automatically determines whether dynamic invoking is possible or a invoke over the ISynchronizeInvoke interface is required.
+        /// The delegate has to be in the form Delegate(object sender, object param) for the invocation to work correctly. 
         /// </summary>
         /// <param name="d">The delgate to invoke</param>
         /// <param name="param">The params for the invocation</param>
         protected void InvokeExternal(Delegate d, object param)
         {
-            if (d != null)
-            {
-                foreach (Delegate dDelgate in d.GetInvocationList())
-                {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
-                        && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
-                    {
-                        ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).Invoke(dDelgate, new object[] { this, param });
-                    }
-                    else
-                    {
-                        dDelgate.DynamicInvoke(this, param);
-                    }
-                }
-            }
+            eExNetworkLibrary.Threading.InvocationHelper.InvokeExternal(d, param, this);
         }
 
         /// <summary>
         /// Invokes a delegate asyncronously on any external object with the given params.
         /// This method automatically determines whether dynamic invoking is possible or a invoke over the ISynchronizeInvoke interface is required.
+        /// The delegate has to be in the form Delegate(object sender, object param) for the invocation to work correctly. 
         /// </summary>
         /// <param name="d">The delgate to invoke</param>
         /// <param name="param">The params for the invocation</param>
         protected void InvokeExternalAsync(Delegate d, object param)
         {
-            if (d != null)
-            {
-                foreach (Delegate dDelgate in d.GetInvocationList())
-                {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
-                        && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
-                    {
-                        ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { this, param });
-                    }
-                    else
-                    {
-                        dDelgate.DynamicInvoke(this, param);
-                    }
-                }
-            }
+            eExNetworkLibrary.Threading.InvocationHelper.InvokeExternalAsync(d, param, this);
         }
 
         /// <summary>
         /// Invokes a delegate asyncronously on any external object with EventArgs.Empty as params.
         /// This method automatically determines whether dynamic invoking is possible or a invoke over the ISynchronizeInvoke interface is required.
+        /// The delegate has to be in the form Delegate(object sender, object param) for the invocation to work correctly. 
         /// </summary>
         /// <param name="d">The delgate to invoke</param>
         protected void InvokeExternalAsync(Delegate d)
         {
-            InvokeExternalAsync(d, EventArgs.Empty);
+            eExNetworkLibrary.Threading.InvocationHelper.InvokeExternalAsync(d, this);
         }
         /// <summary>
         /// Invokes a delegate on any external object with EventArgs.Empty as params and waits for the invoke's completion.
         /// This method automatically determines whether dynamic invoking is possible or a invoke over the ISynchronizeInvoke interface is required.
+        /// The delegate has to be in the form Delegate(object sender, object param) for the invocation to work correctly. 
         /// </summary>
         /// <param name="d">The delgate to invoke</param>
         protected void InvokeExternal(Delegate d)
         {
-            InvokeExternal(d, EventArgs.Empty);
+            eExNetworkLibrary.Threading.InvocationHelper.InvokeExternalAsync(d, this);
         }
     }
 }
