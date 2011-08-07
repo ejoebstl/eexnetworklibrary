@@ -79,14 +79,14 @@ namespace eExNetworkLibrary.Simulation
         {
             if (iMaxErrorCount > 0)
             {
-                while (f != null && FrameTypes.IsIP(f))
-                {
-                    f = f.EncapsulatedFrame;
-                }
+                IP.IPFrame fIPFrame = (IP.IPFrame)ProtocolParser.GetFrameByType(f, IP.IPv4Frame.DefaultFrameType);
+                
+                if(fIPFrame == null)
+                    fIPFrame = (IP.IPFrame)ProtocolParser.GetFrameByType(f, IP.V6.IPv6Frame.DefaultFrameType);
 
-                if (f != null && FrameTypes.IsIP(f))
+                if (fIPFrame != null)
                 {
-                    f.EncapsulatedFrame = new RawDataFrame(DoErrors(f.EncapsulatedFrame.FrameBytes));
+                    fIPFrame.EncapsulatedFrame = new RawDataFrame(DoErrors(fIPFrame.EncapsulatedFrame.FrameBytes));
                 }
             }
 

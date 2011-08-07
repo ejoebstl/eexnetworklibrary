@@ -225,7 +225,7 @@ namespace eExNetworkLibrary.TCP
         }
 
         /// <summary>
-        /// Gets or sets the data offset in bits
+        /// Gets the data offset in bits
         /// </summary>
         public int DataOffset //In bits.
         {
