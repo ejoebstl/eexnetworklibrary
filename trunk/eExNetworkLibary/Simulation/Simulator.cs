@@ -129,6 +129,7 @@ namespace eExNetworkLibrary.Simulation
         {
             if (tsmi != null && tsmi != this)
             {
+                tsmi.ProtocolParser = this.ProtocolParser;
                 tsmi.Start();
                 StartRecourse(tsmi.Next);
             }
@@ -165,6 +166,12 @@ namespace eExNetworkLibrary.Simulation
                 InvokePropertyChanged();
             }
         }
+
+        /// <summary>
+        /// The Protocol Parser of this item. 
+        /// <remarks>This is set by the simulator class which owns this simulation item. </remarks>
+        /// </summary>
+        public ProtocolParsing.ProtocolParser ProtocolParser { get; set; }
 
         /// <summary>
         /// Applies the effect of this simulator chain item to the given frame.
@@ -266,5 +273,10 @@ namespace eExNetworkLibrary.Simulation
         /// Stops this simulator item
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// This protocol parser of this simulator item. 
+        /// </summary>
+        ProtocolParsing.ProtocolParser ProtocolParser { get; set; }
     }
 }
