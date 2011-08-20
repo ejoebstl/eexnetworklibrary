@@ -181,7 +181,7 @@ namespace eExNetworkLibrary.Attacks.Scanning
             if (ARPScanStepDone != null)
             {
                 if (ARPScanFinished.Target != null
-                    && ARPScanStepDone.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                    && ARPScanStepDone.Target is System.ComponentModel.ISynchronizeInvoke
                     && ((System.ComponentModel.ISynchronizeInvoke)(ARPScanStepDone.Target)).InvokeRequired)
                 {
                     ((System.ComponentModel.ISynchronizeInvoke)(ARPScanStepDone.Target)).BeginInvoke(ARPScanStepDone, new object[] { new ARPScanEventArgs(args), this });
@@ -197,8 +197,8 @@ namespace eExNetworkLibrary.Attacks.Scanning
         {
             if (ARPScanFinished != null)
             {
-                if (ARPScanFinished.Target != null 
-                    && ARPScanFinished.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                if (ARPScanFinished.Target != null
+                    && ARPScanFinished.Target is System.ComponentModel.ISynchronizeInvoke
                     && ((System.ComponentModel.ISynchronizeInvoke)(ARPScanFinished.Target)).InvokeRequired)
                 {
                     ((System.ComponentModel.ISynchronizeInvoke)(ARPScanFinished.Target)).BeginInvoke(ARPScanFinished, new object[] { new ARPScanEventArgs(args), this });

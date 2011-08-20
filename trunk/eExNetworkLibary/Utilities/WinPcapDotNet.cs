@@ -295,14 +295,14 @@ namespace eExNetworkLibrary.Utilities
                 {
                     foreach (Delegate dDelgate in ExceptionThrown.GetInvocationList())
                     {
-                        if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                        if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                             && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
                         {
                             ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { this, new ExceptionEventArgs(ex, DateTime.Now) });
                         }
                         else
                         {
-                            dDelgate.DynamicInvoke(this, new ExceptionEventArgs(ex, DateTime.Now));
+                            ((eExNetworkLibrary.TrafficHandler.ExceptionEventHandler)dDelgate)(this, new ExceptionEventArgs(ex, DateTime.Now));
                         }
                     }
                 }
@@ -322,14 +322,19 @@ namespace eExNetworkLibrary.Utilities
                 {
                     foreach (Delegate dDelgate in BytesCaptured.GetInvocationList())
                     {
-                        if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+
+                        if (dDelgate.Target != null && dDelgate.Target is EthernetInterface)
+                        {
+                            ((EthernetInterface)dDelgate.Target).OnBytesCaptured(wpcHeader, bBuffer, this);
+                        }
+                        else if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                             && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
                         {
                             ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { wpcHeader, bBuffer, this });
                         }
                         else
                         {
-                            dDelgate.DynamicInvoke(wpcHeader, bBuffer, this);
+                            ((ByteCapturedHandler)dDelgate)(wpcHeader, bBuffer, this);
                         }
                     }
                 }

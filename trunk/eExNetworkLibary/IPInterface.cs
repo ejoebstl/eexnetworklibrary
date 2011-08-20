@@ -260,14 +260,14 @@ namespace eExNetworkLibrary
             {
                 foreach (Delegate dDelgate in BytesCaptured.GetInvocationList())
                 {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                    if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                         && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
                     {
                         ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { bBuffer, this });
                     }
                     else
                     {
-                        dDelgate.DynamicInvoke(bBuffer, this);
+                        ((BytesCapturedHandler)dDelgate)(bBuffer, this);
                     }
                 }
             }
@@ -289,14 +289,18 @@ namespace eExNetworkLibrary
             {
                 foreach (Delegate dDelgate in PacketCaptured.GetInvocationList())
                 {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                    if (dDelgate.Target != null && dDelgate.Target is DirectInterfaceIOHandler)
+                    {
+                        ((DirectInterfaceIOHandler)dDelgate.Target).OnPacketCaptured(fFrame, this);
+                    }
+                    else if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                         && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
                     {
                         ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { fFrame, this });
                     }
                     else
                     {
-                        dDelgate.DynamicInvoke(fFrame, this);
+                        ((PacketCapturedHandler)dDelgate)(fFrame, this);
                     }
                 }
             }

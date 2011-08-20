@@ -114,7 +114,7 @@ namespace eExNetworkLibrary
         /// <param name="ipInterface">The interface to connect</param>
         public virtual void AddInterface(IPInterface ipInterface)
         {
-            ipInterface.PacketCaptured += new eExNetworkLibrary.IPInterface.PacketCapturedHandler(ipInterface_PacketCaptured);
+            ipInterface.PacketCaptured += new eExNetworkLibrary.IPInterface.PacketCapturedHandler(OnPacketCaptured);
             lInterfaces.Add(ipInterface);
             ipInterface.AddressAdded += new IPInterface.AddressEventHandler(ipInterface_AddressAdded);
             ipInterface.AddressRemoved += new IPInterface.AddressEventHandler(ipInterface_AddressRemoved);
@@ -181,7 +181,7 @@ namespace eExNetworkLibrary
         /// <param name="ipInterface">The interface to remove</param>
         public virtual void RemoveInterface(IPInterface ipInterface)
         {
-            ipInterface.PacketCaptured -= new eExNetworkLibrary.IPInterface.PacketCapturedHandler(ipInterface_PacketCaptured);
+            ipInterface.PacketCaptured -= new eExNetworkLibrary.IPInterface.PacketCapturedHandler(OnPacketCaptured);
             lInterfaces.Remove(ipInterface);
             ipInterface.AddressAdded -= new IPInterface.AddressEventHandler(ipInterface_AddressAdded);
             ipInterface.AddressRemoved -= new IPInterface.AddressEventHandler(ipInterface_AddressRemoved);
@@ -192,10 +192,10 @@ namespace eExNetworkLibrary
             }
         }
 
-        void ipInterface_PacketCaptured(Frame fFrame, object sender)
+        internal void OnPacketCaptured(Frame fFrame, object sender)
         {
             InvokeInterfaceFrameReceived();
-            iReceivedPackets++;
+            Interlocked.Increment(ref iReceivedPackets);
 
             if (OutputHandler != null)
             {

@@ -242,7 +242,7 @@ namespace eExNetworkLibrary.Monitoring
             {
                 foreach (Delegate dDelgate in HostInformationChanged.GetInvocationList())
                 {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                    if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                         && ((System.ComponentModel.ISynchronizeInvoke)(HostInformationChanged.Target)).InvokeRequired)
                     {
                         ((System.ComponentModel.ISynchronizeInvoke)(HostInformationChanged.Target)).Invoke(HostInformationChanged, new object[] { args, this });
