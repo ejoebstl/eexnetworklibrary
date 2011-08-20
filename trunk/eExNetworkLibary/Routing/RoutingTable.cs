@@ -197,21 +197,7 @@ namespace eExNetworkLibrary.Routing
         /// <param name="param">The parameters</param>
         protected void Invoke(Delegate d, object param)
         {
-            if (d != null)
-            {
-                foreach (Delegate dDelgate in d.GetInvocationList())
-                {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
-                        && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
-                    {
-                        ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { this, param });
-                    }
-                    else
-                    {
-                        dDelgate.DynamicInvoke(this, param);
-                    }
-                }
-            }
+            Threading.InvocationHelper.InvokeExternalAsync(d, param, this);
         }
     }
 

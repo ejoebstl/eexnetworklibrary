@@ -21,14 +21,15 @@ namespace eExNetworkLibrary.Threading
             {
                 foreach (Delegate dDelgate in d.GetInvocationList())
                 {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                    if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                         && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
                     {
                         ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).Invoke(dDelgate, new object[] { sender, param });
                     }
                     else
                     {
-                        dDelgate.DynamicInvoke(sender, param);
+                        dDelgate.DynamicInvoke(sender, (EventArgs)param);
+                        //dDelgate.DynamicInvoke(sender, param);
                     }
                 }
             }
@@ -48,14 +49,15 @@ namespace eExNetworkLibrary.Threading
             {
                 foreach (Delegate dDelgate in d.GetInvocationList())
                 {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
+                    if (dDelgate.Target != null && dDelgate.Target is System.ComponentModel.ISynchronizeInvoke
                         && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
                     {
                         ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { sender, param });
                     }
                     else
                     {
-                        dDelgate.DynamicInvoke(sender, param);
+                        dDelgate.DynamicInvoke(sender, (EventArgs)param);
+                        //dDelgate.DynamicInvoke(sender, param);
                     }
                 }
             }

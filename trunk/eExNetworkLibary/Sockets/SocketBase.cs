@@ -93,21 +93,7 @@ namespace eExNetworkLibrary.Sockets
         /// <param name="param">The params for the invocation</param>
         protected void InvokeExternal(Delegate d, object param)
         {
-            if (d != null)
-            {
-                foreach (Delegate dDelgate in d.GetInvocationList())
-                {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
-                        && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
-                    {
-                        ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).Invoke(dDelgate, new object[] { this, param });
-                    }
-                    else
-                    {
-                        dDelgate.DynamicInvoke(this, param);
-                    }
-                }
-            }
+            Threading.InvocationHelper.InvokeExternal(d, this, param);
         }
 
         /// <summary>
@@ -181,21 +167,7 @@ namespace eExNetworkLibrary.Sockets
         /// <param name="param">The params for the invocation</param>
         protected void InvokeExternalAsync(Delegate d, object param)
         {
-            if (d != null)
-            {
-                foreach (Delegate dDelgate in d.GetInvocationList())
-                {
-                    if (dDelgate.Target != null && dDelgate.Target.GetType().GetInterface(typeof(System.ComponentModel.ISynchronizeInvoke).Name, true) != null
-                        && ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).InvokeRequired)
-                    {
-                        ((System.ComponentModel.ISynchronizeInvoke)(dDelgate.Target)).BeginInvoke(dDelgate, new object[] { this, param });
-                    }
-                    else
-                    {
-                        dDelgate.DynamicInvoke(this, param);
-                    }
-                }
-            }
+            Threading.InvocationHelper.InvokeExternalAsync(d, this, param);
         }
 
         /// <summary>

@@ -38,6 +38,7 @@ namespace eExNetworkLibrary
         private HostTable arpHostTable;
         private bool bExcludeOwnTraffic;
         private bool bExcludeLocalHostTraffic;
+        private bool bPromiscousMode;
         private object oInterfaceStartStopLock;
         private AddressResolution ipAddressResolution;
 
@@ -79,6 +80,22 @@ namespace eExNetworkLibrary
                 if (bAutoAnswerARPRequests != value)
                 {
                     bAutoAnswerARPRequests = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a bool determining whether this interface should capture any packets or only packets addresses for this interface. 
+        /// </summary>
+        public bool PromiscousMode
+        {
+            get { return bPromiscousMode; }
+            set
+            {
+                if (bPromiscousMode != value)
+                {
+                    bPromiscousMode = value;
                     InvokePropertyChanged();
                 }
             }
@@ -248,6 +265,7 @@ namespace eExNetworkLibrary
                 throw new ArgumentException("Cannot create an interface instance for an interface not properly recognised by WinPcap."); 
             }
 
+            bPromiscousMode = true;
             oInterfaceStartStopLock = new object();
             AddressResolutionMethod = AddressResolution.NDP;
             bExcludeOwnTraffic = true;
@@ -280,7 +298,7 @@ namespace eExNetworkLibrary
             PrimaryMACAddress = this.MACAddress;
         }
 
-        void wpcDevice_BytesCaptured(WinPcapCaptureHeader wpcHeader, byte[] bPacketData, object sender)
+        internal void OnBytesCaptured(WinPcapCaptureHeader wpcHeader, byte[] bPacketData, object sender)
         {
             if (!bShutdownPending)
             {
@@ -300,7 +318,7 @@ namespace eExNetworkLibrary
         {
             EthernetFrame fFrame = new EthernetFrame(bBacketData);
 
-            if (!(IsLocalHostTraffic(fFrame) && bExcludeLocalHostTraffic))
+            if (!(bExcludeLocalHostTraffic && IsLocalHostTraffic(fFrame)) && (bPromiscousMode || IsAddressedForThisInterface(fFrame)))
             {
                 TrafficDescriptionFrame tdf = new TrafficDescriptionFrame(this, wpcHeader.Timestamp);
                 tdf.EncapsulatedFrame = fFrame;
@@ -376,7 +394,12 @@ namespace eExNetworkLibrary
         {
             IPFrame ipFrame = GetIPFrame(fFrame);
             return ipFrame != null && (InterfaceConfiguration.IsLocalAddress(ipFrame.SourceAddress) || InterfaceConfiguration.IsLocalAddress(ipFrame.DestinationAddress));
-        }        
+        }
+
+        private bool IsAddressedForThisInterface(EthernetFrame fFrame)
+        {
+            return PrimaryMACAddress == fFrame.Destination || fFrame.Destination.IsBroadcast || lmacSpoofAdresses.Contains(fFrame.Destination); 
+        }
         
         /// <summary>
         /// Adds a MACAddress here to announce it as spoofed address. The interface will not pass traffic with this source MACAddress to connected traffic handlers if the property AutoExcludeOwnTraffic is also set.
@@ -589,7 +612,7 @@ namespace eExNetworkLibrary
             }
             wpcDevice.StartCapture();
             wpcDevice.ExceptionThrown += new ExceptionEventHandler(wpcDevice_ExceptionThrown);
-            wpcDevice.BytesCaptured += new WinPcapDotNet.ByteCapturedHandler(wpcDevice_BytesCaptured);
+            wpcDevice.BytesCaptured += new WinPcapDotNet.ByteCapturedHandler(OnBytesCaptured);
         }
 
         void wpcDevice_ExceptionThrown(object sender, ExceptionEventArgs args)
@@ -601,7 +624,7 @@ namespace eExNetworkLibrary
         {
             wpcDevice.StopCapture();
             wpcDevice.CloseDevice();
-            wpcDevice.BytesCaptured -= new WinPcapDotNet.ByteCapturedHandler(wpcDevice_BytesCaptured);
+            wpcDevice.BytesCaptured -= new WinPcapDotNet.ByteCapturedHandler(OnBytesCaptured);
             wpcDevice.ExceptionThrown -= new ExceptionEventHandler(wpcDevice_ExceptionThrown);
         }
 
