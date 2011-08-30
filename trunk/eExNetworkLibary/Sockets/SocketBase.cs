@@ -167,7 +167,7 @@ namespace eExNetworkLibrary.Sockets
         /// <param name="param">The params for the invocation</param>
         protected void InvokeExternalAsync(Delegate d, object param)
         {
-            Threading.InvocationHelper.InvokeExternalAsync(d, this, param);
+            Threading.InvocationHelper.InvokeExternalAsync(d, param, this);
         }
 
         /// <summary>
