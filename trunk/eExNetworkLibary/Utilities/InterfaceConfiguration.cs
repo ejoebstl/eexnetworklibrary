@@ -211,7 +211,19 @@ namespace eExNetworkLibrary.Utilities
                 return dictIntIndexStoreIndex[dictNameIndex[strPrepared]];
             }
 
-            throw new NotImplementedException("The submitted interface could not be found");
+            throw new ArgumentException("The submitted interface could not be found: " + strName);
+        }
+
+        /// <summary>
+        /// Checks whether an interface with the given name is known to the operating system
+        /// </summary>
+        /// <param name="strName">The interface to search for</param>
+        /// <returns>A bool indicating whether the given interface is known</returns>
+        public static bool IsKnown(string strName)
+        {
+            CheckChache();
+            string strPrepared = PrepareString(strName);
+            return dictNameIndex.ContainsKey(strPrepared);
         }
 
         /// <summary>
