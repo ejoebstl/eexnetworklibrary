@@ -125,6 +125,7 @@
     <Compile Include="Sockets\TCPIPStack.cs" />
     <Compile Include="Sockets\TCPSocket.cs" />
     <Compile Include="Sockets\UDPSocket.cs" />
+    <Compile Include="TrafficGeneration\LibPcapReplayHandler.cs" />
     <Compile Include="TrafficModifiers\HTTPStreamModifier.cs" />
     <Compile Include="TrafficModifiers\StreamModification\HTTP\Actions\ImageAction.cs" />
     <Compile Include="TrafficModifiers\StreamModification\HTTP\Actions\ImageFlipper.cs" />

@@ -34,6 +34,7 @@ namespace eExNetworkLibrary.Monitoring
         bool bIsLiveLogging;
         Process pWireshark;
         private BinaryWriter bwLiveCapture;
+        private DateTime origin;
 
 
         /// <summary>
@@ -100,6 +101,7 @@ namespace eExNetworkLibrary.Monitoring
         public LibPcapDumper()
         {
             strFileName = "";
+            origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
         }
 
         /// <summary>
@@ -212,7 +214,7 @@ namespace eExNetworkLibrary.Monitoring
         /// Writes a libpcap file header to the given binary writer.
         /// </summary>
         /// <param name="bw">The binary writer to write the header to.</param>
-        protected void WriteLogfieHeader(BinaryWriter bw)
+        protected virtual void WriteLogfieHeader(BinaryWriter bw)
         {
             iLogByteCount += 24;
             bw.Write(0xa1b2c3d4); //Magic number
@@ -229,33 +231,30 @@ namespace eExNetworkLibrary.Monitoring
         /// </summary>
         /// <param name="fFrame">The frame to write the header for</param>
         /// <param name="bw">The binary writer to write the header to.</param>
-        protected void WritePacketHeader(Frame fFrame, BinaryWriter bw)
+        protected virtual void WritePacketHeader(Frame fFrame, BinaryWriter bw)
         {
             iLogByteCount += 16;
             TrafficDescriptionFrame tdf = (TrafficDescriptionFrame)GetFrameByType(fFrame, FrameTypes.TrafficDescriptionFrame);
             uint ts_sec;
             uint ts_usec;
+            DateTime dateToConvert;
             if (tdf != null)
             {
-                DateTime dateToConvert = tdf.CaptureTime;
-                DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                TimeSpan diff = dateToConvert - origin; // Seconds since 1970
-                ts_sec = (uint)Math.Floor(diff.TotalSeconds); // Microsecond offset
-                ts_usec = (uint)(1000000 * (diff.TotalSeconds - ts_sec));
+                dateToConvert = tdf.CaptureTime;
             }
             else
             {
-                DateTime dateToConvert = DateTime.Now;
-                DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                TimeSpan diff = dateToConvert - origin; // Seconds since 1970
-                ts_sec = (uint)Math.Floor(diff.TotalSeconds); // Microsecond offset
-                ts_usec = (uint)(1000000 * (diff.TotalSeconds - ts_sec));
+                dateToConvert = DateTime.Now;
             }
+            
+            TimeSpan diff = dateToConvert - origin; // Seconds since 1970
+            ts_sec = (uint)Math.Floor(diff.TotalSeconds); // Microsecond offset
+            ts_usec = (uint)(1000000 * (diff.TotalSeconds - ts_sec));
 
             bw.Write(ts_sec); //Seconds
             bw.Write(ts_usec); //Nanos
-            bw.Write(fFrame.Length); //Len
-            bw.Write(fFrame.Length); //Len
+            bw.Write(fFrame.Length); //Saved Len
+            bw.Write(fFrame.Length); //Actual Len
         }
 
         /// <summary>
