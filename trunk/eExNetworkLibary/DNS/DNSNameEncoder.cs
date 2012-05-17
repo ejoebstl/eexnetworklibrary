@@ -131,14 +131,14 @@ namespace eExNetworkLibrary.DNS
                     msMemoryStream.WriteByte((byte)(strValue.Length - 1));
                     msMemoryStream.Write(ASCIIEncoding.ASCII.GetBytes(strValue.Substring(1)), 0, strValue.Length - 1);
                     iStartIndex += strValue.Length;
-                    //if (strName == "")
-                    //{
-                    //    msMemoryStream.WriteByte(0);
-                    //    iStartIndex++;
-                    //}
-                }
-            }
 
+                    if (strName == "")
+                    {
+                        msMemoryStream.WriteByte(0);
+                    }
+                }
+            } 
+            
             return msMemoryStream.ToArray();
         }
         /// <summary>
