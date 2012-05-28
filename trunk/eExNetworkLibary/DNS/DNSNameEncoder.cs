@@ -102,6 +102,10 @@ namespace eExNetworkLibrary.DNS
             {
                 strName = "." + strName;
             }
+            if (!strName.EndsWith("."))
+            {
+                strName = strName + ".";
+            }
             MemoryStream msMemoryStream = new MemoryStream();
 
             while (strName != "")
@@ -132,10 +136,10 @@ namespace eExNetworkLibrary.DNS
                     msMemoryStream.Write(ASCIIEncoding.ASCII.GetBytes(strValue.Substring(1)), 0, strValue.Length - 1);
                     iStartIndex += strValue.Length;
 
-                    if (strName == "")
-                    {
-                        msMemoryStream.WriteByte(0);
-                    }
+                    //if (strName == "")
+                    //{
+                    //    msMemoryStream.WriteByte(0);
+                    //}
                 }
             } 
             
