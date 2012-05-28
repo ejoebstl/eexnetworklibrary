@@ -150,9 +150,16 @@ namespace eExNetworkLibrary.Threading
                     }
                     else
                     {
-                        MethodInfo miMethodInfo = dDelgate.Method;
-                        CachedMethodDelegate dChachedDelegate = GetOrAdd(miMethodInfo);
-                        dChachedDelegate(objTarget, sender, (EventArgs)param);
+                        if (objTarget != null)
+                        {
+                            MethodInfo miMethodInfo = dDelgate.Method;
+                            CachedMethodDelegate dChachedDelegate = GetOrAdd(miMethodInfo);
+                            dChachedDelegate(objTarget, sender, (EventArgs)param);
+                        }
+                        else
+                        {
+                            dDelgate.DynamicInvoke(sender, param);
+                        }
                     }
                 }
             }
@@ -180,9 +187,16 @@ namespace eExNetworkLibrary.Threading
                     }
                     else
                     {
-                        MethodInfo miMethodInfo = dDelgate.Method;
-                        CachedMethodDelegate dChachedDelegate = GetOrAdd(miMethodInfo);
-                        dChachedDelegate(objTarget, sender, param);
+                        if (objTarget != null)
+                        {
+                            MethodInfo miMethodInfo = dDelgate.Method;
+                            CachedMethodDelegate dChachedDelegate = GetOrAdd(miMethodInfo);
+                            dChachedDelegate(objTarget, sender, param);
+                        }
+                        else
+                        {
+                            dDelgate.DynamicInvoke(sender, param);
+                        }
                     }
                 }
             }
