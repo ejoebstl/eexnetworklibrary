@@ -24,6 +24,8 @@ namespace eExNetworkLibrary.Simulation
         private bool bRun;
         private int iTrafficCredit;
         private int iSpeed;
+        private int iBufferSize;
+        private int iMaxBufferSize; 
 
         private Queue<Frame> qFrames;
 
@@ -33,6 +35,8 @@ namespace eExNetworkLibrary.Simulation
         public SpeedConstrainer()
         {
             iSpeed = 4096;
+            iMaxBufferSize = Int32.MaxValue;
+            iBufferSize = 0;
             qFrames = new Queue<Frame>();
         }
 
@@ -50,6 +54,20 @@ namespace eExNetworkLibrary.Simulation
         }
 
         /// <summary>
+        /// Gets or sets the maximum buffer size in byte. 
+        /// If the buffer is full, tail dropping will occour.
+        /// </summary>
+        public int BufferSize
+        {
+            get { return iMaxBufferSize; }
+            set
+            {
+                iMaxBufferSize = value;
+                InvokePropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// Applies the effect of this simulator chain item to the given frame.
         /// </summary>
         /// <param name="f">The input frame</param>
@@ -57,7 +75,11 @@ namespace eExNetworkLibrary.Simulation
         {
             lock (qFrames)
             {
-                qFrames.Enqueue(f);
+                if (iMaxBufferSize > iBufferSize)
+                {
+                    qFrames.Enqueue(f);
+                    iBufferSize += f.Length;
+                }
             }
 
             DoQueueWork();
@@ -91,7 +113,9 @@ namespace eExNetworkLibrary.Simulation
                 {
                     Frame fDequeue = qFrames.Dequeue();
                     this.Next.Push(fDequeue);
-                    iTrafficCredit -= fDequeue.Length;
+                    int iLen = fDequeue.Length;
+                    iTrafficCredit -= iLen;
+                    iBufferSize -= iLen;
                 }
             }
         }
