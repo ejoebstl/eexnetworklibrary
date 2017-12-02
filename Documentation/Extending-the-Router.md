@@ -73,4 +73,6 @@ Because the frame is copied, the next Traffic Handler can modify the frame witho
 
 The WAN emulator will then forward the frame to the router which will send it out to the according interface (white arrow). 
 
+You can find the complete code and XNL file [here](../Examples/Extended-Router).
+
 The next step is to implement custom [Traffic Handlers](Implementing-own-Traffic-Handlers.md) to actually access frame properties.

@@ -149,4 +149,6 @@ Writing a small program with the network library can be split up into the follow
 
 The boilerplate work of starting, linking and stopping can also be done by using the [Management Layer](Layer-Architecture.md). 
 
+You can find the complete code and XNL file [here](../Examples/Minimal-Router).
+
 The next step is [Extending the Router](Extending-the-Router.md).
