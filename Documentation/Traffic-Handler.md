@@ -21,19 +21,19 @@ These graphs can be either build in code, or build and visualized by the NLML or
 
 In the network library, there are also some classes which derive from TrafficHandler but provide additional functionality. Examples are capability for simultaneous analysis, or the network interfaces, which support any number of output handlers.
 
-###IPInterface
+##IPInterface
 
 The IPInterface class provides an abstract base for interface implementations like the Ethernet interface. Interfaces are not supposed to use the OutputHandler, instead they provide a PacketCaptured event. When this event is invoked, each event handler receives a separate copy of the captured frame. This means, multiple handlers of the type DirectInterfaceIO can be attached to an IPInterface. 
 
-###DirectInterfaceIO
+##DirectInterfaceIO
 
 The DirectInterfaceIO class is supposed to directly connect to interfaces. By default, this class has methods to add any number of interfaces and one output handler. Traffic is received from all interfaces and pushed to the output handler, and incoming traffic is pushed to all connected interfaces. This class is the base for handlers like routers or attacks which need direct access to network interfaces and their metadata. 
 
-###TrafficAnalyzer
+##TrafficAnalyzer
 
 This class provides the capability of analyzing traffic in a parallel way. TrafficAnalyzers must not edit frames and they do not support output handlers. If you implement a class which does not modify traffic (examples are the LibPcap Dumper or the Network Map), you can use this class for a performance boost.
 
-###TrafficSplitter
+##TrafficSplitter
 
 The traffic splitter is a support class for traffic analyzers. If you insert a traffic splitter into your network compilation, you can add analyzers to the splitter. All analyzers will receive the same copy of the frame simultaneously, which will have a positive impact on performance.  
 
