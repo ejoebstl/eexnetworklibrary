@@ -26,8 +26,6 @@ In the Network Library, there are three main concepts, which provide the basics 
 * The second one is the [Frame](Documentation/Frame.md) class. A frame represents any network packet. Frames can be parsed or casted to IP frames, Ethernet frames, TCP frames and so on. A frame also provides methods to parse from raw data or to convert the frame object back to raw data. 
 * The third one is the [Layer Architecture](Documentation/Layer-Architecture), which provides support for larger, more dynamic applications which can also support plug-ins, like the [eEx NetLab](Documentation/eEx-NetLab.md). The benefit is automated resource collection and serializeable state. 
 
-## Example
-
 ## Documentation
 
 All classes are documented using C#-Style comments, compatible with intelliSense. A good place to get started is to look at the implementation of existing Traffic Handlers and at the tutorials linked below. 
