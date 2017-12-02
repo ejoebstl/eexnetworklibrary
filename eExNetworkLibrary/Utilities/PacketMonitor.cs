@@ -17,7 +17,7 @@ using eExNetworkLibrary.IP;
 
 namespace eExNetworkLibrary.Utilities
 {
-    [Obsolete("This class is not Network Libary 2.0 compliant. Further, monitoring sockets are not supported any more.", true)]
+    [Obsolete("This class is not Network Library 2.0 compliant. Further, monitoring sockets are not supported any more.", true)]
     class PacketMonitor
     {
         private Socket sMySocket;

@@ -144,7 +144,7 @@
     <Compile Include="Extensibility\TrafficSplitterRuleDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\eExNetworkLibary\eExNetworkLibrary.csproj">
+    <ProjectReference Include="..\eExNetworkLibrary\eExNetworkLibrary.csproj">
       <Project>{3693D7A0-6012-4C81-B561-286E058499AF}</Project>
       <Name>eExNetworkLibrary</Name>
     </ProjectReference>

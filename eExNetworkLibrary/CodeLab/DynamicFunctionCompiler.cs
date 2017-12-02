@@ -45,7 +45,7 @@ namespace eExNetworkLibrary.CodeLab
     public class DynamicFunctionCompiler
     {
         CSharpCodeProvider cscp;
-        //test: new eExNetworkLibary.CodeLab.DynamicFunctionCompiler().BuildPreview(System.IO.File.ReadAllText("C:\\function_test.txt"), "test");
+        //test: new eExNetworkLibrary.CodeLab.DynamicFunctionCompiler().BuildPreview(System.IO.File.ReadAllText("C:\\function_test.txt"), "test");
 
         /// <summary>
         /// Creates a new instance of this class

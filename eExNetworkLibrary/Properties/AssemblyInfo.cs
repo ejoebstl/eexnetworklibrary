@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("eExNetworkLibary v3 (Beta)")]
-[assembly: AssemblyDescription("eEx Network Libary Version 3 Programmed by Emanuel Jöbstl 2007-2010")]
+[assembly: AssemblyTitle("eExNetworkLibrary v3 (Beta)")]
+[assembly: AssemblyDescription("eEx Network Library Version 3 Programmed by Emanuel Jöbstl 2007-2010")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("eEx")]
-[assembly: AssemblyProduct("eExNetworkLibary Version 3")]
+[assembly: AssemblyProduct("eExNetworkLibrary Version 3")]
 [assembly: AssemblyCopyright("Copyright © eEx 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
